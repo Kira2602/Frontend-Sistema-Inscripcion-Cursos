@@ -7,7 +7,9 @@
   <div class="container">
     <div class="search-container">
       <SearchBar />
-      <button class="registrar">Registrar Nuevo Docente</button>
+      <router-link class="registrar" to="registrarDocentes">
+        Registrar Nuevo Docente
+      </router-link>
     </div>
     <div>
       <ActionCard v-for="user in users" :key="user.id" :user="user" />
@@ -63,6 +65,8 @@ onMounted(async () => {
   align-items: center;
   border: none;
   border-radius: 5px;
+  font-size: small;
+  text-decoration: none;
 }
 
 .registrar:hover {

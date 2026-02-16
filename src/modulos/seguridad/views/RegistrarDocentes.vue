@@ -1,4 +1,4 @@
 <template>
-  <h1>Registro Estudiantes</h1>
+  <h2>Registrar Docentes</h2>
   <p></p>
 </template>

@@ -7,7 +7,9 @@
   <div class="container">
     <div class="search-container">
       <SearchBar />
-      <button class="registrar">Registrar Nuevo Estudiante</button>
+      <router-link class="registrar" to="registrarEstudiantes">
+        Registrar Nuevo Estudiante
+      </router-link>
     </div>
     <div>
       <ActionCard
@@ -67,6 +69,8 @@ onMounted(async () => {
   align-items: center;
   border: none;
   border-radius: 5px;
+  font-size: small;
+  text-decoration: none;
 }
 
 .registrar:hover {
