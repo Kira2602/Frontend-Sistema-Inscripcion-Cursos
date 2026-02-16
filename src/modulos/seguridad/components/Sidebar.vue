@@ -5,14 +5,13 @@
     </div>
 
     <nav class="menu">
-      <router-link to="registrarEstudiantes">Estudiantes</router-link>
-      <router-link to="registrarDocentes">Docentes</router-link>
+      <router-link to="listarEstudiantes">Estudiantes</router-link>
+      <router-link to="listarDocentes">Docentes</router-link>
       <router-link to="registrarAdmin">Administradores</router-link>
     </nav>
     <button class="logout">Cerrar Sesión</button>
   </aside>
 </template>
-
 
 <style scoped>
 .sidebar {
