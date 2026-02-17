@@ -3,7 +3,7 @@
     <div class="modal-content">
       <div class="helper-container">
         <div class="user-data">
-          <h2>Editar a: {{ user.name }}</h2>
+          <h2>Editar a: {{ user.nombre }}</h2>
           <p class="subtitle">Modifica y guarda los cambios</p>
         </div>
 
@@ -16,15 +16,15 @@
         <div class="grid">
           <div>
             <label>Teléfono</label>
-            <input type="text" v-model="user.phone" />
+            <input type="text" v-model="user.telefono" />
           </div>
           <div>
             <label>Dirección</label>
-            <input type="text" v-model="user.address.city" />
+            <input type="text" v-model="user.direccion" />
           </div>
           <div>
             <label>Contraseña</label>
-            <input type="password" v-model="user.name" />
+            <input type="password" v-model="user.contrasenia" />
           </div>
         </div>
 

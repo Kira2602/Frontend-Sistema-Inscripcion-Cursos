@@ -1,12 +1,21 @@
 <template>
   <div class="search-bar">
     <Icon iconName="search" iconColor="#666" />
-    <input type="text" class="search-box" placeholder="Search" />
+    <input type="text" class="search-box" placeholder="Buscar..."  v-model="search" @input="emitSearch" />
   </div>
 </template>
 
 <script setup>
+import { ref } from "vue";
 import Icon from "./Icon.vue";
+
+const emit = defineEmits(["update:search"]);
+
+const search = ref("");
+
+const emitSearch = () => {
+  emit("update:search", search.value);
+};
 </script>
 
 <style scoped>

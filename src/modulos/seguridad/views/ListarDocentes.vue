@@ -6,29 +6,50 @@
 
   <div class="container">
     <div class="search-container">
-      <SearchBar />
+      <SearchBar @update:search="searchTerm = $event"/>
       <router-link class="registrar" to="registrarDocentes">
         Registrar Nuevo Docente
       </router-link>
     </div>
     <div>
-      <ActionCard v-for="user in users" :key="user.id" :user="user" />
+      <ActionCard v-for="docente in filteredDocentes" :key="docente.ci" :user="docente" @edit="openEditModal(docente)" />
     </div>
   </div>
+  <EditModal v-if="isOpen" :user="selectedUser" @close="isOpen = false" />
+
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
+import { listarDocentes } from "../servicios/seguridadService";
+import EditModal from "../components/EditModal.vue";
 import ActionCard from "../components/ActionCard.vue";
 import SearchBar from "../components/SearchBar.vue";
 
-const users = ref([]);
+const searchTerm = ref("");
+const docentes = ref([]);
+const selectedUser = ref(null);
+const isOpen = ref(false);
+
+const openEditModal = (docente) => {
+  selectedUser.value = { ...docente };
+  isOpen.value = true;
+};
+const filteredDocentes = computed(() => {
+  if (!searchTerm.value) return docentes.value;
+
+  return docentes.value.filter((docente) =>
+    docente.nombre.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+    docente.ci.toString().includes(searchTerm.value)
+  );
+});
+
 
 onMounted(async () => {
   try {
-    const response = await fetch("https://jsonplaceholder.typicode.com/users");
-    const data = await response.json();
-    users.value = data;
+    const response = await listarDocentes();
+    const data =response.data;
+    docentes.value = data.data;
   } catch (err) {
     console.error("Error al obtener los datos: ", err);
   }
