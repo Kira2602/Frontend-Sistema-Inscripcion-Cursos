@@ -3,8 +3,10 @@ import AdminLayout from "../layouts/SeguridadLayout.vue";
 import RegistrarAdmin from "../modulos/seguridad/views/RegistrarAdmin.vue";
 import ListarEstudiantes from "../modulos/seguridad/views/ListarEstudiantes.vue";
 import ListarDocentes from "../modulos/seguridad/views/ListarDocentes.vue";
+import ListarAdministradores from "../modulos/seguridad/views/ListarAdministradores.vue";
 import RegistrarEstudiantes from "../modulos/seguridad/views/RegistrarEstudiantes.vue";
 import RegistrarDocentes from "../modulos/seguridad/views/RegistrarDocentes.vue";
+
 const routes = [
   {
     path: "/seguridad",
@@ -12,12 +14,12 @@ const routes = [
     children: [
       {
         path: "",
-        redirect: { name: "registrarAdmin" },
+        redirect: { name: "listarAdministradores" },
       },
       {
-        path: "registrarAdmin",
-        name: "registrarAdmin",
-        component: RegistrarAdmin,
+        path: "listarAdministradores",
+        name: "listarAdministradores",
+        component: ListarAdministradores,
       },
       {
         path: "listarEstudiantes",
@@ -38,6 +40,11 @@ const routes = [
         path: "registrarDocentes",
         name: "registrarDocentes",
         component: RegistrarDocentes,
+      },
+      {
+        path: "registrarAdmin",
+        name: "registrarAdmin",
+        component: RegistrarAdmin,
       },
     ],
   },

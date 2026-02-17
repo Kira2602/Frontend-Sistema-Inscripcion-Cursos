@@ -1,55 +1,58 @@
 <template>
   <div>
+      <Icon to="listarAdministradores" iconName="arrow_back" iconColor="black" />
+
     <h2>Registros de nuevos Administradores</h2>
     <p>Completa el formulario para agregar un nuevo Administrador</p>
 
     <div class="form-card">
-      <form>
+      <form @submit="manejarEnvio">
         <div class="grid">
+
+          <div>
+            <label>Carnet de Identidad</label>
+            <input type="text" v-model="form.ci" />
+          </div>
+          
           <div>
             <label>Nombre Completo</label>
-            <input type="text" />
+            <input type="text" v-model="form.nombre" />
           </div>
 
           <div>
             <label>Dirección</label>
-            <input type="text" />
-          </div>
-
-          <div>
-            <label>Carnet de Identidad</label>
-            <input type="text" />
-          </div>
-
-          <div>
-            <label>Correo electrónico</label>
-            <input type="email" />
-          </div>
-
-          <div>
-            <label>Fecha de Nacimiento</label>
-            <input type="date" />
-          </div>
-
-          <div>
-            <label>Contraseña</label>
-            <input type="password" />
+            <input type="text" v-model="form.direccion"/>
           </div>
 
           <div>
             <label>Número de celular</label>
-            <input type="text" />
+            <input type="text" v-model="form.telefono"/>
+          </div>
+
+          <div>
+            <label>Fecha de Nacimiento</label>
+            <input type="date" v-model="form.fechaNac"/>
+          </div>
+
+          <div>
+            <label>Correo electrónico</label>
+            <input type="email" v-model="form.correo" />
+          </div>
+
+          <div>
+            <label>Contraseña</label>
+            <input type="password" v-model="form.contrasenia" />
           </div>
 
           <div>
             <label>Confirmación de Contraseña</label>
-            <input type="password" />
+            <input type="password" v-model="form.confirmarContrasenia"/>
           </div>
         </div>
 
         <div class="buttons">
           <button type="reset" class="btn-clear">Limpiar</button>
-          <button type="submit" class="btn-register">Registrar</button>
+          <button type="submit" class="btn-register" :disabled="!formularioValido">Registrar</button>
         </div>
       </form>
     </div>
@@ -119,5 +122,54 @@ input:focus {
   border-radius: 8px;
   color: white;
 }
+.btn-register:disabled {
+  background: #405656;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  color: white;
+}
 </style>
 
+<script setup>
+import Icon from "../components/Icon.vue";
+import { ref, computed} from "vue";
+const form=ref({
+  ci:"",
+  nombre:"",
+  direccion:"",
+  telefono:"",
+  fechaNac:"",
+  correo:"",
+  contrasenia:"",
+  confirmarContrasenia:""
+});
+
+const formularioValido=computed(()=>{
+  return(
+    form.value.ci &&
+    form.value.nombre &&
+    form.value.direccion &&
+    form.value.telefono &&
+    form.value.fechaNac &&
+    form.value.correo &&
+    form.value.contrasenia &&
+    form.value.confirmarContrasenia &&
+    form.value.contrasenia ===form.value.confirmarContrasenia
+  )
+})
+const manejarEnvio=()=>{
+  
+  alert(`
+  CI:${form.value.ci}
+  Nombre:${form.value.nombre}
+  Direccion:${form.value.direccion}
+  telefono:${form.value.telefono}
+  fecha de naciemiento:${form.value.fechaNac}
+  correo:${form.value.correo}
+  contraseña:${form.value.contrasenia}
+  confirmacion:${form.value.confirmarContrasenia}
+  `)
+  Object.key(form.value).forEach(campo=>form.value[campo]="")
+}
+</script>
