@@ -1,8 +1,8 @@
 <template>
   <div class="card">
     <div class="teacher-data">
-      <h3>{{ user.name }}</h3>
-      <p class="teacher-details">{{ user.email }}</p>
+      <h3>{{ user.nombre }}</h3>
+      <p class="teacher-details">{{ user.correo }}</p>
     </div>
     <div class="action-group">
       <button class="action" @click="$emit('edit')">

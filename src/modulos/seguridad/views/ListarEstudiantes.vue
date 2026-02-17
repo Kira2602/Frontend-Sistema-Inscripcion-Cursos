@@ -6,15 +6,15 @@
 
   <div class="container">
     <div class="search-container">
-      <SearchBar />
+      <SearchBar @update:search="searchTerm = $event" />
       <router-link class="registrar" to="registrarEstudiantes">
         Registrar Nuevo Estudiante
       </router-link>
     </div>
     <div>
       <ActionCard
-        v-for="student in students"
-        :key="student.id"
+        v-for="student in filteredStudents"
+        :key="student.ci"
         :user="student"
         @edit="openEditModal(student)"
       />
@@ -25,10 +25,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted,computed } from "vue";
+import { listarEstudiantes } from "../servicios/seguridadService";
 import ActionCard from "../components/ActionCard.vue";
 import SearchBar from "../components/SearchBar.vue";
 import EditModal from "../components/EditModal.vue";
+
+const searchTerm = ref("");
+
 
 const students = ref([]);
 const selectedUser = ref(null);
@@ -39,11 +43,19 @@ const openEditModal = (student) => {
   isOpen.value = true;
 };
 
+const filteredStudents = computed(() => {
+  if (!searchTerm.value) return students.value;
+
+  return students.value.filter((student) =>
+    student.nombre.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+    student.ci.toString().includes(searchTerm.value)
+  );
+});
 onMounted(async () => {
   try {
-    const response = await fetch("https://jsonplaceholder.typicode.com/users");
-    const data = await response.json();
-    students.value = data;
+    const response = await listarEstudiantes();
+    const data = response.data;
+    students.value = data.students;
   } catch (error) {
     console.log("Error al obtener los estudiantes: ", error);
   }
