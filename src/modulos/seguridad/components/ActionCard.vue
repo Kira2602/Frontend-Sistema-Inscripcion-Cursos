@@ -5,7 +5,7 @@
       <p class="teacher-details">{{ user.email }}</p>
     </div>
     <div class="action-group">
-      <button class="action">
+      <button class="action" @click="$emit('edit')">
         <Icon iconName="edit" />
       </button>
       <button class="action">
@@ -18,12 +18,8 @@
 <script setup>
 import Icon from "./Icon.vue";
 
-defineProps({
-  user: {
-    type: Object,
-    required: true,
-  },
-});
+defineProps({ user: { type: Object, required: true } });
+defineEmits(["edit"]);
 </script>
 
 <style scoped>

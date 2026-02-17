@@ -16,17 +16,28 @@
         v-for="student in students"
         :key="student.id"
         :user="student"
+        @edit="openEditModal(student)"
       />
     </div>
   </div>
+
+  <EditModal v-if="isOpen" :user="selectedUser" @close="isOpen = false" />
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import ActionCard from "../components/ActionCard.vue";
 import SearchBar from "../components/SearchBar.vue";
+import EditModal from "../components/EditModal.vue";
 
 const students = ref([]);
+const selectedUser = ref(null);
+const isOpen = ref(false);
+
+const openEditModal = (student) => {
+  selectedUser.value = { ...student };
+  isOpen.value = true;
+};
 
 onMounted(async () => {
   try {
