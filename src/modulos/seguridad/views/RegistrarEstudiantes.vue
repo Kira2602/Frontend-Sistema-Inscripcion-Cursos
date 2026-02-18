@@ -50,6 +50,18 @@
         </div>
 
         <div>
+          <label>Carrera</label>
+          <div class="select-wrapper">
+            <select id="carrera" v-model="form.carrera">
+              <option disabled value="">-- Selecciona una opción --</option>
+              <option v-for="carrera in carreras" :key="carrera.id" :value="carrera.id">
+                {{ carrera.nombre }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div>
           <label>Correo Electrónico</label>
           <input type="email" v-model="form.correo" @input="validarCorreo" autocomplete="new-email" />
             <p v-if="errorCorreo" class="error">
@@ -111,12 +123,44 @@
       </div>
     </form>
   </div>
+
+  <ModalExito 
+    :message="successMessage" 
+    :visible="showModal" 
+    @close="showModal = false"
+  />
+
+   <ModalError
+    :message="errorMessage"
+    :visible="showErrorModal"
+    @close="showErrorModal = false"
+  />
 </template>
 
 <script setup>
 import Icon from "../components/Icon.vue";
 import { ref, computed } from "vue";
 import { registrarEstudiante } from "../servicios/seguridadService";
+import ModalExito from "../components/ModalExito.vue";
+import ModalError from "../components/ModalError.vue";
+
+
+
+
+const showModal = ref(false);
+const successMessage = ref("");
+
+const showErrorModal = ref(false);
+const errorMessage = ref("");
+
+
+
+const carreras = [
+  { id: "ins", nombre: 'Ingenieria de sistemas' },
+  { id: "der", nombre: 'Derecho' },
+  { id: "psi", nombre: 'Psicologia' }
+]
+
 const form = ref({
   ci: "",
   nombre: "",
@@ -126,6 +170,7 @@ const form = ref({
   correo: "",
   contrasenia: "",
   confirmarContrasenia: "",
+  carrera:""
 });
 
 const mostrarContrasenia=ref(false);
@@ -301,7 +346,7 @@ const manejarEnvio =async (e) => {
     alert("Porfavor corrige los errores antes de enviar");
     return;
   }
- try{
+ 
    const datosEnviar={
     ci:form.value.ci,
     nombre:form.value.nombre,
@@ -309,24 +354,23 @@ const manejarEnvio =async (e) => {
     telefono:form.value.telefono,
     contrasenia:form.value.contrasenia,
     fecha_nac:form.value.fechaNac,
-    direccion:form.value.direccion
+    direccion:form.value.direccion,
+    carrera:form.value.carrera
   };
+  alert("Datos a enviar:\n" + JSON.stringify(datosEnviar, null, 2));
+/*
   const resultado=await registrarEstudiante(datosEnviar);
-  registroExitoso.value=true;
-    alert("Estudiante registrado correctamente")
+  if(resultado.exito){
+    registroExitoso.value=true;
+    successMessage.value = resultado.mensaje;
+    showModal.value = true;    
     Object.keys(form.value).forEach(campo=>{form.value[campo]=""});
-  
- }catch(error) {
+    
+ }else {
 
-    registroExitoso.value = false;
-
-    if (error.response) {
-      mensajeError.value = error.response.data.message || "Error al registrar";
-    } else {
-      mensajeError.value = "Error de conexión con el servidor";
-    }
-    alert(mensajeError.value)
-  }
+    errorMessage.value = resultado.mensaje;
+    showErrorModal.value = true;
+  }*/
  
   
 
@@ -452,5 +496,50 @@ input:focus {
 .toggle-btn:hover {
   color: #5fa8a8;
 }
+
+/* Estilo general para todos los select dentro del formulario */
+select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background-color: white;
+  font-size: 14px;
+  transition: 0.2s;
+  appearance: none; /* Quita el estilo por defecto en algunos navegadores */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+}
+
+/* Borde y sombra al enfocar */
+select:focus {
+  border-color: #5fa8a8;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(95, 168, 168, 0.2);
+}
+
+/* Estilo de los option (opcional, depende del navegador) */
+select option {
+  padding: 10px;
+}
+
+/* Agregar un ícono de flecha personalizado */
+.select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.select-wrapper::after {
+  content: '▼';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #555;
+  font-size: 12px;
+}
+
 
 </style>

@@ -6,9 +6,20 @@ import ListarDocentes from "../modulos/seguridad/views/ListarDocentes.vue";
 import ListarAdministradores from "../modulos/seguridad/views/ListarAdministradores.vue";
 import RegistrarEstudiantes from "../modulos/seguridad/views/RegistrarEstudiantes.vue";
 import RegistrarDocentes from "../modulos/seguridad/views/RegistrarDocentes.vue";
+import Login from "../modulos/seguridad/views/Login.vue";
 
 const routes = [
   {
+  path: "/login",
+  name: "login",
+  component: Login,
+  },
+  {
+  path: "/",
+  redirect: "/login",
+  },
+  {
+    
     path: "/seguridad",
     component: AdminLayout,
     children: [

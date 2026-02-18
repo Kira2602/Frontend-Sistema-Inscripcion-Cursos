@@ -15,16 +15,32 @@
       <ActionCard v-for="docente in filteredDocentes" :key="docente.ci" :user="docente" @edit="openEditModal(docente)" />
     </div>
   </div>
-  <EditModal v-if="isOpen" :user="selectedUser" @close="isOpen = false" />
+  <EditModal v-if="isOpen" :user="selectedUser" @close="isOpen = false"  @save="actualizarDocente" />
+  <ModalExito 
+    :message="successMessage" 
+    :visible="showModal" 
+    @close="showModal = false"
+  />
 
+   <ModalError
+    :message="errorMessage"
+    :visible="showErrorModal"
+    @close="showErrorModal = false"
+  />
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import { listarDocentes } from "../servicios/seguridadService";
+import { listarDocentes,editarDocente } from "../servicios/seguridadService";
 import EditModal from "../components/EditModal.vue";
 import ActionCard from "../components/ActionCard.vue";
 import SearchBar from "../components/SearchBar.vue";
+import ModalError from "../components/ModalError.vue";
+import ModalExito from "../components/ModalExito.vue";
+const showModal = ref(false);
+const successMessage = ref("");
+const showErrorModal = ref(false);
+const errorMessage = ref("");
 
 const searchTerm = ref("");
 const docentes = ref([]);
@@ -43,6 +59,38 @@ const filteredDocentes = computed(() => {
     docente.ci.toString().includes(searchTerm.value)
   );
 });
+
+const actualizarDocente = async(usuarioActualizado) => {
+  // 🔹 Mostramos en consola lo recibido
+  console.log("Datos recibidos del modal:", usuarioActualizado);
+
+  try {
+     const { ci, ...docenteActualizado } = usuarioActualizado;
+    const resultado = await editarDocente(usuarioActualizado.ci, docenteActualizado);
+
+    if (resultado?.success) {
+      console.log("Docente actualizado correctamente:", resultado);
+
+      // Actualizar lista local usando ref de Vue 3
+      docentes.value = docentes.value.map(doc =>
+        doc.ci === docenteActualizado.ci ? { ...doc, ...docenteActualizado } : doc
+      );
+
+      successMessage.value = resultado.message;
+      showModal.value = true;
+
+    } else {
+      console.error("Error al actualizar:", resultado?.message);
+      errorMessage.value = resultado?.message || "Error desconocido";
+      showErrorModal.value = true;
+    }
+
+  } catch (error) {
+    console.error("Error de conexión con el backend:", error);
+    errorMessage.value = "No se pudo conectar con el servidor";
+    showErrorModal.value = true;
+  }
+};
 
 
 onMounted(async () => {
