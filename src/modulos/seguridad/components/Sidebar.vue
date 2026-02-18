@@ -9,9 +9,18 @@
       <router-link :to="{name:'listarDocentes'}">Docentes</router-link>
       <router-link :to="{name:'listarAdministradores'}">Administradores</router-link>
     </nav>
-    <button class="logout">Cerrar Sesión</button>
+    <button class="logout" @click="logout">Cerrar Sesión</button>
   </aside>
 </template>
+
+<script setup>
+import { useRouter } from 'vue-router';
+const router = useRouter();
+const logout = () => {
+  localStorage.clear(); // solo borrar token
+  router.push('/login');
+}
+</script>
 
 <style scoped>
 .sidebar {

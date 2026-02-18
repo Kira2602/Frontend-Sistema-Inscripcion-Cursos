@@ -1,11 +1,17 @@
 import { createRouter, createWebHistory } from "vue-router";
-import AdminLayout from "../layouts/SeguridadLayout.vue";
+import SeguridadLayout from "../layouts/SeguridadLayout.vue";
 import RegistrarAdmin from "../modulos/seguridad/views/RegistrarAdmin.vue";
 import ListarEstudiantes from "../modulos/seguridad/views/ListarEstudiantes.vue";
 import ListarDocentes from "../modulos/seguridad/views/ListarDocentes.vue";
 import ListarAdministradores from "../modulos/seguridad/views/ListarAdministradores.vue";
 import RegistrarEstudiantes from "../modulos/seguridad/views/RegistrarEstudiantes.vue";
 import RegistrarDocentes from "../modulos/seguridad/views/RegistrarDocentes.vue";
+
+import AdminLayout from "../layouts/AdminLayout.vue";
+
+import DocenteLayout from "../layouts/DocenteLayout.vue";
+
+import EstudianteLayout from "../layouts/EstudianteLayout.vue";
 import Login from "../modulos/seguridad/views/Login.vue";
 
 const routes = [
@@ -21,7 +27,7 @@ const routes = [
   {
     
     path: "/seguridad",
-    component: AdminLayout,
+    component: SeguridadLayout,
     children: [
       {
         path: "",
@@ -59,6 +65,21 @@ const routes = [
       },
     ],
   },
+  {
+    path:"/administrador",
+    component:AdminLayout,
+    //childre:[]
+  },
+  {
+    path:"/docente",
+    component:DocenteLayout,
+    //childre:[]
+  },
+  {
+    path:"/estudiante",
+    component:EstudianteLayout,
+    //childre:[]
+  }
 ];
 
 export default createRouter({

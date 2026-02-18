@@ -2,7 +2,7 @@
   <div class="login-container">
     <div class="login-card">
       <div class="login-left">
-        <img src="../assets/hero.png" alt="Logo" class="login-logo" />
+        <img src="/src/assets/logo.png" alt="Logo" class="login-logo" />
       </div>
       <div class="login-right">
         <h2>SixSeven Academy</h2>
@@ -17,10 +17,12 @@
                 <label>Contraseña</label>
                 <input v-model="password" type="password" />
             </div>
-
-            <button type="submit" :disabled="cargando">
-                {{ cargando ? 'Entrando...' : 'Entrar' }}
+            <div class="form-actions">
+              <button type="submit" :disabled="cargando">
+                {{ cargando ? 'Ingresando...' : 'Ingresar' }}
             </button>
+            </div>
+            
 
             <p v-if="error" class="error">{{ error }}</p>
         </form>
@@ -30,9 +32,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref ,onMounted} from 'vue';
 import authService from '../servicios/AuthServicio';;
 import { useRouter } from 'vue-router';
+
+
 
 const router = useRouter();
 
@@ -55,7 +59,18 @@ const login = async () => {
       localStorage.setItem('token', data.token);
 
       // Redirigir al home/dashboard
-      router.push('/');
+      setTimeout(() => {
+    // Redirigir al dashboard según rol
+    if (data.usuario.rol.nombre === "seguridad")
+      router.push('/seguridad');
+    if (data.usuario.rol.nombre === "administrador")
+      router.push('/administrador');
+    if (data.usuario.rol.nombre === "docente")
+      router.push('/docente');
+    if (data.usuario.rol.nombre === "estudiante")
+      router.push('/estudiante');
+  }, 0);
+      
     } else {
       error.value = mensaje;
     }
@@ -95,6 +110,7 @@ const login = async () => {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  background-color: #00597b;
 }
 
 .login-left {
@@ -102,7 +118,7 @@ const login = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f4f6f8;
+  background: #dee7df;
 }
 
 .login-logo {
@@ -112,45 +128,68 @@ const login = async () => {
 }
 
 .login-card h2 {
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background-color: #9cd7de;
+  color: white;
+  border-radius: 100px;
+  height: 90px;
+
   margin-bottom: 1.5rem;
+  font-size: 3em;
 }
+
 
 .form-group {
   margin-bottom: 1rem;
+  color: white;
 }
+
+.form-actions {
+  display: flex;
+  justify-content: center;
+}
+
 
 label {
   display: block;
   margin-bottom: 0.3rem;
-  font-size: 0.9rem;
-  color: #555;
+  font-size: 1.5rem;
+  color: white;
 }
 
 input {
   width: 100%;
-  padding: 0.6rem;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+  padding: 0.5rem 0;
+  border: none;
+  border-bottom: 2px solid #ccc;
+  border-radius: 0;
+  background: transparent;
+  font-size: 1rem;
+  color: white;
 }
 
 input:focus {
   outline: none;
-  border-color: #42b983;
+  border-color: #dee7df;
 }
 
 button {
-  width: 100%;
+  width: 50%;
+  height: 60px;
   padding: 0.7rem;
-  background: #42b983;
+  background: #f7ba00;
   color: white;
   border: none;
-  border-radius: 4px;
-  font-size: 1rem;
+  border-radius: 100px;
+  font-size: 1.5rem;
   cursor: pointer;
 }
 
+
 button:hover {
-  background: #369f75;
+  background: #a87f02;
 }
 </style>
