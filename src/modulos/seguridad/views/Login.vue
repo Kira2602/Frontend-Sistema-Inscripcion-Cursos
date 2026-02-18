@@ -32,9 +32,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref ,onMounted} from 'vue';
 import authService from '../servicios/AuthServicio';;
 import { useRouter } from 'vue-router';
+
+
 
 const router = useRouter();
 
@@ -57,7 +59,18 @@ const login = async () => {
       localStorage.setItem('token', data.token);
 
       // Redirigir al home/dashboard
-      router.push('/');
+      setTimeout(() => {
+    // Redirigir al dashboard según rol
+    if (data.usuario.rol.nombre === "seguridad")
+      router.push('/seguridad');
+    if (data.usuario.rol.nombre === "administrador")
+      router.push('/administrador');
+    if (data.usuario.rol.nombre === "docente")
+      router.push('/docente');
+    if (data.usuario.rol.nombre === "estudiante")
+      router.push('/estudiante');
+  }, 0);
+      
     } else {
       error.value = mensaje;
     }
