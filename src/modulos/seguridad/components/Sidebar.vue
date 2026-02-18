@@ -31,6 +31,15 @@
   </aside>
 </template>
 
+<script setup>
+import { useRouter } from 'vue-router';
+const router = useRouter();
+const logout = () => {
+  localStorage.clear(); // solo borrar token
+  router.push('/login');
+}
+</script>
+
 <style scoped>
 /* Contenedor principal con la franja lateral */
 .sidebar-container {

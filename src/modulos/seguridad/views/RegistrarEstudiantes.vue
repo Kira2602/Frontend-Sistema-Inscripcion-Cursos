@@ -355,10 +355,9 @@ const manejarEnvio =async (e) => {
     contrasenia:form.value.contrasenia,
     fecha_nac:form.value.fechaNac,
     direccion:form.value.direccion,
-    carrera:form.value.carrera
+    carrera_usuario:form.value.carrera
   };
-  alert("Datos a enviar:\n" + JSON.stringify(datosEnviar, null, 2));
-/*
+  //alert("Datos a enviar:\n" + JSON.stringify(datosEnviar, null, 2));
   const resultado=await registrarEstudiante(datosEnviar);
   if(resultado.exito){
     registroExitoso.value=true;
@@ -370,7 +369,7 @@ const manejarEnvio =async (e) => {
 
     errorMessage.value = resultado.mensaje;
     showErrorModal.value = true;
-  }*/
+  }
  
   
 

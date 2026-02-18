@@ -103,12 +103,12 @@ const actualizarDocente = async (usuarioActualizado) => {
       docenteActualizado,
     );
 
-    if (resultado?.success) {
+    if (resultado?.exito) {
       console.log("Docente actualizado correctamente:", resultado);
 
       // Actualizar lista local usando ref de Vue 3
       docentes.value = docentes.value.map((doc) =>
-        doc.ci === docenteActualizado.ci
+        doc.ci === ci
           ? { ...doc, ...docenteActualizado }
           : doc,
       );

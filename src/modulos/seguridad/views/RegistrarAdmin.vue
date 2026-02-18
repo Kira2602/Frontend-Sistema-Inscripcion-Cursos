@@ -2,7 +2,7 @@
   <div>
     <div class="icon-wrapper">
       <Icon
-      to="listarDocentes"
+      to="listarAdministradores"
       iconName="arrow_back"
       iconColor="black"
       message="Volver"

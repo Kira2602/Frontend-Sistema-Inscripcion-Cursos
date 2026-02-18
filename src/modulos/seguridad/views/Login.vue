@@ -276,7 +276,7 @@ const login = async () => {
       router.push('/docente');
     if (data.usuario.rol.nombre === "estudiante")
       router.push('/estudiante');
-  }, 0);
+  }, 1);
       
     } else {
       error.value = mensaje;
