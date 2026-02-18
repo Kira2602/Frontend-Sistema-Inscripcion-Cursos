@@ -21,7 +21,7 @@
     </div>
   </div>
 
-  <EditModal v-if="isOpen" :user="selectedUser" @close="isOpen = false" />
+  <EditModal v-if="isOpen" :user="selectedUser" @close="isOpen = false" @save="actualizarEstudiante"/>
 </template>
 
 <script setup>
@@ -51,6 +51,23 @@ const filteredStudents = computed(() => {
     student.ci.toString().includes(searchTerm.value)
   );
 });
+
+const actualizarEstudiante = (usuarioActualizado) => {
+  // 🔹 Mostramos en consola lo recibido
+  console.log("Datos recibidos del modal:", usuarioActualizado);
+
+  // 1️⃣ Actualizamos la lista localmente
+  const index = students.value.findIndex(d => d.ci === usuarioActualizado.ci);
+  if (index !== -1) {
+    students.value[index] = { ...usuarioActualizado };
+  }
+
+  // 2️⃣ Aquí puedes llamar a tu servicio para enviar al backend
+  // actualizarDocenteAPI(usuarioActualizado)
+  //   .then(res => console.log("Actualizado exitosamente"))
+  //   .catch(err => console.error(err));
+};
+
 onMounted(async () => {
   try {
     const response = await listarEstudiantes();

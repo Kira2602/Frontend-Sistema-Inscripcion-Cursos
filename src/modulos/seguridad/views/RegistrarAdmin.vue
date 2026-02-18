@@ -105,6 +105,17 @@
       </form>
     </div>
   </div>
+  <ModalExito 
+    :message="successMessage" 
+    :visible="showModal" 
+    @close="showModal = false"
+  />
+
+   <ModalError
+    :message="errorMessage"
+    :visible="showErrorModal"
+    @close="showErrorModal = false"
+  />
 </template>
 
 <style scoped>
@@ -224,6 +235,15 @@ input:focus {
 import Icon from "../components/Icon.vue";
 import { ref, computed} from "vue";
 import { registrarAdministrador } from "../servicios/seguridadService";
+import ModalExito from "../components/ModalExito.vue";
+import ModalError from "../components/ModalError.vue";
+
+const showModal = ref(false);
+const successMessage = ref("");
+
+const showErrorModal = ref(false);
+const errorMessage = ref("");
+
 const form=ref({
   ci:"",
   nombre:"",
@@ -416,10 +436,12 @@ const manejarEnvio=async(e)=>{
   
   const resultado=await registrarAdministrador(datosEnviar);
   if(resultado.exito){
-    alert("Administrador registrado correctamente")
-    Object.key(form.value).forEach(campo=>{form.value[campo]=""});
+    successMessage.value="Administrador registrado correctamente";
+    Object.keys(form.value).forEach(campo=>{form.value[campo]=""});
+    showModal.value = true;
   }else{
-    alert(resultado.mensaje);
+    errorMessage.value = resultado.errores || "Error desconocido";
+    showErrorModal.value = true;
     if(resultado.errores){
       console.log("Errores backend: ", resultado.errores)
     }

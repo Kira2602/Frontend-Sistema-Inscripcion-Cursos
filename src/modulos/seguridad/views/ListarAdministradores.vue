@@ -3,7 +3,6 @@
   <p class="subtitle">
     Aquí puedes ver la lista de Administradores registrados y agregar uno nuevo
   </p>
-
   <div class="container">
     <div class="search-container">
       <SearchBar @update:search="searchTerm = $event"/>
@@ -15,15 +14,33 @@
       <ActionCard v-for="admin in filteredAdmins" :key="admin.ci" :user="admin" @edit="openEditModal(admin)"/>
     </div>
   </div>
-<EditModal v-if="isOpen" :user="selectedUser" @close="isOpen = false" />
+  <EditModal v-if="isOpen" :user="selectedUser" @close="isOpen = false"  @save="actualizarAdministrador"/>
+  <ModalExito 
+    :message="successMessage" 
+    :visible="showModal" 
+    @close="showModal = false"
+  />
+   <ModalError
+    :message="errorMessage"
+    :visible="showErrorModal"
+    @close="showErrorModal = false"
+  />
 </template>
 
 <script setup>
 import { ref, onMounted,computed } from "vue";
-import { listarAdministradores } from "../servicios/seguridadService";
-import ActionCard from "../components/ActionCard.vue";
-import SearchBar from "../components/SearchBar.vue";
-import EditModal from "../components/EditModal.vue";
+import { listarAdministradores, editarAdministrador } from "../servicios/seguridadService";
+import EditModal from "../components/EditModal.vue";//modal de edicion de usuarios
+import ActionCard from "../components/ActionCard.vue";//card de los usuarios
+import SearchBar from "../components/SearchBar.vue";//barra de busqueda
+import ModalError from "../components/ModalError.vue";//Modal de error en operacion
+import ModalExito from "../components/ModalExito.vue";//Modal de exito en operacion
+
+const showModal = ref(false);
+const successMessage = ref("");
+
+const showErrorModal = ref(false);
+const errorMessage = ref("");
 
 const admins = ref([]);
 const selectedUser = ref(null);
@@ -43,6 +60,37 @@ const filteredAdmins = computed(() => {
     admin.ci.toString().includes(searchTerm.value)
   );
 });
+
+
+const actualizarAdministrador = async (usuarioActualizado) => {
+  console.log("Datos recibidos del modal:", usuarioActualizado);
+
+  try {
+    const resultado = await editarAdministrador(usuarioActualizado.ci, usuarioActualizado);
+
+    if (resultado?.exito) {
+      console.log("Administrador actualizado correctamente:", resultado);
+
+      // Actualizar lista local usando ref de Vue 3
+      admins.value = admins.value.map(admin =>
+        admin.ci === usuarioActualizado.ci ? { ...admin, ...usuarioActualizado } : admin
+      );
+
+      successMessage.value = resultado.mensaje;
+      showModal.value = true;
+
+    } else {
+      console.error("Error al actualizar:", resultado?.errores);
+      errorMessage.value = resultado?.errores?.join(", ") || "Error desconocido";
+      showErrorModal.value = true;
+    }
+
+  } catch (error) {
+    console.error("Error de conexión con el backend:", error);
+    errorMessage.value = "No se pudo conectar con el servidor";
+    showErrorModal.value = true;
+  }
+};
 
 onMounted(async () => {
   try {

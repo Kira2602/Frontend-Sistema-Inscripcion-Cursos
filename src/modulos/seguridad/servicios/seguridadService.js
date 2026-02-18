@@ -37,23 +37,22 @@ export const registrarAdministrador=async(datos)=>{
 }
 
 
-export const registrarEstudiante=async(datos)=>{
-    try{
-        const response=await api.post(
-            "/estudiantes", datos
-        );
-        return response.data;
-    }catch(error){
-        if(error.response){
-            return error.response.data;
-        }
-        return{
-            exito:false,
-            mensaje:"Error de conexion con el servidor",
-            errores:["No se pudo conectar con el backend"]
-        }
-    }
-}
+export const registrarEstudiante = async (datos) => {
+  try {
+    const response = await api.post("/estudiantes", datos);
+    return {
+      exito: true,
+      mensaje: response.data.message,
+      data: response.data.data
+    };
+  } catch (error) {
+    return {
+      exito: false,
+      mensaje: error.response?.data?.message || "Error de conexión con el servidor",
+      status: error.response?.status || 500
+    };
+  }
+};
 
 
 
@@ -63,15 +62,49 @@ export const registrarDocente=async(datos)=>{
         const response=await api.post(
             "/usuarios/registro-docente",datos
         );
-        return response.data;
+        return response;
     }catch(error){
-        if(error.response){
-            return error.response.data;
-        }
-         return{
-            exito:false,
-            mensaje:"Error de conexion con el servidor",
-            errores:["No se pudo conectar con el backend"]
-        }
+         return error.response || { status: 500, data: { message: "Error de conexión" } };
     }
 }
+
+
+
+
+export const editarAdministrador = async (ci, datos) => {
+  try {
+    const response = await api.patch(`/administradores/${ci}`, datos);
+
+    // response.data es lo que devuelve tu backend
+    return response.data;
+
+  } catch (error) {
+    if (error.response) {
+      return error.response.data;
+    }
+    return {
+      exito: false,
+      mensaje: "Error de conexión con el servidor",
+      errores: ["No se pudo conectar con el backend"]
+    };
+  }
+};
+
+export const editarDocente = async (ci, datosActualizar) => {
+  try {
+    const response = await api.put(`/usuarios/docentes/${ci}`, datosActualizar);
+
+    // Axios devuelve el objeto dentro de response.data
+    return response.data;
+
+  } catch (error) {
+    if (error.response) return error.response.data;
+
+    return {
+      success: false,
+      message: "Error de conexión con el servidor",
+      error: "No se pudo conectar al backend"
+    };
+  }
+};
+

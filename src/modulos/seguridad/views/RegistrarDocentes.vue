@@ -114,12 +114,31 @@
       </div>
     </form>
   </div>
+  <ModalExito 
+    :message="successMessage" 
+    :visible="showModal" 
+    @close="showModal = false"
+  />
+
+   <ModalError
+    :message="errorMessage"
+    :visible="showErrorModal"
+    @close="showErrorModal = false"
+  />
 </template>
 
 <script setup>
 import Icon from "../components/Icon.vue";
 import { ref, computed } from "vue";
 import { registrarDocente } from "../servicios/seguridadService";
+import ModalExito from "../components/ModalExito.vue";
+import ModalError from "../components/ModalError.vue";
+
+const showModal = ref(false);
+const successMessage = ref("");
+
+const showErrorModal = ref(false);
+const errorMessage = ref("");
 
 const form = ref({
   ci: "",
@@ -318,10 +337,9 @@ const manejarEnvio = async(e) => {
   validarConfirmacion();
 validarExperiencia();
   if(!formularioValido.value){
-    alert("Porfavor corrige los errores antes de enviar");
     return;
   }
-  try{
+  
    const datosEnviar={
     ci:form.value.ci,
     nombre:form.value.nombre,
@@ -333,21 +351,19 @@ validarExperiencia();
     experiencia:form.value.experiencia
   };
   const resultado=await registrarDocente(datosEnviar);
-  registroExitoso.value=true;
-    alert("Estudiante registrado correctamente")
-    Object.keys(form.value).forEach(campo=>{form.value[campo]=""});
-  
- }catch(error) {
+  if(resultado.status===201){
+    // Éxito
+    successMessage.value = "Docente registrado correctamente";
+    showModal.value = true;
 
-    registroExitoso.value = false;
-
-    if (error.response) {
-      mensajeError.value = error.response.data.message || "Error al registrar";
-    } else {
-      mensajeError.value = "Error de conexión con el servidor";
-    }
-    alert(mensajeError.value)
-  }
+    // Limpiar formulario
+    Object.keys(form.value).forEach(key => form.value[key] = "");
+ }else{
+     // Error
+    errorMessage.value = resultado.data.message || "Error al registrar";
+  showErrorModal.value = true;
+ }
+ 
 
 };
 </script>

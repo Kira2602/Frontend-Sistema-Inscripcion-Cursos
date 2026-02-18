@@ -5,9 +5,9 @@
     </div>
 
     <nav class="menu">
-      <router-link to="listarEstudiantes">Estudiantes</router-link>
-      <router-link to="listarDocentes">Docentes</router-link>
-      <router-link to="listarAdministradores">Administradores</router-link>
+      <router-link :to="{name:'listarEstudiantes'}">Estudiantes</router-link>
+      <router-link :to="{name:'listarDocentes'}">Docentes</router-link>
+      <router-link :to="{name:'listarAdministradores'}">Administradores</router-link>
     </nav>
     <button class="logout">Cerrar Sesión</button>
   </aside>
