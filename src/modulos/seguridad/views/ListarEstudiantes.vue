@@ -17,47 +17,84 @@
         :key="student.ci"
         :user="student"
         @edit="openEditModal(student)"
+        @delete="openDeletionModal(student)"
       />
     </div>
   </div>
 
-  <EditModal v-if="isOpen" :user="selectedUser" @close="isOpen = false" @save="actualizarEstudiante"/>
+  <EditModal
+    v-if="isOpen"
+    :user="selectedUser"
+    @close="isOpen = false"
+    @save="actualizarEstudiante"
+  />
+
+  <DeletionModal
+    v-if="isDeletion"
+    :user="selectedUser"
+    @cancelar="isDeletion = false"
+    @aceptar="deleteStudent"
+  />
+
+  <ModalExito
+    :message="successMessage"
+    :visible="showModal"
+    @close="showModal = false"
+  />
+
+  <ModalError
+    :message="errorMessage"
+    :visible="showErrorModal"
+    @close="showErrorModal = false"
+  />
 </template>
 
 <script setup>
-import { ref, onMounted,computed } from "vue";
-import { listarEstudiantes } from "../servicios/seguridadService";
+import { ref, onMounted, computed } from "vue";
+import {
+  listarEstudiantes,
+  eliminarEstudiante,
+} from "../servicios/seguridadService";
 import ActionCard from "../components/ActionCard.vue";
 import SearchBar from "../components/SearchBar.vue";
 import EditModal from "../components/EditModal.vue";
+import DeletionModal from "../components/DeletionModal.vue";
+import ModalExito from "../components/ModalExito.vue";
+import ModalError from "../components/ModalError.vue";
 
 const searchTerm = ref("");
-
-
 const students = ref([]);
 const selectedUser = ref(null);
 const isOpen = ref(false);
+const isDeletion = ref(false);
+const showModal = ref(false);
+const successMessage = ref("");
+const showErrorModal = ref(false);
+const errorMessage = ref("");
 
 const openEditModal = (student) => {
   selectedUser.value = { ...student };
   isOpen.value = true;
 };
 
+const openDeletionModal = (student) => {
+  selectedUser.value = { ...student };
+  isDeletion.value = true;
+};
+
 const filteredStudents = computed(() => {
   if (!searchTerm.value) return students.value;
 
-  return students.value.filter((student) =>
-    student.nombre.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
-    student.ci.toString().includes(searchTerm.value)
+  return students.value.filter(
+    (student) =>
+      student.nombre.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+      student.ci.toString().includes(searchTerm.value),
   );
 });
 
 const actualizarEstudiante = (usuarioActualizado) => {
-  // 🔹 Mostramos en consola lo recibido
   console.log("Datos recibidos del modal:", usuarioActualizado);
-
-  // 1️⃣ Actualizamos la lista localmente
-  const index = students.value.findIndex(d => d.ci === usuarioActualizado.ci);
+  const index = students.value.findIndex((d) => d.ci === usuarioActualizado.ci);
   if (index !== -1) {
     students.value[index] = { ...usuarioActualizado };
   }
@@ -66,6 +103,32 @@ const actualizarEstudiante = (usuarioActualizado) => {
   // actualizarDocenteAPI(usuarioActualizado)
   //   .then(res => console.log("Actualizado exitosamente"))
   //   .catch(err => console.error(err));
+};
+
+const deleteStudent = async () => {
+  if (!selectedUser.value) return;
+
+  try {
+    const response = await eliminarEstudiante(selectedUser.value.ci);
+    if (response.success === false) {
+      console.error("Error al eliminar: ", response.message);
+      return;
+    }
+
+    students.value = students.value.filter(
+      (student) => student.ci !== selectedUser.value.ci,
+    );
+
+    isDeletion.value = false;
+    selectedUser.value = null;
+
+    successMessage.value = "Estudiante eliminado";
+    showModal.value = true;
+  } catch (error) {
+    console.error("Error eliminando estudiante: ", error);
+    errorMessage.value = "Error al eliminar el estudiante";
+    showErrorModal.value = true;
+  }
 };
 
 onMounted(async () => {
