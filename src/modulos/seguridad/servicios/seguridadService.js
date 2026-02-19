@@ -2,6 +2,22 @@ import api from "../../../services";
 
 const token = localStorage.getItem("token");
 
+export const logout =async ()=>{
+    try{
+        return api.post("/auth/logout");
+    }catch(error){
+        if (error.response) {
+      return error.response.data;
+    }
+    return {
+      exito: false,
+      mensaje: "Error de conexion con el servidor",
+      errores: ["No se pudo conectar con el backend"],
+    };
+    }
+
+}
+
 export const listarAdministradores = async () => {
   return api.get("/administradores", {
     headers: {
@@ -28,7 +44,11 @@ export const listarDocentes = async () => {
 
 export const registrarAdministrador = async (datos) => {
   try {
-    const response = await api.post("/administradores/registro", datos);
+    const response = await api.post("/administradores/registro", datos, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
     return response.data;
   } catch (error) {
     if (error.response) {
@@ -44,7 +64,11 @@ export const registrarAdministrador = async (datos) => {
 
 export const registrarEstudiante = async (datos) => {
   try {
-    const response = await api.post("/estudiantes", datos);
+    const response = await api.post("/estudiantes", datos, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
     return {
       exito: true,
       mensaje: response.data.message,
@@ -62,7 +86,11 @@ export const registrarEstudiante = async (datos) => {
 
 export const registrarDocente = async (datos) => {
   try {
-    const response = await api.post("/usuarios/registro-docente", datos);
+    const response = await api.post("/usuarios/registro-docente", datos, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
     return response;
   } catch (error) {
     return (
@@ -73,7 +101,11 @@ export const registrarDocente = async (datos) => {
 
 export const editarAdministrador = async (ci, datos) => {
   try {
-    const response = await api.patch(`/administradores/${ci}`, datos);
+    const response = await api.patch(`/administradores/${ci}`, datos, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
     // response.data es lo que devuelve tu backend
     return response.data;
@@ -91,7 +123,11 @@ export const editarAdministrador = async (ci, datos) => {
 
 export const editarDocente = async (ci, datosActualizar) => {
   try {
-    const response = await api.put(`/usuarios/docentes/${ci}`, datosActualizar);
+    const response = await api.put(`/docentes/${ci}`, datosActualizar, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
     // Axios devuelve el objeto dentro de response.data
     return response.data;
@@ -106,9 +142,33 @@ export const editarDocente = async (ci, datosActualizar) => {
   }
 };
 
+
+
+export const editarEstudiante= async(ci,datos)=>{
+    try{
+        const response= await api.put(`/estudiantes/${ci}`,datos,{
+            headers:{
+                Authorization:`Bearer ${token}`
+            }
+        });
+        return response.data;
+    }catch(error){
+        if (error.response) return error.response.data;
+
+    return {
+      success: false,
+      message: "Error de conexión con el servidor",
+      error: "No se pudo conectar al backend",
+    };
+    }
+}
 export const eliminarEstudiante = async (ci) => {
   try {
-    const response = await api.delete(`/estudiantes/${ci}`);
+    const response = await api.delete(`/estudiantes/${ci}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
     return response.data;
   } catch (error) {
     if (error.response) return error.response.data;
@@ -123,7 +183,11 @@ export const eliminarEstudiante = async (ci) => {
 
 export const eliminarDocente = async (ci) => {
   try {
-    const response = await api.delete(`/docentes/${ci}`);
+    const response = await api.delete(`/docentes/${ci}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
     return response.data;
   } catch (error) {
     if (error.response) return error.response.data;
@@ -138,7 +202,11 @@ export const eliminarDocente = async (ci) => {
 
 export const eliminarAdministrador = async (ci) => {
   try {
-    const response = await api.delete(`/administradores/${ci}`);
+    const response = await api.delete(`/administradores/${ci}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
     return response.data;
   } catch (error) {
     if (error.response) return error.response.data;

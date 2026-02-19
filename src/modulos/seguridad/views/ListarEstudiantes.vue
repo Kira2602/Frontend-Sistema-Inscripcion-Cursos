@@ -54,6 +54,7 @@ import { ref, onMounted, computed } from "vue";
 import {
   listarEstudiantes,
   eliminarEstudiante,
+  editarEstudiante
 } from "../servicios/seguridadService";
 import ActionCard from "../components/ActionCard.vue";
 import SearchBar from "../components/SearchBar.vue";
@@ -92,17 +93,28 @@ const filteredStudents = computed(() => {
   );
 });
 
-const actualizarEstudiante = (usuarioActualizado) => {
+const actualizarEstudiante =async (usuarioActualizado) => {
   console.log("Datos recibidos del modal:", usuarioActualizado);
-  const index = students.value.findIndex((d) => d.ci === usuarioActualizado.ci);
-  if (index !== -1) {
-    students.value[index] = { ...usuarioActualizado };
+  try{
+    const { ci, ...estudianteActualizado } = usuarioActualizado;
+      const resultado= await editarEstudiante(usuarioActualizado.ci,estudianteActualizado);
+      
+        students.value = students.value.map((doc) =>
+            doc.ci === ci
+              ? { ...doc, ...estudianteActualizado }
+              : doc,
+          );
+        successMessage.value = "Estudiante actualizado";
+        showModal.value=true;
+      
+        
+    
+  }catch(error){
+    console.error("Error de conexión con el backend:", error);
+    errorMessage.value = error?.message ||"Error al actualizar";
+    showErrorModal.value = true;
   }
-
-  // 2️⃣ Aquí puedes llamar a tu servicio para enviar al backend
-  // actualizarDocenteAPI(usuarioActualizado)
-  //   .then(res => console.log("Actualizado exitosamente"))
-  //   .catch(err => console.error(err));
+ 
 };
 
 const deleteStudent = async () => {

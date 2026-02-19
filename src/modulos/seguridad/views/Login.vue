@@ -5,37 +5,242 @@
         <img src="/src/assets/logo.png" alt="Logo" class="login-logo" />
       </div>
       <div class="login-right">
-        <h2>SixSeven Academy</h2>
+        <div class="title-container">
+          <h2>SixSeven Academy</h2>
+        </div>
 
         <form @submit.prevent="login">
+          <div class="form-container">
             <div class="form-group">
-                <label>Usuario</label>
-                <input v-model="correo" type="email" />
+              <label>Usuario</label>
+              <input v-model="correo" type="email"  />
             </div>
 
-            <div class="form-group">
-                <label>Contraseña</label>
-                <input v-model="password" type="password" />
-            </div>
-            <div class="form-actions">
-              <button type="submit" :disabled="cargando">
-                {{ cargando ? 'Ingresando...' : 'Ingresar' }}
+            <div class="form-group password-group">
+  <label>Contraseña</label>
+  <div class="password-wrapper">
+    <input v-model="password" :type="mostrarContrasenia ? 'text' : 'password'" />
+    <span class="toggle-password" @click="mostrarContrasenia = !mostrarContrasenia">
+      <Icon :iconName="mostrarContrasenia ? 'visibility_off' : 'visibility'" iconColor="#fff  " />
+    </span>
+  </div>
+</div>
+
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" :disabled="cargando">
+              {{ cargando ? 'Ingresando...' : 'Ingresar' }}
             </button>
-            </div>
-            
+          </div>
 
-            <p v-if="error" class="error">{{ error }}</p>
+          <p v-if="error" class="error">{{ error }}</p>
         </form>
       </div>
     </div>
   </div>
 </template>
 
+<style scoped>
+
+.login-container {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #dee7ef;
+  padding: 2rem;
+}
+
+.login-card {
+  display: flex;
+  border-radius: 50px;
+  overflow: hidden;
+  width: 90%; /* Un poco más ancho en general */
+  max-width: 1000px; /* Evita que crezca demasiado en monitores gigantes */
+  min-height: 500px; /* Altura mínima en lugar de fija */
+  box-shadow: 0 10px 25px rgba(2, 82, 113, 0.3);
+  background: white; /* Asegura un fondo si el gradiente falla */
+}
+
+.login-left {
+  flex: 1.2;
+  background: #dee7ef;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-logo {
+  max-width: 70%;
+  max-height: 75%;
+  object-fit: contain;
+}
+
+.login-right {
+  flex: 0.8;
+  background: linear-gradient(#00597B,#5AB2C6);
+  padding: 5rem 2rem 3rem 2rem; /* Aumenté el padding superior */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: white;
+  position: relative; /* Crucial para el posicionamiento del título */
+}
+
+.title-container {
+  background-color: #5ab2c6;
+  padding: 1rem 2rem;
+  border-radius: 0 50px 50px 0;
+  margin-bottom: 2rem;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  position: absolute;
+  top: 30px;
+  left: 0;
+  right: 20px; /* Reducido un poco */
+  z-index: 10;
+}
+
+.title-container h2 {
+  margin: 0;
+  color: white;
+  font-size: clamp(1.5rem, 4vw, 2.5rem); /* Tamaño fluido según pantalla */
+  text-align: left;
+}
+
+.form-group {
+  
+  margin-bottom: 1.5rem;
+}
+
+.form-container {
+  padding: 30px 10%; /* Reducido el 20% para ganar espacio */
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 1.3rem;
+
+}
+
+input {
+  width: 80%;
+  padding: 0.5rem 0;
+  border: none;
+  border-bottom: 3px solid white;
+  background: transparent;
+  color: white;
+  font-size: 1rem;
+}
+
+input::placeholder {
+  color: rgba(255,255,255,0.7);
+}
+
+input:focus {
+  outline: none;
+  border-bottom: 2px solid #f7ba00;
+}
+
+.form-actions {
+
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+button {
+  background: radial-gradient(circle, #f7ba00 0%, #d48806 100%);
+  color: white;
+  border:1px solid#000;
+  border-radius: 50px;
+  padding: 0.8rem 3rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+  transition: background 0.3s ease;
+  width: 60%;
+}
+
+button:hover {
+  background: #d4a000;
+}
+
+.error {
+  margin-top: 1rem;
+  color: #ff8080;
+  text-align: center;
+}
+
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 80%;
+}
+
+.toggle-password {
+  position:absolute;
+  right: 0;
+  cursor: pointer;
+  font-size: 1.2rem;
+  user-select: none;
+  color: white;
+}
+@media (max-width: 768px) {
+  .login-container {
+    padding: 1rem;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .login-card {
+    flex-direction: column; /* Apila los elementos verticalmente */
+    height: auto;
+    border-radius: 30px;
+  }
+
+  .login-left {
+    padding: 2rem;
+    flex: none; /* Evita que crezca demasiado */
+  }
+
+  .login-logo {
+    max-width: 150px; /* Logo más pequeño en móvil */
+  }
+
+  .login-right {
+    padding: 6rem 1.5rem 3rem 1.5rem; /* Más espacio arriba para el título absoluto */
+    flex: none;
+  }
+
+  .title-container {
+    top: 15px;
+    padding: 0.8rem 1.5rem;
+  }
+
+  .form-container {
+    padding-left: 5%;
+    padding-right: 5%;
+  }
+
+  input, .password-wrapper {
+    width: 100%; /* Inputs a ancho completo */
+  }
+
+  button {
+    width: 100%; /* Botón grande para facilitar el toque */
+  }
+}
+</style>
+
+
 <script setup>
 import { ref ,onMounted} from 'vue';
 import authService from '../servicios/AuthServicio';;
 import { useRouter } from 'vue-router';
-
+import Icon from '../components/Icon.vue';
 
 
 const router = useRouter();
@@ -45,6 +250,8 @@ const password = ref('');
 const error = ref('');
 const cargando = ref(false);
 
+
+const mostrarContrasenia=ref(false)
 const login = async () => {
   error.value = '';
   cargando.value = true;
@@ -69,7 +276,7 @@ const login = async () => {
       router.push('/docente');
     if (data.usuario.rol.nombre === "estudiante")
       router.push('/estudiante');
-  }, 0);
+  }, 1);
       
     } else {
       error.value = mensaje;
@@ -81,115 +288,3 @@ const login = async () => {
   }
 };
 </script>
-
-<style scoped>
-.login-container {
-  height: 100vh;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #f4f6f8;
-  margin: 0;
-  padding: 5rem;
-}
-
-.login-card {
-  background: white;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  border-radius: 50px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  display: flex;
-}
-
-.login-right {
-  flex: 4;
-  padding: 5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background-color: #00597b;
-}
-
-.login-left {
-  flex: 6;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #dee7df;
-}
-
-.login-logo {
-  max-width: 70%;
-  max-height: 70%;
-  object-fit: contain;
-}
-
-.login-card h2 {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  background-color: #9cd7de;
-  color: white;
-  border-radius: 100px;
-  height: 90px;
-
-  margin-bottom: 1.5rem;
-  font-size: 3em;
-}
-
-
-.form-group {
-  margin-bottom: 1rem;
-  color: white;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: center;
-}
-
-
-label {
-  display: block;
-  margin-bottom: 0.3rem;
-  font-size: 1.5rem;
-  color: white;
-}
-
-input {
-  width: 100%;
-  padding: 0.5rem 0;
-  border: none;
-  border-bottom: 2px solid #ccc;
-  border-radius: 0;
-  background: transparent;
-  font-size: 1rem;
-  color: white;
-}
-
-input:focus {
-  outline: none;
-  border-color: #dee7df;
-}
-
-button {
-  width: 50%;
-  height: 60px;
-  padding: 0.7rem;
-  background: #f7ba00;
-  color: white;
-  border: none;
-  border-radius: 100px;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-
-button:hover {
-  background: #a87f02;
-}
-</style>
