@@ -26,15 +26,17 @@
         
       </nav>
 
-      <button class="logout-btn" @click="logout">Cerrar Sesión</button>
+      <button class="logout-btn" @click="logoutUsuario">Cerrar Sesión</button>
     </div>
   </aside>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router';
+import { logout } from '../servicios/seguridadService';
 const router = useRouter();
-const logout = () => {
+const logoutUsuario = async() => {
+  const respuesta=await logout();
   localStorage.clear(); // solo borrar token
   router.push('/login');
 }
