@@ -264,6 +264,7 @@ const login = async () => {
     if (exito) {
       // Guardamos token
       localStorage.setItem('token', data.token);
+      localStorage.setItem('nombre', data.usuario.nombre);
 
       // Redirigir al home/dashboard
       setTimeout(() => {
