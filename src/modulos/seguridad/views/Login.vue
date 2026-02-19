@@ -264,6 +264,7 @@ const login = async () => {
     if (exito) {
       // Guardamos token
       localStorage.setItem('token', data.token);
+      localStorage.setItem('nombre', data.usuario.nombre);
 
       // Redirigir al home/dashboard
       setTimeout(() => {
@@ -276,7 +277,7 @@ const login = async () => {
       router.push('/docente');
     if (data.usuario.rol.nombre === "estudiante")
       router.push('/estudiante');
-  }, 1);
+  }, 500);
       
     } else {
       error.value = mensaje;

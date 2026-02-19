@@ -3,6 +3,8 @@
     <div class="sidebar-accent"></div>
 
     <div class="sidebar-content">
+      
+      <!-- Logo y título -->
       <div class="profile-section">
         <div class="profile-img">
           <img src="/src/assets/logo.png" alt="Logo" />
@@ -13,6 +15,22 @@
         </div>
       </div>
 
+      <!-- NUEVA SECCIÓN USUARIO -->
+      <div class="user-section">
+  <div class="user-icon">
+    <img 
+      src="https://cdn-icons-png.flaticon.com/512/149/149071.png" 
+      alt="Usuario"
+    />
+  </div>
+  <div class="user-data">
+    <div class="user-name">{{ nombreUsuario }}</div>
+    <div class="user-role">Seguridad</div>
+  </div>
+</div>
+
+
+      <!-- Menú -->
       <nav class="menu">
         <router-link :to="{name:'listarEstudiantes'}" class="menu-item">
           Estudiantes
@@ -23,35 +41,47 @@
         <router-link :to="{name:'listarAdministradores'}" class="menu-item">
           Administradores
         </router-link>
-        
       </nav>
 
-      <button class="logout-btn" @click="logoutUsuario">Cerrar Sesión</button>
+      <!-- Logout -->
+      <button class="logout-btn" @click="logoutUsuario">
+        Cerrar Sesión
+      </button>
+
     </div>
   </aside>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
-import { logout } from '../servicios/seguridadService';
-const router = useRouter();
-const logoutUsuario = async() => {
-  const respuesta=await logout();
-  localStorage.clear(); // solo borrar token
-  router.push('/login');
+import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { logout } from '../servicios/seguridadService'
+
+const router = useRouter()
+
+const nombreUsuario = ref('')
+onMounted(() => {
+  nombreUsuario.value = localStorage.getItem('nombre') 
+})
+
+const logoutUsuario = async () => {
+  await logout()
+  localStorage.clear()
+  router.push('/login')
 }
 </script>
 
 <style scoped>
-/* Contenedor principal con la franja lateral */
+
+/* Contenedor principal */
 .sidebar-container {
   display: flex;
   width: 280px;
   height: 100vh;
-  background-color: #A0DDE0; /* Turquesa claro del fondo */
+  background-color: #A0DDE0;
 }
 
-/* La franja azul petróleo oscuro a la izquierda */
+/* Franja lateral */
 .sidebar-accent {
   width: 45px;
   background-color: #004D66;
@@ -66,19 +96,19 @@ const logoutUsuario = async() => {
   align-items: center;
 }
 
-/* Sección de perfil superior */
+/* Logo */
 .profile-section {
   display: flex;
   align-items: center;
   gap: 15px;
   width: 100%;
-  margin-bottom: 50px;
+  margin-bottom: 25px;
 }
 
 .profile-img {
   width: 80px;
   height: 80px;
-  background-color: #D9D9D9; /* Cuadrado gris del mockup */
+  background-color: #D9D9D9;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -94,13 +124,52 @@ const logoutUsuario = async() => {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  flex: 1;
 }
 
-.info-line-short { width: 60%; height: 8px; background: #B3B3B3; }
-.info-line-long { width: 90%; height: 8px; background: #B3B3B3; }
+.titulo {
+  font-size: 3.5vh;
+  font-weight: bold;
+  color: #004D66;
+}
 
-/* Menú y Enlaces */
+/* SECCIÓN USUARIO */
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 40px;
+}
+
+.user-icon {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background-color: #004D66;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+}
+
+.user-data {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-weight: bold;
+  color: #002B3D;
+}
+
+.user-role {
+  font-size: 0.85rem;
+  color: #004D66;
+  opacity: 0.8;
+}
+
+/* Menú */
 .menu {
   display: flex;
   flex-direction: column;
@@ -109,47 +178,55 @@ const logoutUsuario = async() => {
   flex-grow: 1;
 }
 
-.menu-item, .menu-item-placeholder {
+.menu-item {
   text-decoration: none;
   padding: 15px;
-  border-radius: 30px; /* Bordes muy redondeados como el mockup */
-  background: #7FB6BD; /* Color azulado claro de los botones inactivos */
+  border-radius: 30px;
+  background: #7FB6BD;
   color: #002B3D;
   font-weight: 600;
   text-align: center;
   transition: all 0.3s ease;
 }
 
-.menu-item-placeholder {
-  height: 50px;
-  opacity: 0.6;
-}
-
-/* Estado Activo (Igual al botón "Docentes" del mockup) */
 .menu-item.router-link-active {
-  background-color: #000066; /* Azul muy oscuro/negro del mockup */
+  background-color: #000066;
   color: white;
 }
 
-/* Botón Cerrar Sesión inferior */
+/* Logout */
 .logout-btn {
   width: 90%;
   padding: 15px;
   border-radius: 30px;
   border: none;
-  background-color: #003355; /* Azul petróleo oscuro */
+  background-color: #003355;
   color: white;
-  font-weight:bolder;
+  font-weight: bolder;
   cursor: pointer;
-  margin-top: auto; /* Lo empuja al fondo */
+  margin-top: auto;
 }
 
 .logout-btn:hover {
   background-color: #002233;
 }
-.titulo{
-  font-size: 3.5vh;
-  font-weight: bold;
-  color: #004D66;
+
+.user-icon {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background-color: #004D66;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
 }
+
+.user-icon img {
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+}
+
+
 </style>
