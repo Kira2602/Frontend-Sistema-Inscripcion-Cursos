@@ -86,7 +86,7 @@ export const registrarEstudiante = async (datos) => {
 
 export const registrarDocente = async (datos) => {
   try {
-    const response = await api.post("/usuarios/registro-docente", datos, {
+    const response = await api.post("/docentes", datos, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
