@@ -8,7 +8,13 @@ import RegistrarEstudiantes from "../modulos/seguridad/views/RegistrarEstudiante
 import RegistrarDocentes from "../modulos/seguridad/views/RegistrarDocentes.vue";
 
 import AdminLayout from "../layouts/AdminLayout.vue";
+import ListarCarreras from "../modulos/admin/views/ListarCarreras.vue";
+import RegistrarCarrera from "../modulos/admin/views/RegistrarCarrera.vue";
+import ListarExtra from "../modulos/admin/views/ListarExtra.vue";
+import VerCarrera from "../modulos/admin/views/VerCarrera.vue";
 
+
+import ListarCursos from "../modulos/admin/views/ListarCursos.vue";
 import DocenteLayout from "../layouts/DocenteLayout.vue";
 
 import EstudianteLayout from "../layouts/EstudianteLayout.vue";
@@ -68,17 +74,48 @@ const routes = [
   {
     path:"/administrador",
     component:AdminLayout,
-    //childre:[]
+    children:[
+      {
+      path:"",
+      redirect:{name:"listarCarreras"}
+      },
+      {
+        path: "listarCarreras",
+        name: "listarCarreras",
+        component: ListarCarreras,
+      },
+      {
+        path:"registrarCarrera",
+        name:"registrarCarrera",
+        component:RegistrarCarrera
+      },
+      {
+        path:"listarCursos",
+        name:"listarCursos",
+        component:ListarCursos
+      },
+      {
+        path:"listarExtra",
+        name:"listarExtra",
+        component: ListarExtra
+      },
+      {
+        path:"verCarrera/:codigo",
+        name:"verCarrera",
+        component:VerCarrera,
+        
+      }
+    ]
   },
   {
     path:"/docente",
     component:DocenteLayout,
-    //childre:[]
+    //children:[]
   },
   {
     path:"/estudiante",
     component:EstudianteLayout,
-    //childre:[]
+    //children:[]
   }
 ];
 
