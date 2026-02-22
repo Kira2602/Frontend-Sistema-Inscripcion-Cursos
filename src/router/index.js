@@ -14,6 +14,10 @@ import DocenteLayout from "../layouts/DocenteLayout.vue";
 import EstudianteLayout from "../layouts/EstudianteLayout.vue";
 import Login from "../modulos/seguridad/views/Login.vue";
 
+// Importar vistas del admin
+import RegistrarCursos from "../modulos/admin/views/RegistrarCursos.vue";
+import RegistrarCursosExtra from "../modulos/admin/views/RegistrarCursosExtra.vue";
+
 const routes = [
   {
   path: "/login",
@@ -68,7 +72,18 @@ const routes = [
   {
     path:"/administrador",
     component:AdminLayout,
-    //childre:[]
+    children: [
+      {
+        path: "registrarCursos",
+        name: "registrarCursos",
+        component: RegistrarCursos,
+      },
+      {
+        path: "registrarCursosExtra",
+        name: "registrarCursosExtra", 
+        component: RegistrarCursosExtra,
+      },
+    ]
   },
   {
     path:"/docente",
