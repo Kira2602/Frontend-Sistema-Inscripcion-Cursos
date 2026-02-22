@@ -52,7 +52,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import EditModal from "../components/EditModal.vue"; //modal de edicion de usuarios
+import EditModal from "../components/EditModalExtra.vue"; //modal de edicion de cursos extracurriculares
 import ActionCard from "../components/ActionCard.vue";
 import SearchBarCurso from "../components/SearchBarCurso.vue";//barra de busqueda
 import ModalError from "../../seguridad/components/ModalError.vue"; //Modal de error en operacion

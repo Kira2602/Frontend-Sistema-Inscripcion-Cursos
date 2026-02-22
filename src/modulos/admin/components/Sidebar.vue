@@ -31,16 +31,22 @@
 
 
       <!-- Menú -->
+      <!-- 
+        TODO: Reemplazar los divs deshabilitados por router-links cuando estén las rutas:
+        <router-link :to="{name:'listarCarreras'}" class="menu-item">Carreras</router-link>
+        <router-link :to="{name:'listarCursos'}" class="menu-item">Cursos</router-link>
+        <router-link :to="{name:'listarExtra'}" class="menu-item">Extracurriculares</router-link>
+      -->
       <nav class="menu">
-        <router-link :to="{name:'listarCarreras'}" class="menu-item">
+        <div class="menu-item menu-item-disabled">
           Carreras
-        </router-link>
-        <router-link :to="{name:'listarCursos'}" class="menu-item">
+        </div>
+        <div class="menu-item menu-item-disabled">
           Cursos
-        </router-link>
-        <router-link :to="{name:'listarExtra'}" class="menu-item">
-          Extacurriculares
-        </router-link>
+        </div>
+        <div class="menu-item menu-item-disabled">
+          Extracurriculares
+        </div>
       </nav>
 
       <!-- Logout -->
@@ -193,6 +199,12 @@ const logoutUsuario = async () => {
 .menu-item.router-link-active {
   background-color: #000066;
   color: white;
+}
+
+.menu-item-disabled {
+  background: #999 !important;
+  color: #666 !important;
+  cursor: not-allowed !important;
 }
 
 /* Logout */

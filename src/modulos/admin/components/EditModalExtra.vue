@@ -4,7 +4,7 @@
       <div class="helper-container">
         <div class="user-data">
           
-          <h2>Editar información del curso</h2>
+          <h2>Editar información del curso extracurricular</h2>
           <p class="subtitle">Modifica y guarda los cambios</p>
         </div>
 
@@ -65,11 +65,6 @@
           <div>
             <label>Fecha fin</label>
             <input type="text" :value="formatearFecha(curso.fecha_fin)" disabled />
-          </div>
-
-          <div>
-            <label>Carrera</label>
-            <input type="text" :value="curso.carrera_codigo || 'N/A'" disabled />
           </div>
 
           <div>
