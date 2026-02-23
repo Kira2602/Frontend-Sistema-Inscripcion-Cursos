@@ -10,11 +10,11 @@ import RegistrarDocentes from "../modulos/seguridad/views/RegistrarDocentes.vue"
 import AdminLayout from "../layouts/AdminLayout.vue";
 import ListarCarreras from "../modulos/admin/views/ListarCarreras.vue";
 import RegistrarCarrera from "../modulos/admin/views/RegistrarCarrera.vue";
-import ListarExtra from "../modulos/admin/views/ListarExtra.vue";
+//import ListarExtra from "../modulos/admin/views/ListarExtra.vue";
 import VerCarrera from "../modulos/admin/views/VerCarrera.vue";
 
 
-import ListarCursos from "../modulos/admin/views/ListarCursos.vue";
+//import ListarCursos from "../modulos/admin/views/ListarCursos.vue";
 import DocenteLayout from "../layouts/DocenteLayout.vue";
 
 import EstudianteLayout from "../layouts/EstudianteLayout.vue";

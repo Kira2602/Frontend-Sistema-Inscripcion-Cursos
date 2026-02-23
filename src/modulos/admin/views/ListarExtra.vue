@@ -9,7 +9,7 @@
       <SearchBarCurso @update:search="searchTerm = $event" />
       
 
-      <router-link class="registrar" to="registrarCursos">
+      <router-link class="registrar" to="registrarCursosExtra">
         Registrar Curso Extracurricular
       </router-link>
     </div>
