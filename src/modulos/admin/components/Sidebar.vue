@@ -33,20 +33,12 @@
       <!-- Menú -->
       <!-- 
         TODO: Reemplazar los divs deshabilitados por router-links cuando estén las rutas:
+        
+      -->
+      <nav class="menu">
         <router-link :to="{name:'listarCarreras'}" class="menu-item">Carreras</router-link>
         <router-link :to="{name:'listarCursos'}" class="menu-item">Cursos</router-link>
         <router-link :to="{name:'listarExtra'}" class="menu-item">Extracurriculares</router-link>
-      -->
-      <nav class="menu">
-        <div class="menu-item menu-item-disabled">
-          Carreras
-        </div>
-        <div class="menu-item menu-item-disabled">
-          Cursos
-        </div>
-        <div class="menu-item menu-item-disabled">
-          Extracurriculares
-        </div>
       </nav>
 
       <!-- Logout -->
