@@ -116,6 +116,21 @@
           </div>
 
           <div>
+            <label>Aula</label>
+            <select v-model="form.aula" @change="validarAula" class="custom-select">
+              <option value="">Seleccione un aula</option>
+              <option value="1">Aula 1</option>
+              <option value="2">Aula 2</option>
+              <option value="3">Aula 3</option>
+              <option value="4">Aula 4</option>
+              <option value="5">Aula 5</option>
+            </select>
+            <p v-if="errorAula" class="error">
+              {{ errorAula }}
+            </p>
+          </div>
+
+          <div>
             <label>Monto</label>
             <input type="number" v-model="form.monto" @input="validarMonto" min="0" step="0.01" />
             <p v-if="errorMonto" class="error">
@@ -168,6 +183,7 @@ const form = ref({
   fechaInicio: "",
   fechaFin: "",
   carrera: "",
+  aula: "",
   monto: ""
 });
 
@@ -182,6 +198,7 @@ const errorHoraFin = ref("");
 const errorFechaInicio = ref("");
 const errorFechaFin = ref("");
 const errorCarrera = ref("");
+const errorAula = ref("");
 const errorMonto = ref("");
 
 // Validaciones
@@ -281,6 +298,14 @@ const validarCarrera = () => {
   }
 };
 
+const validarAula = () => {
+  if (!form.value.aula) {
+    errorAula.value = "Debe seleccionar un aula";
+  } else {
+    errorAula.value = "";
+  }
+};
+
 const validarMonto = () => {
   if (!form.value.monto || form.value.monto <= 0) {
     errorMonto.value = "El monto debe ser mayor a 0";
@@ -301,6 +326,7 @@ const formularioValido = computed(() => {
     form.value.fechaInicio &&
     form.value.fechaFin &&
     form.value.carrera &&
+    form.value.aula &&
     form.value.monto &&
     !errorCodigo.value &&
     !errorNombre.value &&
@@ -312,6 +338,7 @@ const formularioValido = computed(() => {
     !errorFechaInicio.value &&
     !errorFechaFin.value &&
     !errorCarrera.value &&
+    !errorAula.value &&
     !errorMonto.value
   );
 });
@@ -330,6 +357,7 @@ const manejarEnvio = async (e) => {
   validarFechaInicio();
   validarFechaFin();
   validarCarrera();
+  validarAula();
   validarMonto();
 
   if (!formularioValido.value) {
@@ -348,6 +376,7 @@ const manejarEnvio = async (e) => {
     fechaInicio: form.value.fechaInicio,
     fechaFin: form.value.fechaFin,
     carrera: form.value.carrera,
+    aula: parseInt(form.value.aula),
     monto: parseFloat(form.value.monto)
   };
 

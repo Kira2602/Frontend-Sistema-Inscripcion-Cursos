@@ -17,6 +17,8 @@ import Login from "../modulos/seguridad/views/Login.vue";
 // Importar vistas del admin
 import RegistrarCursos from "../modulos/admin/views/RegistrarCursos.vue";
 import RegistrarCursosExtra from "../modulos/admin/views/RegistrarCursosExtra.vue";
+import ListarCursos from "../modulos/admin/views/ListarCursos.vue";
+import ListarExtra from "../modulos/admin/views/ListarExtra.vue";
 
 const routes = [
   {
@@ -74,6 +76,11 @@ const routes = [
     component:AdminLayout,
     children: [
       {
+        path: "listarCursos",
+        name: "listarCursos",
+        component: ListarCursos,
+      },
+      {
         path: "registrarCursos",
         name: "registrarCursos",
         component: RegistrarCursos,
@@ -82,6 +89,11 @@ const routes = [
         path: "registrarCursosExtra",
         name: "registrarCursosExtra", 
         component: RegistrarCursosExtra,
+      },
+      {
+        path: "listarExtra",
+        name: "listarExtra",
+        component: ListarExtra,
       },
     ]
   },
