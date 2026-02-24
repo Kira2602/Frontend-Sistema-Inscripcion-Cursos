@@ -18,7 +18,7 @@
 
           <div>
             <label>Código</label>
-            <input type="number" v-model="form.codigo" @input="validarCodigo" min="1"/>
+            <input type="text" v-model="form.codigo" @input="validarCodigo" placeholder="Ej: MAT-101" maxlength="20"/>
             <p v-if="errorCodigo" class="error">
               {{ errorCodigo }}
             </p>
@@ -103,6 +103,23 @@
           </div>
 
           <div>
+            <label>Docente</label>
+            <select v-model="form.docente" @change="validarDocente" class="custom-select">
+              <option value="">Seleccione un docente</option>
+              <option 
+                v-for="docente in docentes" 
+                :key="docente.ci"
+                :value="docente.ci"
+              >
+                {{ docente.nombre }} ({{ docente.ci }})
+              </option>
+            </select>
+            <p v-if="errorDocente" class="error">
+              {{ errorDocente }}
+            </p>
+          </div>
+
+          <div>
             <label>Carrera</label>
             <select v-model="form.carrera" @change="validarCarrera" class="custom-select">
               <option value="">Seleccione una carrera</option>
@@ -119,11 +136,9 @@
             <label>Aula</label>
             <select v-model="form.aula" @change="validarAula" class="custom-select">
               <option value="">Seleccione un aula</option>
-              <option value="1">Aula 1</option>
-              <option value="2">Aula 2</option>
-              <option value="3">Aula 3</option>
-              <option value="4">Aula 4</option>
-              <option value="5">Aula 5</option>
+              <option v-for="aula in aulas" :key="aula.id_aula" :value="aula.id_aula">
+                {{ aula.nombre }}
+              </option>
             </select>
             <p v-if="errorAula" class="error">
               {{ errorAula }}
@@ -162,15 +177,22 @@
 
 <script setup>
 import Icon from "../../seguridad/components/Icon.vue";
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import ModalExito from "../../seguridad/components/ModalExito.vue";
 import ModalError from "../../seguridad/components/ModalError.vue";
+import { registrarCurso, listarDocentes, listarAulas } from "../servicios/cursosService.js";
 
 const showModal = ref(false);
 const successMessage = ref("");
 
 const showErrorModal = ref(false);
 const errorMessage = ref("");
+
+// Lista de docentes disponibles
+const docentes = ref([]);
+
+// Lista de aulas disponibles
+const aulas = ref([]);
 
 const form = ref({
   codigo: "",
@@ -182,6 +204,7 @@ const form = ref({
   horaFin: "",
   fechaInicio: "",
   fechaFin: "",
+  docente: "",
   carrera: "",
   aula: "",
   monto: ""
@@ -197,14 +220,19 @@ const errorHoraInicio = ref("");
 const errorHoraFin = ref("");
 const errorFechaInicio = ref("");
 const errorFechaFin = ref("");
+const errorDocente = ref("");
 const errorCarrera = ref("");
 const errorAula = ref("");
 const errorMonto = ref("");
 
 // Validaciones
 const validarCodigo = () => {
-  if (!form.value.codigo || form.value.codigo <= 0) {
-    errorCodigo.value = "El código debe ser un número mayor a 0";
+  const regex = /^[A-Za-z0-9-_]{1,20}$/;
+  
+  if (!form.value.codigo || form.value.codigo.trim() === "") {
+    errorCodigo.value = "El código es obligatorio";
+  } else if (!regex.test(form.value.codigo)) {
+    errorCodigo.value = "El código solo puede contener letras, números, guiones y guiones bajos (máx. 20 caracteres)";
   } else {
     errorCodigo.value = "";
   }
@@ -290,6 +318,14 @@ const validarFechaFin = () => {
   }
 };
 
+const validarDocente = () => {
+  if (!form.value.docente) {
+    errorDocente.value = "Debe seleccionar un docente";
+  } else {
+    errorDocente.value = "";
+  }
+};
+
 const validarCarrera = () => {
   if (!form.value.carrera) {
     errorCarrera.value = "Debe seleccionar una carrera";
@@ -325,6 +361,7 @@ const formularioValido = computed(() => {
     form.value.horaFin &&
     form.value.fechaInicio &&
     form.value.fechaFin &&
+    form.value.docente &&
     form.value.carrera &&
     form.value.aula &&
     form.value.monto &&
@@ -337,6 +374,7 @@ const formularioValido = computed(() => {
     !errorHoraFin.value &&
     !errorFechaInicio.value &&
     !errorFechaFin.value &&
+    !errorDocente.value &&
     !errorCarrera.value &&
     !errorAula.value &&
     !errorMonto.value
@@ -356,6 +394,7 @@ const manejarEnvio = async (e) => {
   validarHoraFin();
   validarFechaInicio();
   validarFechaFin();
+  validarDocente();
   validarCarrera();
   validarAula();
   validarMonto();
@@ -366,48 +405,71 @@ const manejarEnvio = async (e) => {
   }
 
   const datosEnviar = {
-    codigo: parseInt(form.value.codigo),
+    id_materia: form.value.codigo.toString(), // Código de la materia (ahora manual)
+    usuario_ci: form.value.docente, // CI del docente seleccionado
+    carrera_codigo: form.value.carrera,
     nombre: form.value.nombre,
     tipo: form.value.tipo,
     cupo: parseInt(form.value.cupo),
     dia: form.value.dia,
-    horaInicio: form.value.horaInicio,
-    horaFin: form.value.horaFin,
-    fechaInicio: form.value.fechaInicio,
-    fechaFin: form.value.fechaFin,
-    carrera: form.value.carrera,
-    aula: parseInt(form.value.aula),
-    monto: parseFloat(form.value.monto)
+    hora_inicio: form.value.horaInicio,
+    hora_fin: form.value.horaFin,
+    fecha_inicio: form.value.fechaInicio,
+    fecha_fin: form.value.fechaFin,
+    monto: parseFloat(form.value.monto),
+    aula_id_aula: parseInt(form.value.aula)
   };
 
-  // Simulación - reemplazar con llamada real al API
-  alert(`Curso a registrar:
-  Código: ${datosEnviar.codigo}
-  Nombre: ${datosEnviar.nombre}
-  Tipo: ${datosEnviar.tipo}
-  Cupo: ${datosEnviar.cupo}
-  Día: ${datosEnviar.dia}
-  Horario: ${datosEnviar.horaInicio} - ${datosEnviar.horaFin}
-  Período: ${datosEnviar.fechaInicio} al ${datosEnviar.fechaFin}
-  Carrera: ${datosEnviar.carrera}
-  Monto: $${datosEnviar.monto}`);
-  
-  /*
+  // Llamada real al API
   const resultado = await registrarCurso(datosEnviar);
   if(resultado.exito){
-    successMessage.value = "Curso registrado correctamente";
+    successMessage.value = resultado.mensaje || "Curso registrado correctamente";
     showModal.value = true;
+    
+    // Limpiar formulario
+    Object.keys(form.value).forEach(campo => {
+      form.value[campo] = "";
+    });
   } else {
-    errorMessage.value = resultado.errores || "Error desconocido";
+    errorMessage.value = resultado.mensaje || "Error desconocido";
+    if (resultado.errores && resultado.errores.length > 0) {
+      errorMessage.value += ": " + resultado.errores.join(", ");
+    }
     showErrorModal.value = true;
   }
-  */
-
-  // Limpiar formulario
-  Object.keys(form.value).forEach(campo => {
-    form.value[campo] = "";
-  });
 };
+
+// Cargar lista de docentes al montar el componente
+onMounted(async () => {
+  try {
+    const resultado = await listarDocentes();
+    if (resultado.exito) {
+      docentes.value = resultado.data;
+      console.log(`✅ ${docentes.value.length} docentes cargados`);
+    } else {
+      console.warn("⚠️ No se pudo cargar la lista de docentes:", resultado.mensaje);
+      // No mostrar modal, permitir continuar sin docentes
+    }
+  } catch (error) {
+    console.error("❌ Error al cargar docentes:", error);
+    // No mostrar modal, permitir continuar sin docentes
+  }
+
+  // Cargar lista de aulas
+  try {
+    const resultado = await listarAulas();
+    if (resultado.exito) {
+      aulas.value = resultado.data;
+      console.log(`✅ ${aulas.value.length} aulas cargadas`);
+    } else {
+      console.warn("⚠️ No se pudo cargar la lista de aulas:", resultado.mensaje);
+      // No mostrar modal, permitir continuar sin aulas
+    }
+  } catch (error) {
+    console.error("❌ Error al cargar aulas:", error);
+    // No mostrar modal, permitir continuar sin aulas
+  }
+});
 </script>
 
 <style scoped>
