@@ -67,6 +67,9 @@ import SearchBarCurso from "../components/SearchBarCurso.vue";//barra de busqued
 import ModalError from "../../seguridad/components/ModalError.vue"; //Modal de error en operacion
 import ModalExito from "../../seguridad/components/ModalExito.vue"; //Modal de exito en operacion
 import DeletionModal from "../../seguridad/components/DeletionModal.vue";
+
+import { listarCursos,listarCarreras } from "../servicios/adminsService";
+
 const showModal = ref(false);
 const successMessage = ref("");
 const showErrorModal = ref(false);
@@ -80,7 +83,7 @@ const isDeletion = ref(false);
 //variable que almacena el codigo de la carrera para el filtrado por carrera
 const carreraSeleccionada = ref("");
 
-
+const listaCarreras=ref([])
 
 const openEditModal = (curso) => {
   selectedUser.value = { ...curso };
@@ -175,135 +178,19 @@ const deleteTeacher = async () => {
 
 onMounted(async () => {
     //simulacion del cargado de cursos con la lista de prueba
-    cursos.value=listaCursos;
-    /*
+    //cursos.value=listaCursos;
+    
   try {
     const response = await listarCursos();
+    const response2=await listarCarreras();
     const data = response.data;
     cursos.value = data.data;
+    listaCarreras.value=response2.data.data;
   } catch (err) {
     console.error("Error al obtener los datos: ", err);
-  }*/
+  }
 });
 
-//lista de prueba de carreras
-const listaCarreras=[
-    {
-        codigo:"ins",
-        nombre:"Ingenieria de Sistemas",
-        descripcion:"Se enfoca en el diseño, desarrollo, implementación y mantenimiento de software y sistemas informáticos. Los estudiantes aprenden programación, bases de datos, redes y gestión de proyectos tecnológicos.",
-        duracion:"5 años"
-    },
-    {
-        codigo:"der",
-        nombre:"Derecho",
-        descripcion:"Forma profesionales capaces de interpretar y aplicar las leyes, representando a personas o instituciones en asuntos legales, así como asesorando en contratos y derechos.",
-        duracion:"5 años"
-    },
-    {
-        codigo:"psi",
-        nombre:"Psicología",
-        descripcion:"Estudia el comportamiento y los procesos mentales de las personas, capacitando a los profesionales para ofrecer apoyo psicológico, terapias y asesoramiento en distintos contextos.",
-        duracion:"5 años"
-    }
-
-]
-//lista de prueba de cursos
-const listaCursos=[
-    
-  {
-    "id_materia": 1,
-    "usuario_ci": "1234567",
-    "carrera_codigo": "ins",
-    "nombre": "Programación I",
-    "tipo": "Obligatoria",
-    "cupo": 30,
-    "dia": "Lunes",
-    "hora_inicio": "08:00:00",
-    "hora_fin": "10:00:00",
-    "fecha_inicio": "2026-03-01",
-    "fecha_fin": "2026-07-01",
-    "monto": 350.00,
-    "aula_id_aula": 101
-  },
-  {
-    "id_materia": 2,
-    "usuario_ci": "1234567",
-    "carrera_codigo": "ins",
-    "nombre": "Base de Datos",
-    "tipo": "Obligatoria",
-    "cupo": 25,
-    "dia": "Miércoles",
-    "hora_inicio": "10:00:00",
-    "hora_fin": "12:00:00",
-    "fecha_inicio": "2026-03-01",
-    "fecha_fin": "2026-07-01",
-    "monto": 400.00,
-    "aula_id_aula": 102
-  },
-  {
-    "id_materia": 3,
-    "usuario_ci": "7654321",
-    "carrera_codigo": "der",
-    "nombre": "Derecho Constitucional",
-    "tipo": "Obligatoria",
-    "cupo": 40,
-    "dia": "Martes",
-    "hora_inicio": "09:00:00",
-    "hora_fin": "11:00:00",
-    "fecha_inicio": "2026-03-01",
-    "fecha_fin": "2026-07-01",
-    "monto": 300.00,
-    "aula_id_aula": 201
-  },
-  {
-    "id_materia": 4,
-    "usuario_ci": "7654321",
-    "carrera_codigo": "der",
-    "nombre": "Derecho Penal",
-    "tipo": "Obligatoria",
-    "cupo": 35,
-    "dia": "Jueves",
-    "hora_inicio": "11:00:00",
-    "hora_fin": "13:00:00",
-    "fecha_inicio": "2026-03-01",
-    "fecha_fin": "2026-07-01",
-    "monto": 320.00,
-    "aula_id_aula": 202
-  },
-  {
-    "id_materia": 5,
-    "usuario_ci": "4567890",
-    "carrera_codigo": "psi",
-    "nombre": "Psicología General",
-    "tipo": "Obligatoria",
-    "cupo": 28,
-    "dia": "Lunes",
-    "hora_inicio": "14:00:00",
-    "hora_fin": "16:00:00",
-    "fecha_inicio": "2026-03-01",
-    "fecha_fin": "2026-07-01",
-    "monto": 280.00,
-    "aula_id_aula": 301
-  },
-  {
-    "id_materia": 6,
-    "usuario_ci": "4567890",
-    "carrera_codigo": "psi",
-    "nombre": "Psicología Clínica",
-    "tipo": "Electiva",
-    "cupo": 20,
-    "dia": "Viernes",
-    "hora_inicio": "16:00:00",
-    "hora_fin": "18:00:00",
-    "fecha_inicio": "2026-03-01",
-    "fecha_fin": "2026-07-01",
-    "monto": 300.00,
-    "aula_id_aula": 302
-  }
-
-
-]
 
 
 </script>

@@ -48,8 +48,8 @@
       <SearchBarCurso @update:search="searchTerm = $event" />
       
 
-      <router-link class="registrar" to="registrarCursos">
-        Registrar Curso Extracurricular
+      <router-link class="registrar" to="../registrarCursos">
+        Registrar Curso 
       </router-link>
     </div>
     <div>
@@ -254,28 +254,24 @@ textarea:focus {
 
 <script setup>
 import Icon from "../../seguridad/components/Icon.vue";
-import { ref, computed} from "vue";
+import { ref, computed, onMounted} from "vue";
 import { useRoute } from "vue-router";
 import ModalExito from "../../seguridad/components/ModalExito.vue";
 import ModalError from "../../seguridad/components/ModalError.vue";
 import ActionCard from "../components/ActionCard.vue";
 import SearchBarCurso from "../components/SearchBarCurso.vue";
-
+import { verCarrera } from "../servicios/adminsService";
 
 const route = useRoute()
 
-const codigo = route.params.codigo
+
 
 //simulacion de cargado de la carrera por medio de su codigo
 //Esto sera reemplazado con el resultado del endpoint de obtener datos por carrera
-const user = computed(()=>{
-    return listaCarreras.find(c=>c.codigo===codigo);
-})
+
 //simulacion de cargado de las materias de la carrera
 //Esto sera reemplazado con el resultado del endpoint de obtener datos por carrera
-const cursos=computed(()=>{
-    return listaCursos;
-})
+
 
 const showModal = ref(false);
 const successMessage = ref("");
@@ -291,11 +287,29 @@ const form=ref({
   duracion:""
 });
 
-;
-const filteredCursos = computed(() => {
-  if (!searchTerm.value) return cursos.value;
+const user=ref({});
+const listaCursos=ref([])
+onMounted(async()=>{
+    try{
+        const codigo = route.params.codigo
+        console.log(codigo)
+        const response=await verCarrera(codigo)
+        user.value={
+            codigo: response.data.data.codigo,
+            nombre:response.data.data.nombre,
+            descripcion: response.data.data.descripcion,
+            duracion:response.data.data.duracion
+        }
+        listaCursos.value=response.data.data.materias;
+    }catch(err){
+        alert("Error")
+    }
 
-  return cursos.value.filter(
+})
+const filteredCursos = computed(() => {
+  if (!searchTerm.value) return listaCursos.value;
+
+  return listaCursos.value.filter(
     (curso) =>
       curso.nombre.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
       curso.id_materia.toString().includes(searchTerm.value),
@@ -303,62 +317,9 @@ const filteredCursos = computed(() => {
 });
 
 //lista de prueba de carreras
-const listaCarreras=[
-    {
-        codigo:"ins",
-        nombre:"Ingenieria de Sistemas",
-        descripcion:"Se enfoca en el diseño, desarrollo, implementación y mantenimiento de software y sistemas informáticos. Los estudiantes aprenden programación, bases de datos, redes y gestión de proyectos tecnológicos.",
-        duracion:"5 años"
-    },
-    {
-        codigo:"der",
-        nombre:"Derecho",
-        descripcion:"Forma profesionales capaces de interpretar y aplicar las leyes, representando a personas o instituciones en asuntos legales, así como asesorando en contratos y derechos.",
-        duracion:"5 años"
-    },
-    {
-        codigo:"psi",
-        nombre:"Psicología",
-        descripcion:"Estudia el comportamiento y los procesos mentales de las personas, capacitando a los profesionales para ofrecer apoyo psicológico, terapias y asesoramiento en distintos contextos.",
-        duracion:"5 años"
-    }
 
-]
     
 //lista de prueba de cursos
-const listaCursos=[
-    
-  {
-    "id_materia": 1,
-    "usuario_ci": "1234567",
-    "carrera_codigo": "ins",
-    "nombre": "Programación I",
-    "tipo": "Obligatoria",
-    "cupo": 30,
-    "dia": "Lunes",
-    "hora_inicio": "08:00:00",
-    "hora_fin": "10:00:00",
-    "fecha_inicio": "2026-03-01",
-    "fecha_fin": "2026-07-01",
-    "monto": 350.00,
-    "aula_id_aula": 101
-  },
-  {
-    "id_materia": 2,
-    "usuario_ci": "1234567",
-    "carrera_codigo": "ins",
-    "nombre": "Base de Datos",
-    "tipo": "Obligatoria",
-    "cupo": 25,
-    "dia": "Miércoles",
-    "hora_inicio": "10:00:00",
-    "hora_fin": "12:00:00",
-    "fecha_inicio": "2026-03-01",
-    "fecha_fin": "2026-07-01",
-    "monto": 400.00,
-    "aula_id_aula": 102
-  },
-  
-]
+
 
 </script>

@@ -43,6 +43,7 @@ import SearchBar from "../../seguridad/components/SearchBar.vue"; //barra de bus
 import ModalError from "../../seguridad/components/ModalError.vue"; //Modal de error en operacion
 import ModalExito from "../../seguridad/components/ModalExito.vue"; //Modal de exito en operacion
 import DeletionModal from "../../seguridad/components/DeletionModal.vue";
+import { listarCarreras } from "../servicios/adminsService";
 
 const showModal = ref(false);
 const successMessage = ref("");
@@ -87,9 +88,8 @@ const filteredCarreras = computed(() => {
 
 onMounted(async () => {
     //simulacion del cargado de carreras con la lista de prueba
-    carreras.value=listaCarreras
+    //carreras.value=listaCarreras
 
-/* 
   try {
     
     const response = await listarCarreras();
@@ -98,7 +98,7 @@ onMounted(async () => {
 
   } catch (err) {
     console.error("Error al obtener los datos: ", err);
-  }*/
+  }
 });
 
 
