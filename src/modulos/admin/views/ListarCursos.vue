@@ -67,9 +67,8 @@ import SearchBarCurso from "../components/SearchBarCurso.vue";//barra de busqued
 import ModalError from "../../seguridad/components/ModalError.vue"; //Modal de error en operacion
 import ModalExito from "../../seguridad/components/ModalExito.vue"; //Modal de exito en operacion
 import DeletionModal from "../../seguridad/components/DeletionModal.vue";
-
 import { listarCursos,listarCarreras } from "../servicios/adminsService";
-
+import { editarCurso } from "../servicios/cursosService";
 const showModal = ref(false);
 const successMessage = ref("");
 const showErrorModal = ref(false);
@@ -120,9 +119,9 @@ const actualizarCurso = async (usuarioActualizado) => {
   console.log("Datos recibidos del modal:", usuarioActualizado);
 
   try {
-    const { ci, ...cursoActualizado } = usuarioActualizado;
+    const { id_materia, ...cursoActualizado } = usuarioActualizado;
     const resultado = await editarCurso(
-      usuarioActualizado.ci,
+      usuarioActualizado.id_materia,
       cursoActualizado,
     );
 
@@ -131,7 +130,7 @@ const actualizarCurso = async (usuarioActualizado) => {
 
       // Actualizar lista local usando ref de Vue 3
       cursos.value = cursos.value.map((doc) =>
-        doc.ci === ci
+        doc.id_materia === id_materia
           ? { ...doc, ...cursoActualizado }
           : doc,
       );
@@ -161,7 +160,7 @@ const deleteTeacher = async () => {
     }
 
     cursos.value = cursos.value.filter(
-      (curso) => curso.ci !== selectedUser.value.ci,
+      (curso) => curso.id_materia !== selectedUser.value.id_materia,
     );
 
     isDeletion.value = false;

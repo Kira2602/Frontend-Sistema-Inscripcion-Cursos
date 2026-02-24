@@ -48,7 +48,6 @@
     :visible="showErrorModal"
     @close="showErrorModal = false"
   />
-  <h2 v-if="cursos.length==0">No hay cursos extracurriculares</h2>
 </template>
 
 <script setup>
@@ -161,8 +160,9 @@ onMounted(async () => {
     
   try {
     const response = await listarExtra();
+    //console.log(response)
     const data = response.data;
-    cursos.value = data.data;
+    cursos.value = data;
 
 
   } catch (err) {
@@ -174,66 +174,7 @@ onMounted(async () => {
 
 
 const listaCursos=[
-  {
-    "id_materia": 7,
-    "usuario_ci": "9991111",
-    "carrera_codigo": null,
-    "nombre": "Taller de Oratoria",
-    "tipo": "Extracurricular",
-    "cupo": 40,
-    "dia": "Sábado",
-    "hora_inicio": "09:00:00",
-    "hora_fin": "11:00:00",
-    "fecha_inicio": "2026-04-01",
-    "fecha_fin": "2026-06-30",
-    "monto": 150.00,
-    "aula_id_aula": 401
-  },
-  {
-    "id_materia": 8,
-    "usuario_ci": "9991111",
-    "carrera_codigo": null,
-    "nombre": "Curso de Excel Avanzado",
-    "tipo": "Extracurricular",
-    "cupo": 35,
-    "dia": "Martes",
-    "hora_inicio": "18:00:00",
-    "hora_fin": "20:00:00",
-    "fecha_inicio": "2026-04-05",
-    "fecha_fin": "2026-07-05",
-    "monto": 200.00,
-    "aula_id_aula": 402
-  },
-  {
-    "id_materia": 9,
-    "usuario_ci": "8882222",
-    "carrera_codigo": null,
-    "nombre": "Taller de Fotografía",
-    "tipo": "Extracurricular",
-    "cupo": 20,
-    "dia": "Viernes",
-    "hora_inicio": "17:00:00",
-    "hora_fin": "19:00:00",
-    "fecha_inicio": "2026-03-15",
-    "fecha_fin": "2026-06-15",
-    "monto": 180.00,
-    "aula_id_aula": 403
-  },
-  {
-    "id_materia": 10,
-    "usuario_ci": "8882222",
-    "carrera_codigo": null,
-    "nombre": "Curso de Primeros Auxilios",
-    "tipo": "Extracurricular",
-    "cupo": 30,
-    "dia": "Domingo",
-    "hora_inicio": "08:00:00",
-    "hora_fin": "12:00:00",
-    "fecha_inicio": "2026-05-01",
-    "fecha_fin": "2026-05-30",
-    "monto": 220.00,
-    "aula_id_aula": 404
-  }
+  
 ]
 
 

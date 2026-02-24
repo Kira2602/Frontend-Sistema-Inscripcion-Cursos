@@ -39,12 +39,17 @@
 
           <div>
             <label>Cupo</label>
-            <input type="text" :value="curso.cupo" disabled />
+            <input type="text" v-model="form.cupo" />
           </div>
 
           <div>
             <label>Día</label>
-            <input type="text" :value="curso.dia" disabled />
+            <select v-model="form.dia">
+              <option disabled value="">Seleccione un día</option>
+              <option v-for="dia in dias" :key="dia" :value="dia">
+                {{ dia }}
+              </option>
+            </select>          
           </div>
 
           <div>
@@ -69,12 +74,12 @@
 
           <div>
             <label>Aula</label>
-            <input type="text" :value="curso.aula || curso.id_aula || 'N/A'" disabled />
+            <input type="text" :value="aulaSeleccionada|| curso.id_aula || 'N/A'" disabled />
           </div>
 
           <div>
             <label>Monto</label>
-            <input type="text" :value="curso.monto" disabled />
+            <input type="text" v-model="form.monto" />
           </div>
 
         </div>
@@ -91,8 +96,15 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from "vue";
-
+import { computed, onMounted, ref, watch } from "vue";
+import { listarAulas } from "../servicios/cursosService";
+const dias = [
+  "Lunes",
+  "Martes",
+  "Miércoles",
+  "Jueves",
+  "Viernes"
+];
 const props = defineProps({ 
   user: { type: Object, required: true } 
 });
@@ -103,7 +115,24 @@ const curso = computed(() => props.user);
 
 // Estado del formulario - solo nombre es editable
 const form = ref({
-  nombre: ""
+  nombre: "",
+  cupo:"",
+  dia:"",
+  monto:""
+});
+const aulas = ref([]);
+const aulaSeleccionada = ref(null);
+
+onMounted(async () => {
+  const respuestasAulas = await listarAulas();
+  console.log(respuestasAulas.data)
+  aulas.value = respuestasAulas.data;
+  
+  aulaSeleccionada.value = aulas.value.find(
+    a => Number(a.id_aula) === Number(curso.aula_id_aula)
+  );
+
+  console.log(aulaSeleccionada);
 });
 
 const errorNombre = ref("");
@@ -114,6 +143,9 @@ watch(
   (newCurso) => {
     if (newCurso) {
       form.value.nombre = newCurso.nombre || "";
+      form.value.monto=newCurso.monto||"";
+      form.value.cupo=newCurso.cupo||"";
+      form.value.dia=newCurso.dia||"";
     }
   },
   { immediate: true }
@@ -134,11 +166,16 @@ const validarNombre = () => {
 
 // El formulario es válido si el nombre cambió y es válido
 const formularioValido = computed(() => {
-  return (
-    form.value.nombre.trim() !== "" &&
-    form.value.nombre !== curso.value.nombre &&
-    !errorNombre.value
-  );
+  if (errorNombre.value) return false;
+
+  const cambioNombre = form.value.nombre !== curso.value.nombre;
+  const cambioDia = form.value.dia !== curso.value.dia;
+  const cambioCupo = form.value.cupo !== curso.value.cupo;
+  const cambioMonto = form.value.monto !== curso.value.monto;
+
+  const hayCambios = cambioNombre || cambioDia || cambioCupo || cambioMonto;
+
+  return form.value.nombre.trim() !== "" && hayCambios;
 });
 
 // Formatear fecha para mostrar
@@ -157,8 +194,13 @@ const guardarCambios = () => {
 
   const cambios = {
     id_materia: curso.value.id_materia || curso.value.codigo,
-    nombre: form.value.nombre
+    
   };
+  
+  if (form.value.nombre !== curso.value.nombre) cambios.nombre = form.value.nombre;
+  if (form.value.dia !== curso.value.dia) cambios.dia = form.value.dia;
+  if(form.value.cupo!==curso.value.cupo)cambios.cupo=form.value.cupo;
+  if(form.value.monto!==curso.value.monto)cambios.monto=form.value.monto;
 
   console.log("Datos a guardar:", cambios);
   emit("save", cambios);
@@ -321,5 +363,18 @@ input:focus {
 
 .toggle-btn:hover {
   color: #5fa8a8;
+}
+
+select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  transition: 0.2s;
+}
+
+select:focus {
+  border-color: #5fa8a8;
+  outline: none;
 }
 </style>

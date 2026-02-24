@@ -57,12 +57,25 @@
         v-for="curso in filteredCursos"
         :key="curso.id_materia"
         :user="curso"
-        @edit="openEditModal(curso)"
         @delete="openDeletionModal(curso)"
+        @edit="openEditModal(curso)"
       />
     </div>
   </div>
   </div>
+  <EditModal
+    v-if="isOpen"
+    :user="selectedUser"
+    @close="isOpen = false"
+    @save="actualizarCurso"
+  />
+
+  <DeletionModal
+    v-if="isDeletion"
+    :user="selectedUser"
+    @cancelar="isDeletion = false"
+    @aceptar="deleteTeacher"
+  />
   <ModalExito 
     :message="successMessage" 
     :visible="showModal" 
@@ -261,7 +274,8 @@ import ModalError from "../../seguridad/components/ModalError.vue";
 import ActionCard from "../components/ActionCard.vue";
 import SearchBarCurso from "../components/SearchBarCurso.vue";
 import { verCarrera } from "../servicios/adminsService";
-
+import EditModal from "../components/EditModal.vue";
+import DeletionModal from "../../seguridad/components/DeletionModal.vue";
 const route = useRoute()
 
 
@@ -320,6 +334,17 @@ const filteredCursos = computed(() => {
 
     
 //lista de prueba de cursos
+const selectedUser = ref(null);
+const isOpen = ref(false);
+const isDeletion = ref(false);
 
+const openEditModal = (curso) => {
+  selectedUser.value = { ...curso };
+  isOpen.value = true;
+};
+const openDeletionModal = (curso) => {
+  selectedUser.value = { ...curso };
+  isDeletion.value = true;
+};
 
 </script>

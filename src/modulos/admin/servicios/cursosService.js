@@ -90,21 +90,19 @@ export const eliminarCurso = async (id) => {
       },
     });
     return {
-      exito: true,
-      mensaje: response.data.message || "Curso eliminado correctamente",
-      data: response.data.data,
+      success: true,
+      message: response.data.message || "Curso eliminado correctamente",
     };
   } catch (error) {
     if (error.response) {
       return {
-        exito: false,
-        mensaje: error.response.data.message || "Error al eliminar el curso",
-        status: error.response.status,
+        success: false,
+        message: error.response.data.message || "Error al eliminar el curso",
       };
     }
     return {
-      exito: false,
-      mensaje: "Error de conexión con el servidor",
+      success: false,
+      message: "Error de conexión con el servidor",
     };
   }
 };
@@ -202,21 +200,19 @@ export const eliminarCursoExtracurricular = async (id) => {
       },
     });
     return {
-      exito: true,
-      mensaje: response.data.message || "Curso extracurricular eliminado correctamente",
-      data: response.data.data,
+      success: true,
+      message: response.data.message || "Curso extracurricular eliminado correctamente",
     };
   } catch (error) {
     if (error.response) {
       return {
-        exito: false,
-        mensaje: error.response.data.message || "Error al eliminar el curso extracurricular",
-        status: error.response.status,
+        success: false,
+        message: error.response.data.message || "Error al eliminar el curso extracurricular",
       };
     }
     return {
-      exito: false,
-      mensaje: "Error de conexión con el servidor",
+      success: false,
+      message: "Error de conexión con el servidor",
     };
   }
 };

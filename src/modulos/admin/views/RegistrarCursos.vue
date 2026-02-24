@@ -437,6 +437,7 @@ const manejarEnvio = async (e) => {
     }
     showErrorModal.value = true;
   }
+  //Object.keys(form.value).forEach(campo=>{form.value[campo]=""});
 };
 
 // Cargar lista de docentes al montar el componente
