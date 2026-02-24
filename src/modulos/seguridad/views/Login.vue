@@ -262,9 +262,10 @@ const login = async () => {
     const { exito, data, mensaje } = response.data;
 
     if (exito) {
-      // Guardamos token
+      // Guardamos token y datos del usuario
       localStorage.setItem('token', data.token);
       localStorage.setItem('nombre', data.usuario.nombre);
+      localStorage.setItem('ci', data.usuario.ci); // Guardar CI para uso en otros módulos
 
       // Redirigir al home/dashboard
       setTimeout(() => {
