@@ -186,7 +186,7 @@ input:focus {
 <script setup>
 import Icon from "../../seguridad/components/Icon.vue";
 import { ref, computed} from "vue";
-//import { registrarAdministrador } from "../servicios/seguridadService";
+import { registrarCarrera } from "../servicios/adminsService";
 import ModalExito from "../../seguridad/components/ModalExito.vue";
 import ModalError from "../../seguridad/components/ModalError.vue";
 
@@ -213,7 +213,7 @@ const errorDuracion=ref("");
 
 
 const validarCodigo=()=>{
-  const regex= /^[A-Za]{3,4}$/;
+  const regex= /^[a-z]{2,4}$/;
   if(!regex.test(form.value.codigo)){
     errorCodigo.value="El codigo debe tener entre 3 y 4 caracteres";
   }else{
@@ -288,13 +288,9 @@ const manejarEnvio=async(e)=>{
     duracion:form.value.duracion,
   };
 
-  alert(`Codigo: ${datosEnviar.codigo}
-  Nombre : ${datosEnviar.nombre}
-  Descripcion: ${datosEnviar.descripcion}
-  Duracion: ${datosEnviar.duracion}`)
-  /*
+  
   const resultado=await registrarCarrera(datosEnviar);
-  if(resultado.exito){
+  if(resultado.success){
     successMessage.value="Carrera registrada correctamente";
     
     showModal.value = true;
@@ -304,7 +300,7 @@ const manejarEnvio=async(e)=>{
     if(resultado.errores){
       console.log("Errores backend: ", resultado.errores)
     }
-  }*/
+  }
  Object.keys(form.value).forEach(campo=>{form.value[campo]=""});
 }
 </script>

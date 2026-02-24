@@ -48,6 +48,7 @@
     :visible="showErrorModal"
     @close="showErrorModal = false"
   />
+  <h2 v-if="cursos.length==0">No hay cursos extracurriculares</h2>
 </template>
 
 <script setup>
@@ -58,6 +59,8 @@ import SearchBarCurso from "../components/SearchBarCurso.vue";//barra de busqued
 import ModalError from "../../seguridad/components/ModalError.vue"; //Modal de error en operacion
 import ModalExito from "../../seguridad/components/ModalExito.vue"; //Modal de exito en operacion
 import DeletionModal from "../../seguridad/components/DeletionModal.vue";
+import { listarExtra } from "../servicios/adminsService";
+
 const showModal = ref(false);
 const successMessage = ref("");
 const showErrorModal = ref(false);
@@ -154,15 +157,17 @@ const deleteTeacher = async () => {
 };
 
 onMounted(async () => {
-    cursos.value=listaCursos;
-    /*
+    //cursos.value=listaCursos;
+    
   try {
-    const response = await listarCursos();
+    const response = await listarExtra();
     const data = response.data;
     cursos.value = data.data;
+
+
   } catch (err) {
     console.error("Error al obtener los datos: ", err);
-  }*/
+  }
 });
 
 

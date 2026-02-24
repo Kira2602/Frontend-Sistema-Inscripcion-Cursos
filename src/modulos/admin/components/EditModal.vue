@@ -74,7 +74,7 @@
 
           <div>
             <label>Aula</label>
-            <input type="text" :value="curso.aula || curso.id_aula || 'N/A'" disabled />
+            <input type="text" :value="curso.aula.nombre || curso.id_aula || 'N/A'" disabled />
           </div>
 
           <div>
