@@ -26,6 +26,14 @@ import RegistrarCursosExtra from "../modulos/admin/views/RegistrarCursosExtra.vu
 import ListarCursos from "../modulos/admin/views/ListarCursos.vue";
 import ListarExtra from "../modulos/admin/views/ListarExtra.vue";
 
+
+
+
+
+
+//Importar vistas del estudiante
+import OfertaAcademica from "../modulos/estudiantes/views/OfertaAcademica.vue";
+
 const routes = [
   {
   path: "/login",
@@ -141,7 +149,18 @@ const routes = [
   {
     path:"/estudiante",
     component:EstudianteLayout,
-    //children:[]
+    children:[
+      {
+        path:"",
+        redirect:{name:"ofertaAcademica"}
+      },
+      {
+        path:"ofertaAcademica",
+        name:"ofertaAcademica",
+        component:OfertaAcademica
+        
+      }
+    ]
   }
 ];
 
