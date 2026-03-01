@@ -31,7 +31,9 @@
             </p>
           </div>
           <div class="button-group">
-            <button class="insc">Inscribirse</button>
+            <button class="insc" @click="inscribirse(carrera)">
+              Inscribirse
+            </button>
             <button class="vermas" @click="verMaterias(carrera)">
               Ver Materias
             </button>
@@ -176,6 +178,34 @@ async function verMaterias(carrera) {
     showModal.value = true;
   } catch (error) {
     console.error("ERROR", error);
+  }
+}
+
+async function inscribirse(carrera) {
+  try {
+    loading.value = true;
+    const locToken = localStorage.getItem("token");
+
+    const inscResponse = await api.post(
+      "/estudiantes/inscribirse",
+      {
+        codigo_carrera: carrera.codigo,
+      },
+      {
+        headers: { Authorization: `Bearer ${locToken}` },
+      },
+    );
+
+    if (inscResponse.data.success) {
+      student.value = inscResponse.data;
+      alert("INSCRIPCION EXITOSA");
+    }
+  } catch (error) {
+    const message = "ERROR";
+    console.error("ERROR", error);
+    alert(message);
+  } finally {
+    loading.value = false;
   }
 }
 </script>
