@@ -13,7 +13,6 @@ import RegistrarCarrera from "../modulos/admin/views/RegistrarCarrera.vue";
 //import ListarExtra from "../modulos/admin/views/ListarExtra.vue";
 import VerCarrera from "../modulos/admin/views/VerCarrera.vue";
 
-
 //import ListarCursos from "../modulos/admin/views/ListarCursos.vue";
 import DocenteLayout from "../layouts/DocenteLayout.vue";
 
@@ -26,26 +25,21 @@ import RegistrarCursosExtra from "../modulos/admin/views/RegistrarCursosExtra.vu
 import ListarCursos from "../modulos/admin/views/ListarCursos.vue";
 import ListarExtra from "../modulos/admin/views/ListarExtra.vue";
 
-
-
-
-
-
 //Importar vistas del estudiante
 import OfertaAcademica from "../modulos/estudiantes/views/OfertaAcademica.vue";
+import MiCarrera from "../modulos/estudiantes/views/miCarrera.vue";
 
 const routes = [
   {
-  path: "/login",
-  name: "login",
-  component: Login,
+    path: "/login",
+    name: "login",
+    component: Login,
   },
   {
-  path: "/",
-  redirect: "/login",
+    path: "/",
+    redirect: "/login",
   },
   {
-    
     path: "/seguridad",
     component: SeguridadLayout,
     children: [
@@ -86,8 +80,8 @@ const routes = [
     ],
   },
   {
-    path:"/administrador",
-    component:AdminLayout,
+    path: "/administrador",
+    component: AdminLayout,
     children: [
       {
         path: "listarCursos",
@@ -101,7 +95,7 @@ const routes = [
       },
       {
         path: "registrarCursosExtra",
-        name: "registrarCursosExtra", 
+        name: "registrarCursosExtra",
         component: RegistrarCursosExtra,
       },
       {
@@ -110,8 +104,8 @@ const routes = [
         component: ListarExtra,
       },
       {
-      path:"",
-      redirect:{name:"listarCarreras"}
+        path: "",
+        redirect: { name: "listarCarreras" },
       },
       {
         path: "listarCarreras",
@@ -119,49 +113,52 @@ const routes = [
         component: ListarCarreras,
       },
       {
-        path:"registrarCarrera",
-        name:"registrarCarrera",
-        component:RegistrarCarrera
+        path: "registrarCarrera",
+        name: "registrarCarrera",
+        component: RegistrarCarrera,
       },
       {
-        path:"listarCursos",
-        name:"listarCursos",
-        component:ListarCursos
+        path: "listarCursos",
+        name: "listarCursos",
+        component: ListarCursos,
       },
       {
-        path:"listarExtra",
-        name:"listarExtra",
-        component: ListarExtra
+        path: "listarExtra",
+        name: "listarExtra",
+        component: ListarExtra,
       },
       {
-        path:"verCarrera/:codigo",
-        name:"verCarrera",
-        component:VerCarrera,
-        
-      }
-    ]
+        path: "verCarrera/:codigo",
+        name: "verCarrera",
+        component: VerCarrera,
+      },
+    ],
   },
   {
-    path:"/docente",
-    component:DocenteLayout,
+    path: "/docente",
+    component: DocenteLayout,
     //children:[]
   },
   {
-    path:"/estudiante",
-    component:EstudianteLayout,
-    children:[
+    path: "/estudiante",
+    component: EstudianteLayout,
+    children: [
       {
-        path:"",
-        redirect:{name:"ofertaAcademica"}
+        path: "",
+        redirect: { name: "ofertaAcademica" },
       },
       {
-        path:"ofertaAcademica",
-        name:"ofertaAcademica",
-        component:OfertaAcademica
-        
-      }
-    ]
-  }
+        path: "ofertaAcademica",
+        name: "ofertaAcademica",
+        component: OfertaAcademica,
+      },
+      {
+        path: "miCarrera",
+        name: "miCarrera",
+        component: MiCarrera,
+      },
+    ],
+  },
 ];
 
 export default createRouter({
