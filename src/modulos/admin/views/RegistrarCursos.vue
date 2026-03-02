@@ -123,9 +123,14 @@
             <label>Carrera</label>
             <select v-model="form.carrera" @change="validarCarrera" class="custom-select">
               <option value="">Seleccione una carrera</option>
-              <option value="ins">Ingeniería de Sistemas</option>
-              <option value="der">Derecho</option>
-              <option value="psi">Psicología</option>
+                  <option 
+                v-for="carrera in listaCarreras" 
+                :key="carrera.codigo"
+                :value="carrera.codigo"
+            >
+                {{ carrera.nombre }}
+            </option>
+             
             </select>
             <p v-if="errorCarrera" class="error">
               {{ errorCarrera }}
@@ -181,6 +186,7 @@ import { ref, computed, onMounted } from "vue";
 import ModalExito from "../../seguridad/components/ModalExito.vue";
 import ModalError from "../../seguridad/components/ModalError.vue";
 import { registrarCurso, listarDocentes, listarAulas } from "../servicios/cursosService.js";
+import { listarCarreras, listarCursos } from "../servicios/adminsService.js";
 
 const showModal = ref(false);
 const successMessage = ref("");
@@ -193,6 +199,8 @@ const docentes = ref([]);
 
 // Lista de aulas disponibles
 const aulas = ref([]);
+
+const listaCursosActuales=ref([])
 
 const form = ref({
   codigo: "",
@@ -381,6 +389,44 @@ const formularioValido = computed(() => {
   );
 });
 
+const hayCruceHorario = () => {
+  const nuevoDia = form.value.dia;
+  const nuevoDocente = form.value.docente;
+  const nuevaAula = parseInt(form.value.aula);
+  const nuevaInicio = form.value.horaInicio;
+  const nuevaFin = form.value.horaFin;
+
+  for (const curso of listaCursosActuales.value) {
+
+    // 1️⃣ Debe ser el mismo día
+    if (curso.dia !== nuevoDia) continue;
+
+    const mismoDocente = curso.usuario_ci == nuevoDocente;
+    const mismaAula = curso.aula_id_aula == nuevaAula;
+
+    // 2️⃣ Solo validar si es mismo docente O misma aula
+    if (!mismoDocente && !mismaAula) continue;
+
+    const inicioExistente = curso.hora_inicio;
+    const finExistente = curso.hora_fin;
+
+    // 3️⃣ Verificar cruce
+    const hayCruce =
+      nuevaInicio < finExistente &&
+      nuevaFin > inicioExistente;
+
+    if (hayCruce) {
+      return {
+        conflicto: true,
+        tipo: mismoDocente ? "docente" : "aula",
+        curso
+      };
+    }
+  }
+
+  return { conflicto: false };
+};
+
 const manejarEnvio = async (e) => {
   e.preventDefault();
   
@@ -419,7 +465,15 @@ const manejarEnvio = async (e) => {
     monto: parseFloat(form.value.monto),
     aula_id_aula: parseInt(form.value.aula)
   };
+const verificacion = hayCruceHorario();
 
+if (verificacion.conflicto) {
+  errorMessage.value = `Existe cruce de horario con el mismo ${verificacion.tipo} en el curso ${verificacion.curso.nombre}`;
+  setTimeout(() => {
+    showErrorModal.value = true;
+  }, 5000);
+  return;
+}
   // Llamada real al API
   const resultado = await registrarCurso(datosEnviar);
   if(resultado.exito){
@@ -439,14 +493,21 @@ const manejarEnvio = async (e) => {
   }
   //Object.keys(form.value).forEach(campo=>{form.value[campo]=""});
 };
-
+const listaCarreras=ref([])
 // Cargar lista de docentes al montar el componente
 onMounted(async () => {
   try {
     const resultado = await listarDocentes();
+    const response=await listarCarreras();
+    const respuesta=await listarCursos();
     if (resultado.exito) {
       docentes.value = resultado.data;
+      listaCarreras.value=response.data.data
+      listaCursosActuales.value=respuesta.data.data
+      console.log(`✅ ${listaCarreras.value.length} carreras cargados`);
       console.log(`✅ ${docentes.value.length} docentes cargados`);
+      console.log(`✅ ${listaCursosActuales.value.length} cursos cargados`);
+
     } else {
       console.warn("⚠️ No se pudo cargar la lista de docentes:", resultado.mensaje);
       // No mostrar modal, permitir continuar sin docentes

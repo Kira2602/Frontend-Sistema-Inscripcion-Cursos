@@ -1,31 +1,18 @@
 <template>
-  <h1>Oferta academica</h1>
+  <h1>Mis materias</h1>
   <div class="head"> 
     <div class="search">
       <SearchBar
       @update:search="searchTerm=$event"
       />
     </div>
-    <select v-model="ofertaCarrera">
-      <option :value="true">Mi carrera</option>
-      <option :value="false">Extracurricular</option>
-    </select>
     
-    <button class="cart-button" @click="toggleCarrito">
-      <Icon iconName="shopping_cart" />
-      <span 
-        v-if="carrito.cursos.length > 0" 
-        class="badge"
-      >
-      {{ carrito.cursos.length }}
-      </span>
-    </button>
   </div>
     
     
     <div class="container" v-if="ofertaCarrera">
       
-        <OfertaCard
+        <CursoCard
         v-for="curso in filteredCursos"
         :key="curso.id_materia"
         :curso="curso"
@@ -33,26 +20,14 @@
         
         />
     </div>
-     <div class="container" v-if="!ofertaCarrera">
-      
-        <OfertaCard
-        v-for="curso in filteredCursosExtra"
-        :key="curso.id_materia"
-        :curso="curso"
-        @view="abrirModal(curso)"
-        
-        />
-    </div>
-    <ModalOferta
+    
+    <ModalCurso
     v-if="modalAbierto"
     :curso="selectedCurso"
     :noCumple="noCumplen"
     @close="modalAbierto = false"
     />
-        <CarritoCursos 
-      v-if="mostrarCarrito" 
-      @cerrar="mostrarCarrito = false" 
-    />
+        
   </template>
 
 <script setup>
@@ -63,7 +38,9 @@ import ModalOferta from '../components/ModalOferta.vue';
 import { usarCarrito } from '../../../store/carrito';
 import CarritoCursos from '../components/CarritoCursos.vue';
 import Icon from '../../seguridad/components/Icon.vue';
-import { listarOfertaCarrera,listarOfertaExtra, materiaOfertaDetalle } from '../services/estudianteService';
+import { listarMisMaterias, listarOfertaCarrera,listarOfertaExtra, materiaOfertaDetalle } from '../services/estudianteService';
+import CursoCard from '../components/CursoCard.vue';
+import ModalCurso from '../components/ModalCurso.vue';
 const carrito = usarCarrito();
 const mostrarCarrito = ref(false);
 
@@ -79,12 +56,7 @@ const ofertaCarrera=ref(true)
 const cumpleMateria=ref(Boolean)
 const noCumplen=[]
 const abrirModal = async(curso) => {
-  const response=await materiaOfertaDetalle(curso.id_materia)
-  response.data?.requisitos?.forEach(requisito => {
-    if(requisito.cumple===false){
-      noCumplen.push(requisito.id_materia)
-    }
-  });
+  
   selectedCurso.value = { ...curso };
   modalAbierto.value = true;
 };
@@ -112,17 +84,29 @@ const filteredCursosExtra = computed(() => {
 
 onMounted(async () => {
   try {
-    const response = await listarOfertaCarrera();
-    cursos.value = response.data.data;
+    
+    const response = await listarMisMaterias();
 
-    const response2 = await listarOfertaExtra();
-    cursosExtracurriculares.value = response2.data.data;
+const inscripciones = response.data.data;
+
+// 🔥 Aplanamos las materias
+cursos.value = inscripciones.flatMap(inscripcion =>
+  inscripcion.materias.map(m => ({
+    ...m.materia,           // datos reales de la materia
+    estado: m.estado,       // estado INSCRITO o PENDIENTE_PAGO
+    id_inscripcion: inscripcion.id_inscripcion,
+    fecha_inscripcion: inscripcion.fecha_inscripcion
+  }))
+);
+
   } catch (error) {
-    console.log("Error al obtener los estudiantes: ", error);
+    console.log("Error al obtener los cursos: ", error);
   }
 });
 
-const cursos = ref([]);
+const cursos = ref([
+
+]);
 
 const cursosExtracurriculares = ref([]);
 </script>

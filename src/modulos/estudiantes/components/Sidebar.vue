@@ -23,7 +23,7 @@
         </div>
         <div class="user-data">
           <div class="user-name">{{ nombreUsuario }}</div>
-          <div class="user-role">Administrador</div>
+          <div class="user-role">Estudiante</div>
         </div>
       </div>
 
@@ -45,7 +45,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-
+import { logout } from '../../seguridad/servicios/seguridadService'
 const router = useRouter()
 const nombreUsuario = ref('')
 const isMenuOpen = ref(false) // Estado del menú
@@ -57,11 +57,11 @@ const toggleMenu = () => {
 onMounted(() => {
   nombreUsuario.value = localStorage.getItem('nombre') || "Usuario"; 
 })
-/*
 const logoutUsuario = async () => {
+  await logout()
   localStorage.clear()
-  router.push({ name: "login" })
-}*/
+  router.push('/login')
+}
 </script>
 
 <style scoped>
