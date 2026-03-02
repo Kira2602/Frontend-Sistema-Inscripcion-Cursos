@@ -108,6 +108,17 @@
     :visible="mostrarExito"
     @close="mostrarExito = false"
   />
+
+  <ModalError
+    :message="mensajeModal"
+    :visible="mostrarError"
+    @close="mostrarError = false"
+  />
+  <ModalExito
+    :message="mensajeModal"
+    :visible="mostrarExito"
+    @close="mostrarExito = false"
+  />
 </template>
 
 <script setup>

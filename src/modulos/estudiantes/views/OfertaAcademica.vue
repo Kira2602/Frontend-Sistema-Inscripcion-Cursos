@@ -20,6 +20,16 @@
       {{ carrito.cursos.length }}
       </span>
     </button>
+    
+    <button class="cart-button" @click="toggleCarrito">
+      <Icon iconName="shopping_cart" />
+      <span 
+        v-if="carrito.cursos.length > 0" 
+        class="badge"
+      >
+      {{ carrito.cursos.length }}
+      </span>
+    </button>
   </div>
     
     
@@ -53,11 +63,16 @@
       v-if="mostrarCarrito" 
       @cerrar="mostrarCarrito = false" 
     />
+        <CarritoCursos 
+      v-if="mostrarCarrito" 
+      @cerrar="mostrarCarrito = false" 
+    />
   </template>
 
 <script setup>
 import OfertaCard from '../components/OfertaCard.vue';
 import SearchBar from '../components/SearchBar.vue'
+import { ref,computed,onMounted } from 'vue';
 import { ref,computed,onMounted } from 'vue';
 import ModalOferta from '../components/ModalOferta.vue';
 import { usarCarrito } from '../../../store/carrito';
@@ -110,6 +125,21 @@ const filteredCursosExtra = computed(() => {
 });
 
 
+onMounted(async () => {
+  try {
+    const response = await listarOfertaCarrera();
+    cursos.value = response.data.data;
+
+    const response2 = await listarOfertaExtra();
+    cursosExtracurriculares.value = response2.data.data;
+  } catch (error) {
+    console.log("Error al obtener los estudiantes: ", error);
+  }
+});
+
+const cursos = ref([]);
+
+const cursosExtracurriculares = ref([]);
 onMounted(async () => {
   try {
     const response = await listarOfertaCarrera();
@@ -187,6 +217,26 @@ option {
   font-size: 14px;
   background-color: #fff;
   color: #333;
+}
+.cart-button {
+  position: relative;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #f7ba00;
+  color: black;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 3px 7px;
+  border-radius: 50%;
 }
 .cart-button {
   position: relative;
