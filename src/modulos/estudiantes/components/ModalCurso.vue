@@ -92,7 +92,7 @@ const props = defineProps({
   curso: { type: Object, required: true },
   noCumple:{type:Array,required:true}
 });
-const emit = defineEmits(["close", "save"]);
+const emit = defineEmits(["close"]);
 const noCumpleComputed = computed(() => {
   // si props.noCumple viene como array de ids
   return Array.isArray(props.noCumple) ? props.noCumple : [];

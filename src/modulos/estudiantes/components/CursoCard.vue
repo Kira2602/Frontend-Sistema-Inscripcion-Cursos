@@ -8,15 +8,7 @@
 
     <div class="content">
       <div class="info-grid">
-        <div class="box">
-          <p>Cupo</p>
-          <div class="pill">{{ curso.cupo }}</div>
-        </div>
-
-        <div class="box">
-          <p>Monto</p>
-          <div class="pill">{{ curso.monto }} Bs</div>
-        </div>
+        
       </div>
 
       <div class="schedule-section">
@@ -26,6 +18,7 @@
           <span class="pill small">{{ curso.hora_fin }}</span>
         </div>
       </div>
+      <span class="pill">{{ curso.estado }}</span>
     </div>
 
     <div class="footer">
