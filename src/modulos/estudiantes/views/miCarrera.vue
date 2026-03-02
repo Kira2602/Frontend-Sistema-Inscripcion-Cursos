@@ -31,7 +31,7 @@
             </p>
           </div>
           <div class="button-group">
-            <button class="insc" @click="inscribirse(carrera)">
+            <button class="insc" @click="prepararInscripcion(carrera)">
               Inscribirse
             </button>
             <button class="vermas" @click="verMaterias(carrera)">
@@ -69,6 +69,29 @@
           <p v-else>No hay materias disponibles.</p>
 
           <button class="cerrar" @click="showModal = false">Cerrar</button>
+        </div>
+      </div>
+      <div
+        v-if="showConfirmModal"
+        class="modal-overlay"
+        @click.self="showConfirmModal = false"
+      >
+        <div class="modal-content confirm-box">
+          <SimpleIcon iconName="warning" iconColor="orange" />
+          <p>
+            Te inscribirás a
+            <strong>{{ carreraParaInscribir?.nombre }}</strong> ¿Deseas
+            continuar?
+          </p>
+
+          <div class="confirm-buttons">
+            <button class="btn-cancel" @click="showConfirmModal = false">
+              Cancelar
+            </button>
+            <button class="btn-confirm" @click="inscribirse">
+              Sí, Inscribirme
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -133,6 +156,8 @@ const carreras = ref([]);
 const materias = ref([]);
 const selectedCarrera = ref("");
 const showModal = ref(false);
+const showConfirmModal = ref(false);
+const carreraParaInscribir = ref(null);
 
 onMounted(async () => {
   try {
@@ -181,15 +206,23 @@ async function verMaterias(carrera) {
   }
 }
 
-async function inscribirse(carrera) {
+function prepararInscripcion(carrera) {
+  carreraParaInscribir.value = carrera;
+  showConfirmModal.value = true;
+}
+
+async function inscribirse() {
+  if (!carreraParaInscribir.value) return;
+
   try {
+    showConfirmModal.value = false;
     loading.value = true;
     const locToken = localStorage.getItem("token");
 
     const inscResponse = await api.post(
       "/estudiantes/inscribirse",
       {
-        codigo_carrera: carrera.codigo,
+        codigo_carrera: carreraParaInscribir.value.codigo,
       },
       {
         headers: { Authorization: `Bearer ${locToken}` },
@@ -198,14 +231,13 @@ async function inscribirse(carrera) {
 
     if (inscResponse.data.success) {
       student.value = inscResponse.data;
-      alert("INSCRIPCION EXITOSA");
     }
   } catch (error) {
-    const message = "ERROR";
     console.error("ERROR", error);
-    alert(message);
+    alert("No se pudo completar la inscripción.");
   } finally {
     loading.value = false;
+    carreraParaInscribir.value = null;
   }
 }
 </script>
@@ -447,5 +479,44 @@ async function inscribirse(carrera) {
   display: flex;
   flex-direction: row;
   gap: 6px;
+}
+
+.confirm-box {
+  text-align: center;
+  max-width: 400px;
+}
+
+.confirm-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.btn-cancel {
+  background-color: #eee;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-confirm {
+  background-color: #003cff;
+  color: white;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-confirm:hover {
+  background-color: #002db3;
+}
+
+.btn-cancel:hover {
+  background-color: #ddd;
 }
 </style>
