@@ -31,7 +31,66 @@
             </p>
           </div>
           <div class="button-group">
-            <button class="insc">Inscribirse</button>
+            <button class="insc" @click="prepararInscripcion(carrera)">
+              Inscribirse
+            </button>
+            <button class="vermas" @click="verMaterias(carrera)">
+              Ver Materias
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        v-if="showModal"
+        class="modal-overlay"
+        @click.self="showModal = false"
+      >
+        <div class="modal-content">
+          <h2>{{ selectedCarrera }}</h2>
+
+          <div v-if="materias.data && materias.data.length > 0">
+            <div v-for="materia in materias.data" class="materia-row">
+              <p class="detail">
+                <SimpleIcon iconName="carrera" iconColor="#003ffc" />
+                {{ materia.nombre }}
+              </p>
+              <p class="detail">
+                <SimpleIcon iconName="attention" iconColor="red" />
+                Tipo: {{ materia.tipo }}
+              </p>
+              <p class="detail">
+                <SimpleIcon iconName="money" iconColor="#00ff3c" />
+                Monto: Bs. {{ materia.monto }}
+              </p>
+            </div>
+          </div>
+          <p v-else-if="!materias.data">Cargando materias...</p>
+          <p v-else>No hay materias disponibles.</p>
+
+          <button class="cerrar" @click="showModal = false">Cerrar</button>
+        </div>
+      </div>
+      <div
+        v-if="showConfirmModal"
+        class="modal-overlay"
+        @click.self="showConfirmModal = false"
+      >
+        <div class="modal-content confirm-box">
+          <SimpleIcon iconName="warning" iconColor="orange" />
+          <p>
+            Te inscribirás a
+            <strong>{{ carreraParaInscribir?.nombre }}</strong> ¿Deseas
+            continuar?
+          </p>
+
+          <div class="confirm-buttons">
+            <button class="btn-cancel" @click="showConfirmModal = false">
+              Cancelar
+            </button>
+            <button class="btn-confirm" @click="inscribirse">
+              Sí, Inscribirme
+            </button>
           </div>
         </div>
       </div>
@@ -94,6 +153,11 @@ import SimpleIcon from "../../seguridad/components/SimpleIcon.vue";
 const student = ref(null);
 const loading = ref(true);
 const carreras = ref([]);
+const materias = ref([]);
+const selectedCarrera = ref("");
+const showModal = ref(false);
+const showConfirmModal = ref(false);
+const carreraParaInscribir = ref(null);
 
 onMounted(async () => {
   try {
@@ -122,16 +186,63 @@ onMounted(async () => {
     loading.value = false;
   }
 });
+
+async function verMaterias(carrera) {
+  try {
+    selectedCarrera.value = carrera.nombre;
+    const localToken = localStorage.getItem("token");
+    const materiasResponse = await api.get(
+      `carreras/disponibles/${carrera.codigo}/materias`,
+      {
+        headers: { Authorization: `Bearer ${localToken}` },
+      },
+    );
+
+    const materiasData = materiasResponse.data;
+    materias.value = materiasData;
+    showModal.value = true;
+  } catch (error) {
+    console.error("ERROR", error);
+  }
+}
+
+function prepararInscripcion(carrera) {
+  carreraParaInscribir.value = carrera;
+  showConfirmModal.value = true;
+}
+
+async function inscribirse() {
+  if (!carreraParaInscribir.value) return;
+
+  try {
+    showConfirmModal.value = false;
+    loading.value = true;
+    const locToken = localStorage.getItem("token");
+
+    const inscResponse = await api.post(
+      "/estudiantes/inscribirse",
+      {
+        codigo_carrera: carreraParaInscribir.value.codigo,
+      },
+      {
+        headers: { Authorization: `Bearer ${locToken}` },
+      },
+    );
+
+    if (inscResponse.data.success) {
+      student.value = inscResponse.data;
+    }
+  } catch (error) {
+    console.error("ERROR", error);
+    alert("No se pudo completar la inscripción.");
+  } finally {
+    loading.value = false;
+    carreraParaInscribir.value = null;
+  }
+}
 </script>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
-/*
-* {
-    font-family: "Poppins", sans-serif;
-}
-*/
-
 .title {
   display: flex;
   flex-direction: row;
@@ -216,9 +327,15 @@ onMounted(async () => {
 
 .carrera-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
   gap: 20px;
   padding: 20px;
+}
+
+@media (min-width: 768px) {
+  .carrera-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .carrera-card {
@@ -273,6 +390,7 @@ onMounted(async () => {
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  gap: 10px;
 }
 
 .insc {
@@ -285,9 +403,120 @@ onMounted(async () => {
   border-radius: 6px;
   padding: 0.6rem 2rem;
   font-weight: 600;
+  min-width: 6rem;
 }
 
 .insc:hover {
   text-decoration: underline;
+}
+
+.vermas {
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 2rem;
+  min-width: 6rem;
+}
+
+.vermas:hover {
+  background-color: #dcdcdc;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.materia-row {
+  margin: 1rem 0rem;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0.5rem 0.5rem;
+  border-radius: 6px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.cerrar {
+  cursor: pointer;
+  margin-top: 1rem;
+  padding: 0.5rem 0.6rem;
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 8px;
+}
+
+.cerrar:hover {
+  background-color: crimson;
+}
+
+.detail {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+}
+
+.confirm-box {
+  text-align: center;
+  max-width: 400px;
+}
+
+.confirm-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.btn-cancel {
+  background-color: #eee;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-confirm {
+  background-color: #003cff;
+  color: white;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-confirm:hover {
+  background-color: #002db3;
+}
+
+.btn-cancel:hover {
+  background-color: #ddd;
 }
 </style>
