@@ -21,15 +21,7 @@
       </span>
     </button>
     
-    <button class="cart-button" @click="toggleCarrito">
-      <Icon iconName="shopping_cart" />
-      <span 
-        v-if="carrito.cursos.length > 0" 
-        class="badge"
-      >
-      {{ carrito.cursos.length }}
-      </span>
-    </button>
+    
   </div>
     
     
