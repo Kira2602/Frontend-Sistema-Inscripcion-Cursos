@@ -73,7 +73,6 @@
 import OfertaCard from '../components/OfertaCard.vue';
 import SearchBar from '../components/SearchBar.vue'
 import { ref,computed,onMounted } from 'vue';
-import { ref,computed,onMounted } from 'vue';
 import ModalOferta from '../components/ModalOferta.vue';
 import { usarCarrito } from '../../../store/carrito';
 import CarritoCursos from '../components/CarritoCursos.vue';
@@ -140,21 +139,7 @@ onMounted(async () => {
 const cursos = ref([]);
 
 const cursosExtracurriculares = ref([]);
-onMounted(async () => {
-  try {
-    const response = await listarOfertaCarrera();
-    cursos.value = response.data.data;
 
-    const response2 = await listarOfertaExtra();
-    cursosExtracurriculares.value = response2.data.data;
-  } catch (error) {
-    console.log("Error al obtener los estudiantes: ", error);
-  }
-});
-
-const cursos = ref([]);
-
-const cursosExtracurriculares = ref([]);
 </script>
 
 
