@@ -34,7 +34,7 @@ onMounted(() => {
 
 .content {
   flex: 1;
-  padding: 40px;
+  
   background: #f5f6f7;
   overflow-y: auto;
   width: 100%;

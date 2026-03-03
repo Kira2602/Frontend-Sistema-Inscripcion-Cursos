@@ -54,3 +54,55 @@ export const listarMisMaterias = async () => {
 };
 
 
+
+export const inscribirMaterias = async (materias) => {
+  try {
+
+    const response = await api.post(
+      '/inscripcion',
+      { materias },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+
+    return response.data
+
+  } catch (error) {
+
+    console.error(
+      "Error al inscribir materias:",
+      error.response?.data || error
+    )
+
+    throw error.response?.data || error
+  }
+}
+
+export const pagarInscripcion = async (idInscripcion, datosPago) => {
+  try {
+
+    const response = await api.post(
+      `/pagos/inscripciones/${idInscripcion}/pagar`,
+      datosPago,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+
+    return response.data
+
+  } catch (error) {
+
+    console.error(
+      "Error al pagar inscripción:",
+      error.response?.data || error
+    )
+
+    throw error.response?.data || error
+  }
+}

@@ -92,10 +92,12 @@
         <div class="items-list" v-if="items.length > 0">
           <div class="item-row" v-for="(item, index) in items" :key="index">
             <div class="item-info">
-              <span class="item-name">{{ item.name }}</span>
-              <span class="item-qty" v-if="item.quantity && item.quantity > 1">x{{ item.quantity }}</span>
+              <span class="codigo">{{item.id_materia  }}</span>
+
+              <span class="item-name">{{ item.nombre }}</span>
+              
             </div>
-            <span class="item-price">Bs. {{ formatPrice(item.price) }}</span>
+            <span class="item-price">Bs. {{item.monto }}</span>
           </div>
         </div>
 
@@ -112,11 +114,11 @@
 
         <div class="items-total-row">
           <span class="items-total-label">Subtotal</span>
-          <span class="items-total-value">Bs. {{ formatPrice(subtotal) }}</span>
+          <span class="items-total-value">Bs. {{ carrito.total }}</span>
         </div>
         <div class="items-total-row total-main">
           <span class="items-total-label">Total</span>
-          <span class="items-total-value total-highlight">Bs. {{ formatPrice(subtotal) }}</span>
+          <span class="items-total-value total-highlight">Bs. {{ carrito.total }}</span>
         </div>
       </aside>
     </div>
@@ -243,246 +245,244 @@
     </div>
 
   </div>
+   <ModalExito
+    :message="mensaje"
+    :visible="mostrarExito"
+    @close="mostrarExito = false"
+  />
+  <ModalError
+    :message="mensajeModal"
+    :visible="mostrarError"
+    @close="mostrarError = false"
+  />
+
+
 </template>
 
-<script>
-export default {
-  name: 'PaymentModule',
-  props: {
-    // Pass items from the parent as: :items="[{ name: 'Producto', price: 100, quantity: 1 }]"
-    items: {
-      type: Array,
-      default: () => [
-        { name: 'Producto de ejemplo A', price: 150.00, quantity: 1 },
-        { name: 'Producto de ejemplo B', price: 75.50, quantity: 2 },
-        { name: 'Servicio adicional',    price: 30.00, quantity: 1 }
-      ]
-    }
-  },
-  computed: {
-    subtotal() {
-      return this.items.reduce((sum, item) => {
-        const qty = item.quantity || 1
-        return sum + (item.price * qty)
-      }, 0)
-    }
-  },
-  data() {
-    return {
-      activeModal: null,
-      form: {
-        nitci: '',
-        razonSocial: '',
-        correo: ''
-      },
-      errors: {
-        nitci: '',
-        razonSocial: '',
-        correo: ''
-      },
-      cardForm: {
-        cardNumber: '',
-        expiryMM: '',
-        expiryYY: '',
-        cvv: '',
-        firstName: '',
-        lastName: ''
-      },
-      cardErrors: {
-        cardNumber: '',
-        expiryMM: '',
-        expiryYY: '',
-        cvv: '',
-        firstName: '',
-        lastName: ''
-      }
-    }
-  },
-  methods: {
-    validateField(field) {
-      this.errors[field] = ''
-      const value = this.form[field].trim()
+<script setup>
+import { ref, reactive, computed } from 'vue'
+import { usarCarrito } from '../../../store/carrito'
+// import { pagarInscripcionSimulado } from '../services/tuServicio'
+import { inscribirMaterias } from '../../estudiantes/services/estudianteService'
+import { pagarInscripcion } from '../../estudiantes/services/estudianteService'
+import ModalError from '../../seguridad/components/ModalError.vue'
+import ModalExito from '../../seguridad/components/ModalExito.vue'
 
-      if (field === 'nitci') {
-        if (!value) {
-          this.errors.nitci = 'El NIT/CI es requerido.'
-        } else if (!/^\d+$/.test(value)) {
-          this.errors.nitci = 'Solo se permiten números.'
-        }
-      }
+const mensaje=ref("")
 
-      if (field === 'razonSocial') {
-        if (!value) {
-          this.errors.razonSocial = 'La Razón Social/Nombre es requerida.'
-        } else if (value.length < 2) {
-          this.errors.razonSocial = 'Debe tener al menos 2 caracteres.'
-        }
-      }
+const mostrarExito=ref(false)
+const mostrarError=ref(false)
 
-      if (field === 'correo') {
-        if (!value) {
-          this.errors.correo = 'El correo es requerido.'
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          this.errors.correo = 'Ingrese un correo válido.'
-        }
-      }
-    },
+/* ======================
+   STORE
+====================== */
+const carrito = usarCarrito()
 
-    validateAllFields() {
-      ['nitci', 'razonSocial', 'correo'].forEach(f => this.validateField(f))
-      return !this.errors.nitci && !this.errors.razonSocial && !this.errors.correo
-    },
+const items = computed(() => carrito.cursos)
 
-    openModal(type) {
-      if (!this.validateAllFields()) return
-      this.activeModal = type
-      this.resetCardForm()
-    },
+const subtotal = computed(() =>
+  items.value.reduce((sum, item) => sum + Number(item.monto), 0)
+)
 
-    closeModal() {
-      this.activeModal = null
-    },
+/* ======================
+   MODAL
+====================== */
+const activeModal = ref(null)
 
-    resetCardForm() {
-      this.cardForm = { cardNumber: '', expiryMM: '', expiryYY: '', cvv: '', firstName: '', lastName: '' }
-      this.cardErrors = { cardNumber: '', expiryMM: '', expiryYY: '', cvv: '', firstName: '', lastName: '' }
-    },
+const openModal = (type) => {
 
-    formatCardNumber() {
-      let val = this.cardForm.cardNumber.replace(/\D/g, '').substring(0, 16)
-      this.cardForm.cardNumber = val.replace(/(.{4})/g, '$1 ').trim()
-    },
+  // 🔴 Validar factura antes de abrir
+  const isValid = validateAllFacturaFields()
 
-    validateCardField(field) {
-      this.cardErrors[field] = ''
-      const value = this.cardForm[field].trim()
+  if (!isValid) return
 
-      if (field === 'cardNumber') {
-        const digits = value.replace(/\s/g, '')
-        if (!digits) {
-          this.cardErrors.cardNumber = 'El número de tarjeta es requerido.'
-        } else if (digits.length < 16) {
-          this.cardErrors.cardNumber = 'Debe tener 16 dígitos.'
-        }
-      }
+  // ✅ Si todo está bien
+  activeModal.value = type
+}
 
-      if (field === 'expiryMM') {
-        if (!value) {
-          this.cardErrors.expiryMM = 'Mes requerido.'
-        } else if (!/^(0[1-9]|1[0-2])$/.test(value)) {
-          this.cardErrors.expiryMM = 'Mes inválido (01-12).'
-        }
-      }
+const closeModal = () => {
+  activeModal.value = null
+}
 
-      if (field === 'expiryYY') {
-        if (!value) {
-          this.cardErrors.expiryYY = 'Año requerido.'
-        } else if (!/^\d{2}$/.test(value)) {
-          this.cardErrors.expiryYY = 'Año inválido.'
-        }
-      }
+/* ======================
+   FORM FACTURA
+====================== */
+const form = reactive({
+  nitci: '',
+  razonSocial: '',
+  correo: ''
+})
 
-      if (field === 'cvv') {
-        if (!value) {
-          this.cardErrors.cvv = 'CVV requerido.'
-        } else if (!/^\d{3,4}$/.test(value)) {
-          this.cardErrors.cvv = 'CVV inválido (3-4 dígitos).'
-        }
-      }
+const errors = reactive({
+  nitci: '',
+  razonSocial: '',
+  correo: ''
+})
 
-      if (field === 'firstName') {
-        if (!value) this.cardErrors.firstName = 'Nombres requeridos.'
-      }
-
-      if (field === 'lastName') {
-        if (!value) this.cardErrors.lastName = 'Apellidos requeridos.'
-      }
-    },
-
-    validateAllCardFields() {
-      ['cardNumber', 'expiryMM', 'expiryYY', 'cvv', 'firstName', 'lastName'].forEach(f => this.validateCardField(f))
-      return Object.values(this.cardErrors).every(e => !e)
-    },
-
-    async submitCard() {
-      if (!this.validateAllCardFields()) return
-
-      const payload = {
-        inscripcion_id: 15, // simulado
-        metodo_pago: "TARJETA",
-        total: this.subtotal,
-        datos_factura: {
-          nit_ci: this.form.nitci,
-          razon_social: this.form.razonSocial,
-          correo: this.form.correo
-        },
-        tarjeta: {
-          numero: this.cardForm.cardNumber,
-          mm: this.cardForm.expiryMM,
-          yy: this.cardForm.expiryYY,
-          cvv: this.cardForm.cvv,
-          titular: `${this.cardForm.firstName} ${this.cardForm.lastName}`
-        }
-      }
-
-      try {
-        const resultado = await pagarInscripcionSimulado(payload)
-
-        console.log("Respuesta backend:", resultado)
-
-        alert(resultado.mensaje_envio_factura)
-
-        this.closeModal()
-
-
-      } catch (error) {
-        alert("Error al procesar el pago")
-      }
-    },
-    async procesarPagoQR() {
-      const payload = {
-        inscripcion_id: 15, // simulado
-        metodo_pago: "QR",
-        total: this.subtotal,
-        datos_factura: {
-          nit_ci: this.form.nitci,
-          razon_social: this.form.razonSocial,
-          correo: this.form.correo
-        }
-      }
-
-      try {
-        const resultado = await pagarInscripcionSimulado(payload)
-
-        console.log("Pago QR procesado:", resultado)
-
-        alert(resultado.mensaje_envio_factura)
-
-        this.closeModal()
-
-      } catch (error) {
-        alert("Error al procesar el pago QR")
-      }
-    },
-    downloadQR() {
-      alert('QR descargado.')
-    },
-
-    formatPrice(value) {
-      return Number(value).toFixed(2)
-    }
+const validateField = (field) => {
+  if (!form[field]) {
+    errors[field] = 'Este campo es obligatorio'
+  } else {
+    errors[field] = ''
   }
+}
+
+/* ======================
+   FORM TARJETA
+====================== */
+const cardForm = reactive({
+  cardNumber: '',
+  expiryMM: '',
+  expiryYY: '',
+  cvv: '',
+  firstName: '',
+  lastName: ''
+})
+
+const cardErrors = reactive({
+  cardNumber: '',
+  expiryMM: '',
+  expiryYY: '',
+  cvv: '',
+  firstName: '',
+  lastName: ''
+})
+
+const validateCardField = (field) => {
+  if (!cardForm[field]) {
+    cardErrors[field] = 'Campo obligatorio'
+  } else {
+    cardErrors[field] = ''
+  }
+}
+
+const validateAllCardFields = () => {
+  let valid = true
+  Object.keys(cardForm).forEach(key => {
+    if (!cardForm[key]) {
+      cardErrors[key] = 'Campo obligatorio'
+      valid = false
+    }
+  })
+  return valid
+}
+
+const formatCardNumber = () => {
+  let value = cardForm.cardNumber.replace(/\D/g, '')
+  value = value.match(/.{1,4}/g)?.join(' ') || ''
+  cardForm.cardNumber = value
+}
+
+/* ======================
+   PAGOS
+====================== */
+const submitCard = async () => {
+
+  if (!validateAllCardFields()) return
+
+  try {
+
+    // 🔥 1️⃣ Crear inscripción
+    const data = await inscribirMaterias(
+      items.value.map(item => item.id_materia)
+    )
+
+    console.log("Inscripción creada:", data)
+
+    const idInscripcion = data.data.inscripcion.id_inscripcion
+
+    // 🔥 2️⃣ Pagar inscripción
+    const pago = await pagarInscripcion(idInscripcion, {
+      nit_ci: form.nitci,
+      razon_social: form.razonSocial,
+      correo: form.correo,
+      metodo_pago: "TARJETA"
+    })
+
+    console.log("Pago realizado:", pago)
+
+    //alert(pago.mensaje_envio_factura || "Pago procesado correctamente")
+    mensaje.value="Pago procesado correctamente";
+    mostrarExito.value=true;
+    carrito.vaciarCarrito()
+    closeModal()
+
+  } catch (error) {
+
+    //alert(error?.message || "Error en el proceso de pago")
+    mensaje.value="Error en el proceso de pago";
+    mostrarError.value=true;
+    console.log(error)
+  }
+}
+
+const downloadQR = () => {
+  alert("Descargando QR...")
+}
+
+const procesarPagoQR = async () => {
+
+  try {
+
+    // 🔥 1️⃣ Crear inscripción
+    const data = await inscribirMaterias(
+      items.value.map(item => item.id_materia)
+    )
+
+    console.log("Inscripción creada:", data)
+
+    const idInscripcion = data.data.inscripcion.id_inscripcion
+
+    // 🔥 2️⃣ Pagar con QR
+    const pago = await pagarInscripcion(idInscripcion, {
+      nit_ci: form.nitci,
+      razon_social: form.razonSocial,
+      correo: form.correo,
+      metodo_pago: "QR"
+    })
+
+    console.log("Pago QR realizado:", pago)
+
+    mensaje.value="Pago procesado correctamente";
+    mostrarExito.value=true;
+
+    carrito.vaciarCarrito()
+    closeModal()
+
+  } catch (error) {
+
+    mensaje.value="Error en el proceso de pago";
+    mostrarError.value=true;
+    console.log(error)
+  }
+}
+
+const validateAllFacturaFields = () => {
+  let valid = true
+
+  Object.keys(form).forEach(key => {
+    if (!form[key]) {
+      errors[key] = 'Este campo es obligatorio'
+      valid = false
+    } else {
+      errors[key] = ''
+    }
+  })
+
+  return valid
 }
 </script>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+.codigo {
+  background: #0b7285;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 20px;
+  width: 30%;
 }
+
 
 .app-wrapper {
   font-family: 'DM Sans', sans-serif;
@@ -521,7 +521,7 @@ export default {
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
-  background: #d6dde5;
+  background: transparent; /* 👈 cambiar */
 }
 
 .card {
@@ -757,7 +757,6 @@ export default {
   width: 260px;
   min-width: 260px;
   background: #ffffff;
-  border-left: 1px solid #e5e9ef;
   display: flex;
   flex-direction: column;
   padding: 0;
