@@ -18,15 +18,15 @@
           <p class="desc">{{ carrera.descripcion }}</p>
           <div class="specs">
             <p class="spec">
-              <SimpleIcon iconName="grid" iconColor="" />
+              <SimpleIcon iconName="grid" iconColor="#c32aff" />
               Código: {{ String(carrera.codigo).toUpperCase() }}
             </p>
             <p class="spec">
-              <SimpleIcon iconName="verified" iconColor="" />
+              <SimpleIcon iconName="verified" iconColor="#00ff3c" />
               Certificación
             </p>
             <p class="spec">
-              <SimpleIcon iconName="info" iconColor="" />
+              <SimpleIcon iconName="clock" iconColor="rgb(255,140,0)" />
               Duración: {{ carrera.duracion }}
             </p>
           </div>
@@ -68,7 +68,7 @@
           <p v-else-if="!materias.data">Cargando materias...</p>
           <p v-else>No hay materias disponibles.</p>
 
-          <button class="cerrar" @click="showModal = false">Cerrar</button>
+          <button class="btn-cancel" @click="showModal = false">Cerrar</button>
         </div>
       </div>
       <div
@@ -104,21 +104,21 @@
         <div class="two-group">
           <div class="badges">
             <p class="badge">
-              <SimpleIcon iconName="info" iconColor="" />
+              <SimpleIcon iconName="clock" iconColor="rgb(255,140,0)" />
               Duración de {{ student.data.carrera.duracion }}
             </p>
             <p class="badge">
-              <SimpleIcon iconName="verified" iconColor="" />
+              <SimpleIcon iconName="verified" iconColor="#00ff3c" />
               Certificación Digital
             </p>
             <p class="badge">
-              <SimpleIcon iconName="grid" iconColor="" />
+              <SimpleIcon iconName="grid" iconColor="#c32aff" />
               Código:
               {{ String(student.data.carrera.codigo).toUpperCase() }}
             </p>
             <p class="badge" v-if="courseComp && totalMaterias > 0">
-              Completado: {{ completionPercentage }}
-              <SimpleIcon iconName="percentage" iconColor="" />
+              <SimpleIcon iconName="percentage" iconColor="#ff2b00" />
+              Completado: {{ completionPercentage }} %
             </p>
           </div>
           <div class="information">
@@ -270,84 +270,93 @@ async function inscribirse() {
 <style scoped>
 .title {
   display: flex;
-  flex-direction: row;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-size: xx-large;
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  text-align: center;
+  flex-wrap: wrap;
+  margin-top: 1rem;
 }
 
 .description {
   color: #787878;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0rem 5rem;
+  text-align: center;
+  padding: 0 clamp(1rem, 6vw, 5rem);
   margin-top: 1rem;
+  font-size: clamp(0.9rem, 1.5vw, 1rem);
+  line-height: 1.6;
 }
 
 .main-container {
   margin-top: 1rem;
   background-color: white;
-  padding: 1rem;
+  padding: clamp(1rem, 3vw, 2rem);
   border-radius: 12px;
-  box-shadow: 10px 10px 12px 10px #dcdcdc;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
 .two-group {
   display: flex;
-  flex-direction: row;
+  gap: 2rem;
   margin-top: 2.5rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+  .two-group {
+    flex-direction: column;
+  }
 }
 
 .badges {
   margin-top: 1rem;
   display: flex;
   flex-direction: column;
-  flex: 4;
+  flex: 1 1 300px;
   gap: 1rem;
 }
 
 .badge {
   cursor: default;
+  user-select: none;
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  border-radius: 50px;
-  font-size: small;
+  align-items: center;
+  border-radius: 999px;
+  font-size: clamp(0.7rem, 1.5vw, 0.9rem);
   font-weight: bold;
-  padding: 0.3rem 1rem;
-  gap: 5px;
-  max-width: 70%;
+  padding: clamp(0.3rem, 1vw, 0.5rem) clamp(0.8rem, 2vw, 1.2rem);
+  gap: 0.5rem;
+  width: fit-content;
+  max-width: 100%;
+  flex-wrap: wrap;
 }
 
 .badge:nth-child(1) {
-  background-color: rgb(150, 150, 0);
-  color: rgb(255, 255, 0);
+  background-color: rgb(105, 37, 0);
+  color: rgb(255, 255, 158);
 }
 
 .badge:nth-child(2) {
-  background-color: #005414;
-  color: #00ff3c;
+  background-color: #00542e;
+  color: #a0ffb6;
 }
 
 .badge:nth-child(3) {
-  background-color: #001457;
-  color: #6ab7ff;
+  background-color: #450060;
+  color: #f0c9ff;
 }
 
 .badge:nth-child(4) {
-  background-color: #600000;
-  color: #ff8a8a;
+  background-color: #890000;
+  color: #ffacac;
 }
 
 .information {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  flex: 6;
-  padding: 0.3rem 2rem;
+  flex: 2 1 400px;
+  padding: clamp(0.5rem, 2vw, 2rem);
 }
 
 .titu {
@@ -357,100 +366,92 @@ async function inscribirse() {
 
 .carrera-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
   gap: 20px;
-  padding: 20px;
-}
-
-@media (min-width: 768px) {
-  .carrera-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  padding: clamp(1rem, 3vw, 2rem);
 }
 
 .carrera-card {
   background-color: white;
-  border: 1px solid #dcdcdc;
+  border: 1px solid #e5e5e5;
   border-radius: 12px;
-  padding: 0.6rem 1rem;
-  box-shadow: 10px 10px 12px 5px #dcdcdc;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
 }
 
 .desc {
-  margin: 0.5rem 0rem;
+  margin: 0.5rem 0;
   color: #787878;
-  font-size: small;
+  font-size: clamp(0.85rem, 1.4vw, 0.95rem);
 }
 
 .specs {
   display: flex;
-  gap: 5px;
-  margin: 1rem 0rem;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 1rem 0;
 }
 
 .spec {
-  cursor: default;
   display: flex;
+  cursor: default;
+  user-select: none;
   align-items: center;
-  justify-content: center;
-  border-radius: 50px;
-  padding: 0.5rem 0.8rem;
-  font-size: small;
+  border-radius: 999px;
+  padding: 0.4rem 0.8rem;
+  font-size: clamp(0.7rem, 1.2vw, 0.85rem);
   gap: 5px;
+  white-space: nowrap;
 }
 
 .spec:nth-child(1) {
-  background-color: #680092;
-  color: #de8bff;
+  background-color: #450060;
+  color: #f0c9ff;
 }
 
 .spec:nth-child(2) {
-  background-color: #005414;
-  color: #00ff3c;
+  background-color: #00542e;
+  color: #a0ffb6;
 }
 
 .spec:nth-child(3) {
-  background-color: rgb(150, 120, 0);
-  color: rgb(255, 255, 0);
+  background-color: rgb(105, 37, 0);
+  color: rgb(255, 255, 158);
 }
 
 .button-group {
-  margin: 2rem 0rem;
+  margin: 2rem 0 0 0;
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
+  flex-wrap: wrap;
   gap: 10px;
+  justify-content: center;
+}
+
+.insc,
+.vermas {
+  cursor: pointer;
+  padding: 0.6rem 1.5rem;
+  min-width: 120px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: clamp(0.8rem, 1.2vw, 0.95rem);
 }
 
 .insc {
-  cursor: pointer;
-  display: flex;
-  flex-direction: row;
   background-color: #003cff;
   color: white;
   border: none;
-  border-radius: 6px;
-  padding: 0.6rem 2rem;
-  font-weight: 600;
-  min-width: 6rem;
 }
 
 .insc:hover {
-  text-decoration: underline;
+  background-color: #002db3;
 }
 
 .vermas {
-  cursor: pointer;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
   background-color: transparent;
   border: none;
-  border-radius: 6px;
-  padding: 0.6rem 2rem;
-  min-width: 6rem;
 }
 
 .vermas:hover {
@@ -459,61 +460,45 @@ async function inscribirse() {
 
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 1rem;
   z-index: 1000;
 }
 
 .modal-content {
   background: white;
-  padding: 2rem;
+  padding: clamp(1rem, 3vw, 2rem);
   border-radius: 15px;
-  width: 90%;
+  width: 100%;
   max-width: 500px;
-  max-height: 80vh;
+  max-height: 85vh;
   overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
 .materia-row {
-  margin: 1rem 0rem;
+  margin: 1rem 0;
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 0.5rem 0.5rem;
-  border-radius: 6px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-}
-
-.cerrar {
-  cursor: pointer;
-  margin-top: 1rem;
-  padding: 0.5rem 0.6rem;
-  background-color: red;
-  color: white;
-  border: none;
+  gap: 6px;
+  padding: 0.6rem;
   border-radius: 8px;
-}
-
-.cerrar:hover {
-  background-color: crimson;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
 }
 
 .detail {
   display: flex;
-  flex-direction: row;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
 .confirm-box {
   text-align: center;
-  max-width: 400px;
+  max-width: 500px;
 }
 
 .confirm-buttons {
@@ -521,32 +506,32 @@ async function inscribirse() {
   gap: 15px;
   justify-content: center;
   margin-top: 2rem;
+  flex-wrap: wrap;
 }
 
-.btn-cancel {
-  background-color: #eee;
-  border: none;
+.btn-cancel,
+.btn-confirm {
   padding: 0.7rem 1.5rem;
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
+  border: none;
+}
+
+.btn-cancel {
+  background-color: #eee;
+}
+
+.btn-cancel:hover {
+  background-color: #ddd;
 }
 
 .btn-confirm {
   background-color: #003cff;
   color: white;
-  border: none;
-  padding: 0.7rem 1.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
 }
 
 .btn-confirm:hover {
   background-color: #002db3;
-}
-
-.btn-cancel:hover {
-  background-color: #ddd;
 }
 </style>
