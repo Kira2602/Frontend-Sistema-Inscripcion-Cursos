@@ -116,6 +116,10 @@
               Código:
               {{ String(student.data.carrera.codigo).toUpperCase() }}
             </p>
+            <p class="badge" v-if="courseComp && totalMaterias > 0">
+              Completado: {{ completionPercentage }}
+              <SimpleIcon iconName="percentage" iconColor="" />
+            </p>
           </div>
           <div class="information">
             <h3 class="title">
@@ -146,7 +150,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import api from "../../../services";
 import SimpleIcon from "../../seguridad/components/SimpleIcon.vue";
 
@@ -158,6 +162,20 @@ const selectedCarrera = ref("");
 const showModal = ref(false);
 const showConfirmModal = ref(false);
 const carreraParaInscribir = ref(null);
+const courseComp = ref(null);
+
+const totalMaterias = computed(() => {
+  return courseComp.value?.data?.total_materias_carrera ?? 0;
+});
+
+const aprobadasMaterias = computed(() => {
+  return courseComp.value?.data?.materias_por_estado?.aprobadas ?? 0;
+});
+
+const completionPercentage = computed(() => {
+  if (!totalMaterias.value) return 0;
+  return ((aprobadasMaterias.value / totalMaterias.value) * 100).toFixed(0);
+});
 
 onMounted(async () => {
   try {
@@ -180,6 +198,13 @@ onMounted(async () => {
     });
     const carreraData = await carrerasResponse.data;
     carreras.value = carreraData;
+
+    const courseResponse = await api.get("/estudiantes/mi-carrera", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    courseComp.value = courseResponse.data;
   } catch (error) {
     console.error("Error al obtener el usuario:", error);
   } finally {
@@ -309,6 +334,11 @@ async function inscribirse() {
 .badge:nth-child(3) {
   background-color: #001457;
   color: #6ab7ff;
+}
+
+.badge:nth-child(4) {
+  background-color: #600000;
+  color: #ff8a8a;
 }
 
 .information {
