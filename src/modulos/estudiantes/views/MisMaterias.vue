@@ -1,4 +1,5 @@
 <template>
+  <div class="wrapper">
   <h1>Mis materias</h1>
   <div class="head"> 
     <div class="search">
@@ -27,7 +28,7 @@
     :noCumple="noCumplen"
     @close="modalAbierto = false"
     />
-        
+        </div>
   </template>
 
 <script setup>
@@ -114,7 +115,9 @@ const cursosExtracurriculares = ref([]);
 
 
 <style scoped>
-
+.wrapper{
+  padding: 40px;
+}
 .search{
   width: 60%;
 }

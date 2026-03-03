@@ -29,6 +29,10 @@ import ListarExtra from "../modulos/admin/views/ListarExtra.vue";
 import OfertaAcademica from "../modulos/estudiantes/views/OfertaAcademica.vue";
 import MiCarrera from "../modulos/estudiantes/views/miCarrera.vue";
 import MisMaterias from "../modulos/estudiantes/views/MisMaterias.vue";
+import pagos from "../modulos/pagos/components/Pagos.vue"
+import Pagos from "../modulos/pagos/components/Pagos.vue";
+
+
 const routes = [
   {
     path: "/login",
@@ -161,6 +165,11 @@ const routes = [
         path:"misMaterias",
         name:"misMaterias",
         component:MisMaterias
+      },
+      {
+        path:"pagarCarrito",
+        name:"pagarCarrito",
+        component:Pagos
       }
     ],
   },

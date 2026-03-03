@@ -1,64 +1,66 @@
 <template>
-  <h1>Oferta academica</h1>
-  <div class="head"> 
-    <div class="search">
-      <SearchBar
-      @update:search="searchTerm=$event"
+  <div class="wrapper">
+    <h1>Oferta academica</h1>
+    <div class="head"> 
+      <div class="search">
+        <SearchBar
+        @update:search="searchTerm=$event"
+        />
+      </div>
+      <select v-model="ofertaCarrera">
+        <option :value="true">Mi carrera</option>
+        <option :value="false">Extracurricular</option>
+      </select>
+      
+      <button class="cart-button" @click="toggleCarrito">
+        <Icon iconName="shopping_cart" />
+        <span 
+          v-if="carrito.cursos.length > 0" 
+          class="badge"
+        >
+        {{ carrito.cursos.length }}
+        </span>
+      </button>
+      
+      
+    </div>
+      
+      
+      <div class="container" v-if="ofertaCarrera">
+        
+          <OfertaCard
+          v-for="curso in filteredCursos"
+          :key="curso.id_materia"
+          :curso="curso"
+          @view="abrirModal(curso)"
+          
+          />
+      </div>
+      <div class="container" v-if="!ofertaCarrera">
+        
+          <OfertaCard
+          v-for="curso in filteredCursosExtra"
+          :key="curso.id_materia"
+          :curso="curso"
+          @view="abrirModal(curso)"
+          
+          />
+      </div>
+      <ModalOferta
+      v-if="modalAbierto"
+      :curso="selectedCurso"
+      :noCumple="noCumplen"
+      @close="modalAbierto = false"
+      />
+          <CarritoCursos 
+        v-if="mostrarCarrito" 
+        @cerrar="mostrarCarrito = false" 
+      />
+          <CarritoCursos 
+        v-if="mostrarCarrito" 
+        @cerrar="mostrarCarrito = false" 
       />
     </div>
-    <select v-model="ofertaCarrera">
-      <option :value="true">Mi carrera</option>
-      <option :value="false">Extracurricular</option>
-    </select>
-    
-    <button class="cart-button" @click="toggleCarrito">
-      <Icon iconName="shopping_cart" />
-      <span 
-        v-if="carrito.cursos.length > 0" 
-        class="badge"
-      >
-      {{ carrito.cursos.length }}
-      </span>
-    </button>
-    
-    
-  </div>
-    
-    
-    <div class="container" v-if="ofertaCarrera">
-      
-        <OfertaCard
-        v-for="curso in filteredCursos"
-        :key="curso.id_materia"
-        :curso="curso"
-        @view="abrirModal(curso)"
-        
-        />
-    </div>
-     <div class="container" v-if="!ofertaCarrera">
-      
-        <OfertaCard
-        v-for="curso in filteredCursosExtra"
-        :key="curso.id_materia"
-        :curso="curso"
-        @view="abrirModal(curso)"
-        
-        />
-    </div>
-    <ModalOferta
-    v-if="modalAbierto"
-    :curso="selectedCurso"
-    :noCumple="noCumplen"
-    @close="modalAbierto = false"
-    />
-        <CarritoCursos 
-      v-if="mostrarCarrito" 
-      @cerrar="mostrarCarrito = false" 
-    />
-        <CarritoCursos 
-      v-if="mostrarCarrito" 
-      @cerrar="mostrarCarrito = false" 
-    />
   </template>
 
 <script setup>
@@ -83,17 +85,30 @@ const searchTerm = ref("");
 const selectedCurso = ref(null);
 const ofertaCarrera=ref(true)
 const cumpleMateria=ref(Boolean)
-const noCumplen=[]
-const abrirModal = async(curso) => {
-  const response=await materiaOfertaDetalle(curso.id_materia)
-  response.data?.requisitos?.forEach(requisito => {
-    if(requisito.cumple===false){
-      noCumplen.push(requisito.id_materia)
-    }
-  });
-  selectedCurso.value = { ...curso };
-  modalAbierto.value = true;
-};
+const noCumplen=ref([])
+const abrirModal = async (curso) => {
+
+  noCumplen.value = [] // limpiar siempre
+
+  if (ofertaCarrera.value) {
+
+    const response = await materiaOfertaDetalle(curso.id_materia)
+
+    response.data?.requisitos?.forEach(requisito => {
+      if (requisito.cumple === false) {
+        noCumplen.value.push(requisito.id_materia)
+      }
+    })
+
+    selectedCurso.value = { ...curso }
+    modalAbierto.value = true
+
+  } else {
+    // Si es extracurricular NO ejecuta materiaOfertaDetalle
+    selectedCurso.value = { ...curso }
+    modalAbierto.value = true
+  }
+}
 
 const filteredCursos = computed(() => {
   if (!searchTerm.value) return cursos.value;
@@ -137,7 +152,9 @@ const cursosExtracurriculares = ref([]);
 
 
 <style scoped>
-
+.wrapper{
+  padding: 40px;
+}
 .search{
   width: 60%;
 }

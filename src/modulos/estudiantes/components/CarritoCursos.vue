@@ -53,8 +53,9 @@
 <script setup>
 import { usarCarrito } from '../../../store/carrito';
 import Icon from '../../seguridad/components/Icon.vue';
+import { useRouter } from 'vue-router';
 const carrito=usarCarrito();
-
+const router=useRouter();
 const eliminar = (id_materia) => {
   carrito.eliminarCurso(id_materia);
 };
@@ -64,7 +65,7 @@ const vaciar = () => {
 };
 
 const pagar = () => {
-  alert("Redirigiendo al pago...");
+  router.push({name:"pagarCarrito"})
 };
 </script>
 <style scoped>
