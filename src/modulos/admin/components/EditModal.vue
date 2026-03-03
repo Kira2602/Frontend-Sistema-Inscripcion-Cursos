@@ -87,6 +87,45 @@
             <input type="text" v-model="form.monto"  />
           </div>
 
+          <div>
+  <label>Agregar requisito</label>
+
+  <div class="requisito-row">
+    <select v-model="requisitoSeleccionado">
+      <option disabled value="">Seleccione materia</option>
+      <option 
+        v-for="mat in materiasDisponibles"
+        :key="mat.id_materia"
+        :value="mat.id_materia"
+      >
+        {{ mat.nombre }}
+      </option>
+    </select>
+
+    <button 
+      type="button" 
+      class="btn-add"
+      @click="agregarRequisito"
+    >
+      Agregar
+    </button>
+  </div>
+
+  <!-- BURBUJAS -->
+  <div class="requisitos-burbujas">
+    <span 
+      v-for="codigo in requisitosAgregados"
+      :key="codigo"
+      class="burbuja"
+    >
+      {{
+        materiasDisponibles.find(m => m.id_materia === codigo)?.nombre
+      }}
+      <button @click="eliminarRequisito(codigo)">×</button>
+    </span>
+  </div>
+</div>
+
         </div>
           
         <div class="buttons">
@@ -102,6 +141,7 @@
 
 <script setup>
 import { computed, ref, watch } from "vue";
+import { listarCursos } from "../servicios/adminsService";
 const dias = [
   "Lunes",
   "Martes",
@@ -112,6 +152,27 @@ const dias = [
 const props = defineProps({ 
   user: { type: Object, required: true } 
 });
+
+const requisitoSeleccionado = ref("")
+const requisitosAgregados = ref([]) 
+
+const agregarRequisito = () => {
+  if (!requisitoSeleccionado.value) return
+
+  const yaExiste = requisitosAgregados.value.includes(requisitoSeleccionado.value)
+
+  if (!yaExiste) {
+    requisitosAgregados.value.push(requisitoSeleccionado.value)
+  }
+
+  requisitoSeleccionado.value = ""
+}
+
+const eliminarRequisito = (codigo) => {
+  requisitosAgregados.value = requisitosAgregados.value.filter(
+    r => r !== codigo
+  )
+}
 const emit = defineEmits(["close", "save"]);
 
 // Renombramos user a curso para claridad
@@ -126,16 +187,33 @@ const form = ref({
 });
 
 const errorNombre = ref("");
+const listaMaterias = async (curso) => {
+  try {
+    const response = await listarCursos()
+    const todas = response.data.data
 
+    materiasDisponibles.value = todas.filter(m =>
+      m.carrera_codigo === curso.carrera_codigo &&
+      m.id_materia !== curso.id_materia
+    )
+
+  } catch (error) {
+    console.error("Error cargando materias", error)
+  }
+}
 // Watch para actualizar el form cuando cambie el curso seleccionado
 watch(
   () => props.user,
-  (newCurso) => {
+  async(newCurso) => {
     if (newCurso) {
+      await listaMaterias(newCurso)
       form.value.nombre = newCurso.nombre || "";
       form.value.monto=newCurso.monto||"";
       form.value.cupo=newCurso.cupo||"";
       form.value.dia=newCurso.dia||"";
+      requisitosAgregados.value = newCurso.requisitos
+        ? [...newCurso.requisitos]
+        : []
     }
   },
   { immediate: true }
@@ -153,20 +231,35 @@ const validarNombre = () => {
     errorNombre.value = "";
   }
 };
+const materiasDisponibles = ref([])
+
 
 // El formulario es válido si el nombre cambió y es válido
 const formularioValido = computed(() => {
   if (errorNombre.value) return false;
 
-  const cambioNombre = form.value.nombre !== curso.value.nombre;
-  const cambioDia = form.value.dia !== curso.value.dia;
-  const cambioCupo = form.value.cupo !== curso.value.cupo;
-  const cambioMonto = form.value.monto !== curso.value.monto;
+  const cambioNombre = form.value.nombre !== curso.value.nombre
+  const cambioDia = form.value.dia !== curso.value.dia
+  const cambioCupo = form.value.cupo !== curso.value.cupo
+  const cambioMonto = form.value.monto !== curso.value.monto
 
-  const hayCambios = cambioNombre || cambioDia || cambioCupo || cambioMonto;
+  // 👇 Comparar requisitos
+  const requisitosOriginales = curso.value.requisitos || []
+  const requisitosActuales = requisitosAgregados.value
 
-  return form.value.nombre.trim() !== "" && hayCambios;
-});
+  const cambioRequisitos =
+    requisitosOriginales.length !== requisitosActuales.length ||
+    !requisitosOriginales.every(r => requisitosActuales.includes(r))
+
+  const hayCambios =
+    cambioNombre ||
+    cambioDia ||
+    cambioCupo ||
+    cambioMonto ||
+    cambioRequisitos
+
+  return form.value.nombre.trim() !== "" && hayCambios
+})
 
 // Formatear fecha para mostrar
 const formatearFecha = (fecha) => {
@@ -190,6 +283,9 @@ const guardarCambios = () => {
   if (form.value.dia !== curso.value.dia) cambios.dia = form.value.dia;
   if(form.value.cupo!==curso.value.cupo)cambios.cupo=form.value.cupo;
   if(form.value.monto!==curso.value.monto)cambios.monto=form.value.monto;
+  if (requisitosAgregados.value.length > 0) {
+  cambios.requisitos = [...requisitosAgregados.value]
+  }
   
   console.log("Datos a guardar:", cambios);
   emit("save", cambios);
@@ -216,7 +312,10 @@ const guardarCambios = () => {
   background-color: white;
   padding: 2rem;
   border-radius: 8px;
-  width: 60%;
+  width: 80%;
+  max-height: 90vh;   /* mejor que height fijo */
+  display: flex;
+  flex-direction: column;
   position: relative;
 }
 
@@ -266,6 +365,9 @@ const guardarCambios = () => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 25px;
+  overflow-y: auto;
+  padding-right: 10px;
+  flex: 1;
 }
 
 label {
@@ -364,5 +466,54 @@ select {
 select:focus {
   border-color: #5fa8a8;
   outline: none;
+}
+form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+.requisito-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.btn-add {
+  background: #1a1a7c;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-add:hover {
+  opacity: 0.9;
+}
+
+.requisitos-burbujas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.burbuja {
+  background: #0b7285;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.burbuja button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
 }
 </style>

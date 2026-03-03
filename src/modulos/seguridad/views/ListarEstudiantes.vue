@@ -146,8 +146,9 @@ const deleteStudent = async () => {
 onMounted(async () => {
   try {
     const response = await listarEstudiantes();
-    const data = response.data;
-    students.value = data.students;
+    const data = response.data.data;
+    students.value = response.data.data;
+    console.log(response.data.data)
   } catch (error) {
     console.log("Error al obtener los estudiantes: ", error);
   }

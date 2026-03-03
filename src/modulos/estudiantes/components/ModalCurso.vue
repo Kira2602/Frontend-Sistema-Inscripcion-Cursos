@@ -42,21 +42,7 @@
                 <input :value="curso.dia" disabled />
             </div>
 
-            <div class="field requisitos" v-if="Array.isArray(curso.requisitos) && curso.requisitos.length" >
-                <label>Requisitos</label>
-                <div class="req-container">
-                    <input 
-                      v-for="req in curso.requisitos"
-                      :key="req.id_materia"
-                      :value="req.nombre"
-                      disabled
-                      :class="{
-                        'input-error': noCumpleComputed.includes(req.id_materia) === false,
-                        'input-success': req.cumple === true
-                      }"
-                    />
-                </div>
-            </div>
+           
 
                 <!-- FILA 3 -->
             <div class="field">
@@ -87,38 +73,11 @@
 
         </div>
       </form>
-    <button 
-      type="submit" 
-      class="btn-submit" 
-      @click="agregarAlCarrito" 
-      :disabled="yaEnCarrito || (curso.requisitos.length>0 )"
-    >
-      {{ yaEnCarrito ? "Ya agregado" : curso.requisitos.length>0? "No se cumplen los requisitos":"Agregar al carrito" }}
-    </button>
+    
     </div>
   </div>
 
-  <ModalError
-    :message="mensajeModal"
-    :visible="mostrarError"
-    @close="mostrarError = false"
-  />
-  <ModalExito
-    :message="mensajeModal"
-    :visible="mostrarExito"
-    @close="mostrarExito = false"
-  />
-
-  <ModalError
-    :message="mensajeModal"
-    :visible="mostrarError"
-    @close="mostrarError = false"
-  />
-  <ModalExito
-    :message="mensajeModal"
-    :visible="mostrarExito"
-    @close="mostrarExito = false"
-  />
+  
 </template>
 
 <script setup>
@@ -126,47 +85,14 @@ import { computed, ref, watch } from "vue";
 import { usarCarrito } from "../../../store/carrito";
 import ModalError from "../../seguridad/components/ModalError.vue";
 import ModalExito from "../../seguridad/components/ModalExito.vue";
-import { materiaOfertaDetalle } from "../services/estudianteService";
-const carrito=usarCarrito();
-const mensajeModal=ref("");
-const mostrarExito=ref(false)
-const mostrarError=ref(false);
 
-const agregarAlCarrito = () => {
-  // Solo bloquear si hay materias que no cumplen requisito
-  if (props.noCumple.length>0) {
-    mensajeModal.value = "No puedes agregar este curso porque no cumple los requisitos";
-    mostrarError.value = true;
-    return; // detiene la función
-  }
 
-  const resultado = carrito.agregarCurso(props.curso);
 
-  mensajeModal.value = resultado.mensaje;
-
-  if (resultado.exito) {
-    mostrarExito.value = true;
-    
-    // cerrar después de un pequeño delay
-    setTimeout(() => {
-      emit("close")
-    }, 3000);
-
-  } else {
-    mostrarError.value = true;
-  }
-};
-
-const yaEnCarrito = computed(() => {
-  return carrito.cursos.some(
-    c => c.id_materia === props.curso.id_materia
-  )
-})
 const props = defineProps({ 
   curso: { type: Object, required: true },
   noCumple:{type:Array,required:true}
 });
-const emit = defineEmits(["close", "save"]);
+const emit = defineEmits(["close"]);
 const noCumpleComputed = computed(() => {
   // si props.noCumple viene como array de ids
   return Array.isArray(props.noCumple) ? props.noCumple : [];

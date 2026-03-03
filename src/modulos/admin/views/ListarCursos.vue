@@ -120,6 +120,7 @@ const actualizarCurso = async (usuarioActualizado) => {
 
   try {
     const { id_materia, ...cursoActualizado } = usuarioActualizado;
+    console.log("Datos recibidos del modal:", cursoActualizado);
     const resultado = await editarCurso(
       usuarioActualizado.id_materia,
       cursoActualizado,

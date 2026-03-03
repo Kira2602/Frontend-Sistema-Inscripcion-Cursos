@@ -28,7 +28,7 @@ import ListarExtra from "../modulos/admin/views/ListarExtra.vue";
 //Importar vistas del estudiante
 import OfertaAcademica from "../modulos/estudiantes/views/OfertaAcademica.vue";
 import MiCarrera from "../modulos/estudiantes/views/miCarrera.vue";
-
+import MisMaterias from "../modulos/estudiantes/views/MisMaterias.vue";
 const routes = [
   {
     path: "/login",
@@ -157,6 +157,11 @@ const routes = [
         name: "miCarrera",
         component: MiCarrera,
       },
+      {
+        path:"misMaterias",
+        name:"misMaterias",
+        component:MisMaterias
+      }
     ],
   },
 ];

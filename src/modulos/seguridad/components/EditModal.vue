@@ -71,7 +71,7 @@
           </div>
           <div v-if="rol==='Estudiante'">
             <label>Carrera</label>
-            <input type="text" disabled="" v-model="user.carrera.nombre"><!-- aca poner la carrera-->
+            <input type="text" disabled="" :value="user.carrera?.nombre ?? 'ninguna'"><!-- aca poner la carrera-->
           </div>
           <div v-if="esDocente">
             <label>Experiencia</label>

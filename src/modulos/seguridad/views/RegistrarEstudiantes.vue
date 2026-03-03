@@ -48,7 +48,7 @@
               {{ errorFecha }}
             </p>
         </div>
-
+        <!--
         <div>
           <label>Carrera</label>
           <div class="select-wrapper">
@@ -59,7 +59,7 @@
               </option>
             </select>
           </div>
-        </div>
+        </div>-->
 
         <div>
           <label>Correo Electrónico</label>
@@ -355,7 +355,7 @@ const manejarEnvio =async (e) => {
     contrasenia:form.value.contrasenia,
     fecha_nac:form.value.fechaNac,
     direccion:form.value.direccion,
-    carrera_usuario:form.value.carrera
+    //carrera_usuario:form.value.carrera
   };
   //alert("Datos a enviar:\n" + JSON.stringify(datosEnviar, null, 2));
   const resultado=await registrarEstudiante(datosEnviar);
