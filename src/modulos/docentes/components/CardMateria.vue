@@ -11,11 +11,12 @@
           <p>Cupo</p>
           <div class="pill">{{ curso.cupo }}</div>
         </div>
-
         <div class="box">
-          <p>Monto</p>
-          <div class="pill">{{ curso.monto }} Bs</div>
+          <p>Inscritos</p>
+          <div class="pill">{{ curso.inscritos }}</div>
         </div>
+
+        
       </div>
 
       <div class="schedule-section">
