@@ -61,7 +61,9 @@ const filteredCursos = computed(() => {
 });
 
 
-
+const abrirNotas=()=>{
+    router.push({name:"NotasMateria"})
+}
 
 onMounted(async () => {
   /*try {

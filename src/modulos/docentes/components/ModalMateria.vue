@@ -75,7 +75,7 @@
     <div class="buttons">
         <button 
         type="submit" 
-        class="btn-submit" 
+        class="btn-submit" @click="abrirNotas" 
         >
         Registrar Notas
         </button>
@@ -94,12 +94,12 @@
 
 <script setup>
 import { computed, ref, watch } from "vue";
-
+import { useRouter } from 'vue-router';
 const mensajeModal=ref("");
 const mostrarExito=ref(false)
 const mostrarError=ref(false);
 
-
+const router=useRouter()
 
 const props = defineProps({ 
   curso: { type: Object, required: true },
@@ -121,6 +121,10 @@ const formatearFecha = (fecha) => {
   if (!fecha) return "N/A";
   return fecha; // Las fechas ya vienen en formato YYYY-MM-DD
 };
+
+const abrirNotas=()=>{
+    router.push({name:"NotasMateria"})
+}
 </script>
 
 
