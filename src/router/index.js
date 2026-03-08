@@ -32,6 +32,9 @@ import MisMaterias from "../modulos/estudiantes/views/MisMaterias.vue";
 import Pagos from "../modulos/pagos/components/Pagos.vue";
 import EstadoAcademico from "../modulos/estudiantes/views/EstadoAcademico.vue";
 
+//Importar vistas del docente
+import MateriasDocente from "../modulos/docentes/views/MateriasDocente.vue";
+import NotasMateria from "../modulos/docentes/views/NotasMateria.vue";
 
 const routes = [
   {
@@ -141,7 +144,22 @@ const routes = [
   {
     path: "/docente",
     component: DocenteLayout,
-    //children:[]
+    children:[
+      {
+        path:"",
+        redirect:{name:"MateriasDocente"}
+      },
+      {
+        path:"MateriasDocente",
+        name:"MateriasDocente",
+        component:MateriasDocente
+      },
+      {
+        path:"NotasMateria",
+        name:"NotasMateria",
+        component:NotasMateria
+      }
+    ]
   },
   {
     path: "/estudiante",

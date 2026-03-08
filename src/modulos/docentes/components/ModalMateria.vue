@@ -21,10 +21,6 @@
                 <input :value="curso.id_materia" disabled />
             </div>
 
-            <div class="field">
-                <label>Docente</label>
-                <input :value="curso.docente?.nombre" disabled />
-            </div>
 
             <div class="field">
                 <label>Tipo</label>
@@ -46,21 +42,6 @@
                 <input :value="curso.dia" disabled />
             </div>
 
-            <div class="field requisitos" v-if="Array.isArray(curso.requisitos) && curso.requisitos.length" >
-                <label>Requisitos</label>
-                <div class="req-container">
-                    <input 
-                      v-for="req in curso.requisitos"
-                      :key="req.id_materia"
-                      :value="req.nombre"
-                      disabled
-                      :class="{
-                        'input-error': noCumpleComputed.includes(req.id_materia) === false,
-                        'input-success': req.cumple === true
-                      }"
-                    />
-                </div>
-            </div>
 
                 <!-- FILA 3 -->
             <div class="field">
@@ -91,90 +72,40 @@
 
         </div>
       </form>
-    <button 
-      type="submit" 
-      class="btn-submit" 
-      @click="agregarAlCarrito" 
-      :disabled="yaEnCarrito || (curso.requisitos.length>0 )"
-    >
-      {{ yaEnCarrito ? "Ya agregado" : curso.requisitos.length>0? "No se cumplen los requisitos":"Agregar al carrito" }}
-    </button>
+    <div class="buttons">
+        <button 
+        type="submit" 
+        class="btn-submit" @click="abrirNotas" 
+        >
+        Registrar Notas
+        </button>
+        <button class="btn-submit">
+            Registrar Asistencia
+        </button>
+    </div>
+
+
     </div>
   </div>
 
-  <ModalError
-    :message="mensajeModal"
-    :visible="mostrarError"
-    @close="mostrarError = false"
-  />
-  <ModalExito
-    :message="mensajeModal"
-    :visible="mostrarExito"
-    @close="mostrarExito = false"
-  />
-
-  <ModalError
-    :message="mensajeModal"
-    :visible="mostrarError"
-    @close="mostrarError = false"
-  />
-  <ModalExito
-    :message="mensajeModal"
-    :visible="mostrarExito"
-    @close="mostrarExito = false"
-  />
+  
+  
 </template>
 
 <script setup>
 import { computed, ref, watch } from "vue";
-import { usarCarrito } from "../../../store/carrito";
-import ModalError from "../../seguridad/components/ModalError.vue";
-import ModalExito from "../../seguridad/components/ModalExito.vue";
-import { materiaOfertaDetalle } from "../services/estudianteService";
-const carrito=usarCarrito();
+import { useRouter } from 'vue-router';
 const mensajeModal=ref("");
 const mostrarExito=ref(false)
 const mostrarError=ref(false);
 
-const agregarAlCarrito = () => {
-  // Solo bloquear si hay materias que no cumplen requisito
-  if (props.noCumple.length>0) {
-    mensajeModal.value = "No puedes agregar este curso porque no cumple los requisitos";
-    mostrarError.value = true;
-    return; // detiene la función
-  }
+const router=useRouter()
 
-  const resultado = carrito.agregarCurso(props.curso);
-
-  mensajeModal.value = resultado.mensaje;
-
-  if (resultado.exito) {
-    mostrarExito.value = true;
-    
-    // cerrar después de un pequeño delay
-    setTimeout(() => {
-      emit("close")
-    }, 3000);
-
-  } else {
-    mostrarError.value = true;
-  }
-};
-
-const yaEnCarrito = computed(() => {
-  return carrito.cursos.some(
-    c => c.id_materia === props.curso.id_materia
-  )
-})
 const props = defineProps({ 
   curso: { type: Object, required: true },
-  noCumple:{type:Array,required:true}
 });
 const emit = defineEmits(["close", "save"]);
-const noCumpleComputed = computed(() => {
-  // si props.noCumple viene como array de ids
-  return Array.isArray(props.noCumple) ? props.noCumple : [];
-});
+
 // Renombramos user a curso para claridad
 
 // Estado del formulario - solo nombre es editable
@@ -190,10 +121,19 @@ const formatearFecha = (fecha) => {
   if (!fecha) return "N/A";
   return fecha; // Las fechas ya vienen en formato YYYY-MM-DD
 };
+
+const abrirNotas=()=>{
+    router.push({name:"NotasMateria"})
+}
 </script>
 
 
 <style scoped>
+.buttons{
+    display: flex;
+    grid-template-rows: auto;
+}
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -308,6 +248,10 @@ input:focus {
   padding: 10px 22px;
   border-radius: 8px;
   color: white;
+}
+.btn-submit:hover{
+      transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15), 0 0 20px rgba(102, 194, 255, 0.4);
 }
 
 .btn-submit:disabled {
