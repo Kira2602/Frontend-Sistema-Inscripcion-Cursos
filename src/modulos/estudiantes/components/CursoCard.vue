@@ -2,14 +2,14 @@
   <div class="card-container">
     <div class="header">
       <h2 class="title">{{ curso.nombre }}</h2>
-      <p class="codigo">ID: {{ curso.id_materia }}</p>
-      <p class="docente"><strong>Docente:</strong> {{ curso.docente.nombre }}</p>
+      <p class="codigo">Código materia</p>
+      <p class="codigo-value">{{ curso.id_materia }}</p>
+      <p class="docente">Docente</p>
+      <p class="docente-value">{{ curso.docente?.nombre }}</p>
     </div>
 
     <div class="content">
-      <div class="info-grid">
-        
-      </div>
+      <div class="info-grid"></div>
 
       <div class="schedule-section">
         <div class="pill dia">{{ curso.dia }}</div>
@@ -18,7 +18,17 @@
           <span class="pill small">{{ curso.hora_fin }}</span>
         </div>
       </div>
-      <span class="pill">{{ curso.estado }}</span>
+
+      <span class="estado-pill" :class="estadoClass">
+        {{ estadoLabel }}
+      </span>
+
+      <p
+        v-if="normalizarEstado(curso.estado) === 'RETIRADO' && curso.fecha_retiro"
+        class="fecha-retiro"
+      >
+        Fecha de retiro: {{ curso.fecha_retiro }}
+      </p>
     </div>
 
     <div class="footer">
@@ -28,16 +38,44 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   curso: { type: Object, required: true }
 })
+
 defineEmits(["view"])
+
+const normalizarEstado = (estado) => {
+  if (!estado) return ""
+  return estado.toUpperCase().trim()
+}
+
+const estadoLabel = computed(() => {
+  const estado = normalizarEstado(props.curso.estado)
+
+  if (estado === 'INSCRITO') return 'Inscrito'
+  if (estado === 'PENDIENTE_PAGO') return 'Pago Pendiente'
+  if (estado === 'RETIRADO') return 'Retirado'
+
+  return props.curso.estado
+})
+
+const estadoClass = computed(() => {
+  const estado = normalizarEstado(props.curso.estado)
+
+  if (estado === 'INSCRITO') return 'estado-inscrito'
+  if (estado === 'PENDIENTE_PAGO') return 'estado-pendiente'
+  if (estado === 'RETIRADO') return 'estado-retirada'
+
+  return ''
+})
 </script>
 
 <style scoped>
 .card-container {
   width: 100%;
-  max-width: 350px; 
+  max-width: 350px;
   min-width: 280px;
   background-color: #fff;
   border-radius: 12px;
@@ -47,15 +85,12 @@ defineEmits(["view"])
   gap: 15px;
   box-shadow: 0 4px 6px rgba(0,0,0,0.05);
   box-sizing: border-box;
-  
-  /* REQUISITOS PARA EL EFECTO GIRATORIO */
   position: relative;
-  overflow: hidden; /* Corta lo que sobresale del giro */
+  overflow: hidden;
   z-index: 1;
   transition: transform 0.3s ease;
 }
 
-/* El "rayo" o fondo que gira */
 .card-container::before {
   content: '';
   position: absolute;
@@ -63,44 +98,39 @@ defineEmits(["view"])
   left: -50%;
   width: 200%;
   height: 200%;
-  /* Graduación cónica para el efecto de giro */
   background: conic-gradient(
-    transparent, 
-    #66c2ff, 
+    transparent,
+    #66c2ff,
     transparent 70%
   );
   transition: opacity 0.3s ease;
-  opacity: 0; /* Oculto por defecto */
+  opacity: 0;
   z-index: -2;
   animation: rotate 4s linear infinite;
 }
 
-/* El fondo interno para que el contenido no se tape */
 .card-container::after {
   content: '';
   position: absolute;
-  inset: 3px; /* Grosor del borde */
+  inset: 3px;
   background: white;
   border-radius: 10px;
   z-index: -1;
 }
 
-/* Animación de rotación */
 @keyframes rotate {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
-/* HOVER */
 .card-container:hover {
   transform: scale(1.05);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15), 0 0 20px rgba(102, 194, 255, 0.4);
 }
 
 .card-container:hover::before {
-  opacity: 1; /* Mostramos el giro al pasar el mouse */
+  opacity: 1;
 }
-
 
 .title {
   margin: 0;
@@ -109,39 +139,30 @@ defineEmits(["view"])
   color: #333;
 }
 
-.codigo {
+.codigo,
+.docente {
   margin: 5px 0 0;
   font-size: 0.85rem;
-  color: #666;
+  color: #777;
 }
 
-.docente {
-  margin: 5px 0 10px;
+.codigo-value,
+.docente-value {
+  margin: 0;
   font-size: 0.9rem;
+  color: #444;
 }
 
 .content {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
 }
 
 .info-grid {
   display: flex;
-  justify-content: bween;
+  justify-content: space-between;
   gap: 10px;
-}
-
-.box {
-  flex: 1; /* Hace que ambas cajas crezcan por igual */
-}
-
-.box p {
-  margin: 0 0 5px;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  color: #777;
-  text-align: center;
 }
 
 .pill {
@@ -157,7 +178,7 @@ defineEmits(["view"])
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-wrap: wrap; /* Permite que baje si no hay espacio */
+  flex-wrap: wrap;
   gap: 20px;
 }
 
@@ -174,14 +195,46 @@ defineEmits(["view"])
   border-color: #b3e5fc;
 }
 
+.estado-pill {
+  border-radius: 20px;
+  padding: 7px 12px;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.estado-inscrito {
+  background: #c7d98d;
+  color: #44561f;
+  border: none;
+}
+
+.estado-pendiente {
+  background: #bfbfbf;
+  color: #303030;
+  border: none;
+}
+
+.estado-retirada {
+  background: #eb8f95;
+  color: #5a1116;
+  border: none;
+}
+
+.fecha-retiro {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #8a8a8a;
+}
+
 .footer {
-  margin-top: auto; /* Empuja el botón al fondo si la card crece */
+  margin-top: auto;
   display: flex;
   justify-content: center;
 }
 
 .btn {
-  width: 60%; /* Botón más fácil de tocar en móviles */
+  width: 60%;
   background: #0c5c75;
   color: white;
   border: none;
@@ -196,12 +249,12 @@ defineEmits(["view"])
   background: #08485c;
 }
 
-/* Ajustes para pantallas muy pequeñas */
 @media (max-width: 320px) {
   .schedule-section {
     flex-direction: column;
     align-items: stretch;
   }
+
   .horarios {
     justify-content: center;
   }

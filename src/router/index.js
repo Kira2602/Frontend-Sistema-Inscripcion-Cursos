@@ -29,8 +29,8 @@ import ListarExtra from "../modulos/admin/views/ListarExtra.vue";
 import OfertaAcademica from "../modulos/estudiantes/views/OfertaAcademica.vue";
 import MiCarrera from "../modulos/estudiantes/views/miCarrera.vue";
 import MisMaterias from "../modulos/estudiantes/views/MisMaterias.vue";
-import pagos from "../modulos/pagos/components/Pagos.vue"
 import Pagos from "../modulos/pagos/components/Pagos.vue";
+import EstadoAcademico from "../modulos/estudiantes/views/EstadoAcademico.vue";
 
 
 const routes = [
@@ -167,10 +167,15 @@ const routes = [
         component:MisMaterias
       },
       {
+        path: "estadoAcademico",
+        name: "estadoAcademico",
+        component: EstadoAcademico
+      },
+      {
         path:"pagarCarrito",
         name:"pagarCarrito",
         component:Pagos
-      }
+      },
     ],
   },
 ];

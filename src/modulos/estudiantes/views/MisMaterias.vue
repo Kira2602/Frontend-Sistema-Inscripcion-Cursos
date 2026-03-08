@@ -1,127 +1,224 @@
 <template>
   <div class="wrapper">
-  <h1>Mis materias</h1>
-  <div class="head"> 
-    <div class="search">
-      <SearchBar
-      @update:search="searchTerm=$event"
-      />
+    <div class="title-row">
+      <h1>Mis materias</h1>
+
+      <button class="estado-academico-btn" @click="irEstadoAcademico">
+        Estado Académico
+      </button>
     </div>
-    
-  </div>
-    
-    
+
+    <div class="head">
+      <div class="search">
+        <SearchBar @update:search="searchTerm = $event" />
+      </div>
+
+      <div class="filter-container">
+        <select v-model="estadoFiltro">
+          <option value="">Filtrar por estado</option>
+          <option value="INSCRITO">Inscrito</option>
+          <option value="PENDIENTE_PAGO">Pago pendiente</option>
+          <option value="RETIRADO">Retirado</option>
+        </select>
+      </div>
+    </div>
+
     <div class="container" v-if="ofertaCarrera">
-      
-        <CursoCard
+      <CursoCard
         v-for="curso in filteredCursos"
         :key="curso.id_materia"
         :curso="curso"
         @view="abrirModal(curso)"
-        
-        />
+      />
     </div>
-    
+
     <ModalCurso
-    v-if="modalAbierto"
-    :curso="selectedCurso"
-    :noCumple="noCumplen"
-    @close="modalAbierto = false"
+      v-if="modalAbierto"
+      :curso="selectedCurso"
+      :noCumple="noCumplen"
+      @close="modalAbierto = false"
+      @retirar="confirmarRetiro"
     />
-        </div>
-  </template>
+  </div>
+</template>
 
 <script setup>
-import OfertaCard from '../components/OfertaCard.vue';
 import SearchBar from '../components/SearchBar.vue'
-import { ref,computed,onMounted } from 'vue';
-import ModalOferta from '../components/ModalOferta.vue';
-import { usarCarrito } from '../../../store/carrito';
-import CarritoCursos from '../components/CarritoCursos.vue';
-import Icon from '../../seguridad/components/Icon.vue';
-import { listarMisMaterias, listarOfertaCarrera,listarOfertaExtra, materiaOfertaDetalle } from '../services/estudianteService';
-import CursoCard from '../components/CursoCard.vue';
-import ModalCurso from '../components/ModalCurso.vue';
-const carrito = usarCarrito();
-const mostrarCarrito = ref(false);
+import { ref, computed, onMounted } from 'vue'
+import Swal from 'sweetalert2'
+import { useRouter } from 'vue-router'
+import { listarMisMaterias } from '../services/estudianteService'
+import CursoCard from '../components/CursoCard.vue'
+import ModalCurso from '../components/ModalCurso.vue'
 
-const toggleCarrito = () => {
-  mostrarCarrito.value = !mostrarCarrito.value;
-};
+const router = useRouter()
 
+const modalAbierto = ref(false)
+const searchTerm = ref("")
+const selectedCurso = ref(null)
+const ofertaCarrera = ref(true)
+const cumpleMateria = ref(Boolean)
+const noCumplen = []
+const estadoFiltro = ref("")
 
-const modalAbierto=ref(false)
-const searchTerm = ref("");
-const selectedCurso = ref(null);
-const ofertaCarrera=ref(true)
-const cumpleMateria=ref(Boolean)
-const noCumplen=[]
-const abrirModal = async(curso) => {
-  
-  selectedCurso.value = { ...curso };
-  modalAbierto.value = true;
-};
+const cursos = ref([])
+const cursosExtracurriculares = ref([])
+
+const normalizarEstado = (estado) => {
+  if (!estado) return ""
+  return estado.toUpperCase().trim()
+}
+
+const abrirModal = async (curso) => {
+  selectedCurso.value = { ...curso }
+  modalAbierto.value = true
+}
+
+const irEstadoAcademico = () => {
+  router.push('/estudiante/estadoAcademico')
+}
 
 const filteredCursos = computed(() => {
-  if (!searchTerm.value) return cursos.value;
+  let resultado = cursos.value
 
-  return cursos.value.filter(
-    (curso) =>
-      curso.nombre.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
-      curso.id_materia.toString().includes(searchTerm.value),
-  );
-});
+  if (searchTerm.value) {
+    resultado = resultado.filter(
+      (curso) =>
+        curso.nombre?.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+        curso.id_materia?.toString().includes(searchTerm.value)
+    )
+  }
+
+  if (estadoFiltro.value) {
+    resultado = resultado.filter(
+      (curso) => normalizarEstado(curso.estado) === normalizarEstado(estadoFiltro.value)
+    )
+  }
+
+  return resultado
+})
 
 const filteredCursosExtra = computed(() => {
-  if (!searchTerm.value) return cursosExtracurriculares.value;
+  if (!searchTerm.value) return cursosExtracurriculares.value
 
   return cursosExtracurriculares.value.filter(
     (curso) =>
-      curso.nombre.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
-      curso.id_materia.toString().includes(searchTerm.value),
-  );
-});
+      curso.nombre?.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+      curso.id_materia?.toString().includes(searchTerm.value),
+  )
+})
 
+const confirmarRetiro = async (curso) => {
+  if (!curso) return
+
+  if (normalizarEstado(curso.estado) === 'RETIRADO') return
+
+  const result = await Swal.fire({
+    title: 'Confirmar retiro',
+    html: `
+      <p>¿Seguro que deseas retirar esta materia?</p>
+      <p>Esta acción no permitirá reinscribirte en el mismo ciclo además de que no hay devoluciones del mismo.</p>
+    `,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Confirmar',
+    cancelButtonText: 'Cancelar',
+    reverseButtons: true
+  })
+
+  if (!result.isConfirmed) return
+
+  const fechaActual = new Date().toISOString().split('T')[0]
+
+  cursos.value = cursos.value.map((item) => {
+    if (
+      item.id_materia === curso.id_materia &&
+      item.id_inscripcion === curso.id_inscripcion
+    ) {
+      return {
+        ...item,
+        estado: 'RETIRADO',
+        fecha_retiro: fechaActual
+      }
+    }
+    return item
+  })
+
+  if (
+    selectedCurso.value &&
+    selectedCurso.value.id_materia === curso.id_materia &&
+    selectedCurso.value.id_inscripcion === curso.id_inscripcion
+  ) {
+    selectedCurso.value = {
+      ...selectedCurso.value,
+      estado: 'RETIRADO',
+      fecha_retiro: fechaActual
+    }
+  }
+
+  await Swal.fire({
+    icon: 'success',
+    title: 'Materia retirada',
+    text: 'La materia fue marcada como retirada.'
+  })
+}
 
 onMounted(async () => {
   try {
-    
-    const response = await listarMisMaterias();
+    const response = await listarMisMaterias()
+    const inscripciones = response.data.data
 
-const inscripciones = response.data.data;
-
-// 🔥 Aplanamos las materias
-cursos.value = inscripciones.flatMap(inscripcion =>
-  inscripcion.materias.map(m => ({
-    ...m.materia,           // datos reales de la materia
-    estado: m.estado,       // estado INSCRITO o PENDIENTE_PAGO
-    id_inscripcion: inscripcion.id_inscripcion,
-    fecha_inscripcion: inscripcion.fecha_inscripcion
-  }))
-);
-
+    cursos.value = inscripciones.flatMap(inscripcion =>
+      inscripcion.materias.map(m => ({
+        ...m.materia,
+        estado: m.estado,
+        id_inscripcion: inscripcion.id_inscripcion,
+        fecha_inscripcion: inscripcion.fecha_inscripcion,
+        fecha_retiro: m.fecha_retiro || null
+      }))
+    )
   } catch (error) {
-    console.log("Error al obtener los cursos: ", error);
+    console.log("Error al obtener los cursos: ", error)
   }
-});
-
-const cursos = ref([
-
-]);
-
-const cursosExtracurriculares = ref([]);
+})
 </script>
 
-
-
 <style scoped>
-.wrapper{
+.wrapper {
   padding: 40px;
 }
-.search{
+
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.estado-academico-btn {
+  border: none;
+  background: #4f9ec3;
+  color: #fff;
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.estado-academico-btn:hover {
+  opacity: 0.9;
+}
+
+.search {
   width: 60%;
 }
-.head{
+
+.filter-container {
+  width: 30%;
+}
+
+.head {
   display: flex;
   flex-direction: row;
   gap: 5%;
@@ -130,30 +227,28 @@ const cursosExtracurriculares = ref([]);
   align-items: center;
   padding: 2%;
   border-radius: 10px;
-  
- 
 }
+
 .container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 25px;
   margin-top: 30px;
 }
-select {
 
-  width: 30%;
+select {
+  width: 100%;
   padding: 10px 12px;
   border-radius: 8px;
-  border:2px solid #f7ba00;
+  border: 2px solid #f7ba00;
   background-color: #fff;
   font-size: 14px;
   color: #333;
   cursor: pointer;
   transition: all 0.2s ease;
-  appearance: none; /* Quita estilo nativo */
+  appearance: none;
 }
 
-/* Flecha personalizada */
 select {
   background-image: url("data:image/svg+xml;utf8,<svg fill='%235fa8a8' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
   background-repeat: no-repeat;
@@ -170,29 +265,10 @@ select:focus {
   box-shadow: 0 0 0 2px rgba(95, 168, 168, 0.2);
   outline: none;
 }
+
 option {
   font-size: 14px;
   background-color: #fff;
   color: #333;
-}
-.cart-button {
-  position: relative;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 18px;
-}
-
-.badge {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background: #f7ba00;
-  color: black;
-  font-size: 12px;
-  font-weight: bold;
-  padding: 3px 7px;
-  border-radius: 50%;
 }
 </style>

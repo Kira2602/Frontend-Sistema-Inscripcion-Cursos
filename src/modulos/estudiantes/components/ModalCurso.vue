@@ -3,7 +3,6 @@
     <div class="modal-content">
       <div class="helper-container">
         <div class="user-data">
-          
           <h2>{{curso.nombre}}</h2>
         </div>
 
@@ -36,15 +35,13 @@
                 <input :value="curso.cupo" disabled />
             </div>
 
-                <!-- FILA 2 -->
+            <!-- FILA 2 -->
             <div class="field">
                 <label>Día</label>
                 <input :value="curso.dia" disabled />
             </div>
 
-           
-
-                <!-- FILA 3 -->
+            <!-- FILA 3 -->
             <div class="field">
                 <label>Fecha de inicio</label>
                 <input :value="curso.fecha_inicio" disabled />
@@ -65,7 +62,15 @@
                 <input :value="curso.hora_fin" disabled />
             </div>
 
-                <!-- MONTO -->
+            <div
+              v-if="normalizarEstado(curso.estado) === 'RETIRADO'"
+              class="field"
+            >
+              <label>Fecha retiro</label>
+              <input :value="curso.fecha_retiro || 'N/A'" disabled />
+            </div>
+
+            <!-- MONTO -->
             <div class="field monto-field">
                 <label>Monto</label>
                 <input :value="curso.monto + ' Bs'" disabled />
@@ -73,11 +78,29 @@
 
         </div>
       </form>
+
+      <div class="buttons">
+        <button
+          v-if="normalizarEstado(curso.estado) !== 'RETIRADO'"
+          type="button"
+          class="btn-retirar"
+          @click="$emit('retirar', curso)"
+        >
+          Retirar Materia
+        </button>
+
+        <button
+          v-else
+          type="button"
+          class="btn-retirada"
+          disabled
+        >
+          Materia retirada
+        </button>
+      </div>
     
     </div>
   </div>
-
-  
 </template>
 
 <script setup>
@@ -86,20 +109,17 @@ import { usarCarrito } from "../../../store/carrito";
 import ModalError from "../../seguridad/components/ModalError.vue";
 import ModalExito from "../../seguridad/components/ModalExito.vue";
 
-
-
 const props = defineProps({ 
   curso: { type: Object, required: true },
   noCumple:{type:Array,required:true}
 });
-const emit = defineEmits(["close"]);
+
+const emit = defineEmits(["close", "retirar"]);
+
 const noCumpleComputed = computed(() => {
-  // si props.noCumple viene como array de ids
   return Array.isArray(props.noCumple) ? props.noCumple : [];
 });
-// Renombramos user a curso para claridad
 
-// Estado del formulario - solo nombre es editable
 const form = ref({
   nombre: "",
   cupo:"",
@@ -107,13 +127,16 @@ const form = ref({
   monto:""
 });
 
-// Formatear fecha para mostrar
 const formatearFecha = (fecha) => {
   if (!fecha) return "N/A";
-  return fecha; // Las fechas ya vienen en formato YYYY-MM-DD
+  return fecha;
+};
+
+const normalizarEstado = (estado) => {
+  if (!estado) return "";
+  return estado.toUpperCase().trim();
 };
 </script>
-
 
 <style scoped>
 .modal-overlay {
@@ -207,7 +230,7 @@ input:focus {
 .buttons {
   margin-top: 40px;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 15px;
 }
 
@@ -238,6 +261,30 @@ input:focus {
   padding: 10px 22px;
   border-radius: 8px;
   color: white;
+}
+
+.btn-retirar {
+  cursor: pointer;
+  background: #e88787;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+}
+
+.btn-retirar:hover {
+  background-color: #d96d6d;
+}
+
+.btn-retirada {
+  cursor: not-allowed;
+  background: #8e8e8e;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
 }
 
 .error {
