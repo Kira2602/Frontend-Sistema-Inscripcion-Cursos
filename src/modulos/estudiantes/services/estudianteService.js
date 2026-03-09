@@ -104,5 +104,27 @@ export const pagarInscripcion = async (idInscripcion, datosPago) => {
     )
 
     throw error.response?.data || error
+  } 
+}
+export const retirarMateria = async (inscripcionId, materiaId) => {
+  try {
+    const response = await api.patch(
+      `/inscripcion/${inscripcionId}/materias/${materiaId}/retirar`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+
+    return response.data
+  } catch (error) {
+    console.error(
+      "Error al retirar materia:",
+      error.response?.data || error
+    )
+
+    throw error.response?.data || error
   }
 }

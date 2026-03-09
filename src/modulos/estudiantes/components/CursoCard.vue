@@ -5,17 +5,17 @@
       <p class="codigo">Código materia</p>
       <p class="codigo-value">{{ curso.id_materia }}</p>
       <p class="docente">Docente</p>
-      <p class="docente-value">{{ curso.docente?.nombre }}</p>
+      <p class="docente-value">{{ curso.docente?.nombre || 'Sin docente' }}</p>
     </div>
 
     <div class="content">
       <div class="info-grid"></div>
 
       <div class="schedule-section">
-        <div class="pill dia">{{ curso.dia }}</div>
+        <div class="pill dia">{{ curso.dia || 'Día' }}</div>
         <div class="horarios">
-          <span class="pill small">{{ curso.hora_inicio }}</span>
-          <span class="pill small">{{ curso.hora_fin }}</span>
+          <span class="pill small">{{ curso.hora_inicio || 'Hora inicio' }}</span>
+          <span class="pill small">{{ curso.hora_fin || 'Hora fin' }}</span>
         </div>
       </div>
 
@@ -23,12 +23,13 @@
         {{ estadoLabel }}
       </span>
 
-      <p
-        v-if="normalizarEstado(curso.estado) === 'RETIRADO' && curso.fecha_retiro"
-        class="fecha-retiro"
+      <div
+        v-if="normalizarEstado(curso.estado) === 'RETIRADO'"
+        class="retiro-info"
       >
-        Fecha de retiro: {{ curso.fecha_retiro }}
-      </p>
+        <span class="retiro-label">Fecha de retiro:</span>
+        <span class="retiro-value">{{ formatearFecha(curso.fecha_retiro) }}</span>
+      </div>
     </div>
 
     <div class="footer">
@@ -48,7 +49,12 @@ defineEmits(["view"])
 
 const normalizarEstado = (estado) => {
   if (!estado) return ""
-  return estado.toUpperCase().trim()
+  return String(estado).toUpperCase().trim()
+}
+
+const formatearFecha = (fecha) => {
+  if (!fecha) return "N/A"
+  return fecha
 }
 
 const estadoLabel = computed(() => {
@@ -58,7 +64,7 @@ const estadoLabel = computed(() => {
   if (estado === 'PENDIENTE_PAGO') return 'Pago Pendiente'
   if (estado === 'RETIRADO') return 'Retirado'
 
-  return props.curso.estado
+  return props.curso.estado || 'Sin estado'
 })
 
 const estadoClass = computed(() => {
@@ -66,7 +72,7 @@ const estadoClass = computed(() => {
 
   if (estado === 'INSCRITO') return 'estado-inscrito'
   if (estado === 'PENDIENTE_PAGO') return 'estado-pendiente'
-  if (estado === 'RETIRADO') return 'estado-retirada'
+  if (estado === 'RETIRADO') return 'estado-retirado'
 
   return ''
 })
@@ -215,16 +221,27 @@ const estadoClass = computed(() => {
   border: none;
 }
 
-.estado-retirada {
+.estado-retirado {
   background: #eb8f95;
   color: #5a1116;
   border: none;
 }
 
-.fecha-retiro {
-  margin: 0;
+.retiro-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: -4px;
+}
+
+.retiro-label {
   font-size: 0.8rem;
   color: #8a8a8a;
+}
+
+.retiro-value {
+  font-size: 0.82rem;
+  color: #666;
 }
 
 .footer {

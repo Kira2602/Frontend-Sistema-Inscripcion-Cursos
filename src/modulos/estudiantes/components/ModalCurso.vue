@@ -3,7 +3,7 @@
     <div class="modal-content">
       <div class="helper-container">
         <div class="user-data">
-          <h2>{{curso.nombre}}</h2>
+          <h2>{{ curso.nombre }}</h2>
         </div>
 
         <div class="close-button" @click="$emit('close')">
@@ -14,67 +14,67 @@
       <form>
         <div class="form-grid">
 
-            <!-- FILA 1 -->
-            <div class="field">
-                <label>Código</label>
-                <input :value="curso.id_materia" disabled />
-            </div>
+          <!-- FILA 1 -->
+          <div class="field">
+            <label>Código</label>
+            <input :value="curso.id_materia" disabled />
+          </div>
 
-            <div class="field">
-                <label>Docente</label>
-                <input :value="curso.docente?.nombre" disabled />
-            </div>
+          <div class="field">
+            <label>Docente</label>
+            <input :value="curso.docente?.nombre || 'Sin docente'" disabled />
+          </div>
 
-            <div class="field">
-                <label>Tipo</label>
-                <input :value="curso.tipo" disabled />
-            </div>
+          <div class="field">
+            <label>Tipo</label>
+            <input :value="curso.tipo || 'N/A'" disabled />
+          </div>
 
-            <div class="field">
-                <label>Cupo</label>
-                <input :value="curso.cupo" disabled />
-            </div>
+          <div class="field">
+            <label>Cupo</label>
+            <input :value="curso.cupo ?? 'N/A'" disabled />
+          </div>
 
-            <!-- FILA 2 -->
-            <div class="field">
-                <label>Día</label>
-                <input :value="curso.dia" disabled />
-            </div>
+          <!-- FILA 2 -->
+          <div class="field">
+            <label>Día</label>
+            <input :value="curso.dia || 'N/A'" disabled />
+          </div>
 
-            <!-- FILA 3 -->
-            <div class="field">
-                <label>Fecha de inicio</label>
-                <input :value="curso.fecha_inicio" disabled />
-            </div>
+          <!-- FILA 3 -->
+          <div class="field">
+            <label>Fecha de inicio</label>
+            <input :value="formatearFecha(curso.fecha_inicio)" disabled />
+          </div>
 
-            <div class="field">
-                <label>Hora de inicio</label>
-                <input :value="curso.hora_inicio" disabled />
-            </div>
+          <div class="field">
+            <label>Hora de inicio</label>
+            <input :value="curso.hora_inicio || 'N/A'" disabled />
+          </div>
 
-            <div class="field">
-                <label>Fecha fin</label>
-                <input :value="curso.fecha_fin" disabled />
-            </div>
+          <div class="field">
+            <label>Fecha fin</label>
+            <input :value="formatearFecha(curso.fecha_fin)" disabled />
+          </div>
 
-            <div class="field">
-                <label>Hora fin</label>
-                <input :value="curso.hora_fin" disabled />
-            </div>
+          <div class="field">
+            <label>Hora fin</label>
+            <input :value="curso.hora_fin || 'N/A'" disabled />
+          </div>
 
-            <div
-              v-if="normalizarEstado(curso.estado) === 'RETIRADO'"
-              class="field"
-            >
-              <label>Fecha retiro</label>
-              <input :value="curso.fecha_retiro || 'N/A'" disabled />
-            </div>
+          <div
+            v-if="normalizarEstado(curso.estado) === 'RETIRADO'"
+            class="field"
+          >
+            <label>Fecha retiro</label>
+            <input :value="formatearFecha(curso.fecha_retiro)" disabled />
+          </div>
 
-            <!-- MONTO -->
-            <div class="field monto-field">
-                <label>Monto</label>
-                <input :value="curso.monto + ' Bs'" disabled />
-            </div>
+          <!-- MONTO -->
+          <div class="field monto-field">
+            <label>Monto</label>
+            <input :value="curso.monto != null ? `${curso.monto} Bs` : 'N/A'" disabled />
+          </div>
 
         </div>
       </form>
@@ -98,7 +98,6 @@
           Materia retirada
         </button>
       </div>
-    
     </div>
   </div>
 </template>
@@ -109,9 +108,9 @@ import { usarCarrito } from "../../../store/carrito";
 import ModalError from "../../seguridad/components/ModalError.vue";
 import ModalExito from "../../seguridad/components/ModalExito.vue";
 
-const props = defineProps({ 
+const props = defineProps({
   curso: { type: Object, required: true },
-  noCumple:{type:Array,required:true}
+  noCumple: { type: Array, required: true }
 });
 
 const emit = defineEmits(["close", "retirar"]);
@@ -122,9 +121,9 @@ const noCumpleComputed = computed(() => {
 
 const form = ref({
   nombre: "",
-  cupo:"",
-  dia:"",
-  monto:""
+  cupo: "",
+  dia: "",
+  monto: ""
 });
 
 const formatearFecha = (fecha) => {
@@ -134,7 +133,7 @@ const formatearFecha = (fecha) => {
 
 const normalizarEstado = (estado) => {
   if (!estado) return "";
-  return estado.toUpperCase().trim();
+  return String(estado).toUpperCase().trim();
 };
 </script>
 
@@ -292,6 +291,7 @@ input:focus {
   font-size: 13px;
   margin-top: 4px;
 }
+
 .password-wrapper {
   position: relative;
   display: flex;
@@ -317,6 +317,7 @@ input:focus {
 .toggle-btn:hover {
   color: #5fa8a8;
 }
+
 select {
   width: 100%;
   padding: 10px;
@@ -348,6 +349,7 @@ select:focus {
   grid-column: 4;
   margin-top: 10px;
 }
+
 .input-error {
   background-color: rgb(255, 173, 173);
 }

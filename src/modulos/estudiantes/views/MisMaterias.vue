@@ -26,7 +26,7 @@
     <div class="container" v-if="ofertaCarrera">
       <CursoCard
         v-for="curso in filteredCursos"
-        :key="curso.id_materia"
+        :key="curso.id_materia + '-' + curso.id_inscripcion"
         :curso="curso"
         @view="abrirModal(curso)"
       />
@@ -47,7 +47,7 @@ import SearchBar from '../components/SearchBar.vue'
 import { ref, computed, onMounted } from 'vue'
 import Swal from 'sweetalert2'
 import { useRouter } from 'vue-router'
-import { listarMisMaterias } from '../services/estudianteService'
+import { listarMisMaterias, retirarMateria } from '../services/estudianteService'
 import CursoCard from '../components/CursoCard.vue'
 import ModalCurso from '../components/ModalCurso.vue'
 
@@ -128,42 +128,38 @@ const confirmarRetiro = async (curso) => {
 
   if (!result.isConfirmed) return
 
-  const fechaActual = new Date().toISOString().split('T')[0]
+  try {
+    await retirarMateria(curso.id_inscripcion, curso.id_materia)
 
-  cursos.value = cursos.value.map((item) => {
-    if (
-      item.id_materia === curso.id_materia &&
-      item.id_inscripcion === curso.id_inscripcion
-    ) {
-      return {
-        ...item,
-        estado: 'RETIRADO',
-        fecha_retiro: fechaActual
-      }
-    }
-    return item
-  })
+    await cargarMisMaterias()
 
-  if (
-    selectedCurso.value &&
-    selectedCurso.value.id_materia === curso.id_materia &&
-    selectedCurso.value.id_inscripcion === curso.id_inscripcion
-  ) {
-    selectedCurso.value = {
-      ...selectedCurso.value,
-      estado: 'RETIRADO',
-      fecha_retiro: fechaActual
+    const materiaActualizada = cursos.value.find(
+      (item) =>
+        item.id_materia === curso.id_materia &&
+        item.id_inscripcion === curso.id_inscripcion
+    )
+
+    if (materiaActualizada) {
+      selectedCurso.value = { ...materiaActualizada }
     }
+
+    await Swal.fire({
+      icon: 'success',
+      title: 'Materia retirada',
+      text: 'La materia fue retirada correctamente.'
+    })
+  } catch (error) {
+    console.log("Error al retirar la materia:", error)
+
+    await Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: error?.mensaje || 'No se pudo retirar la materia.'
+    })
   }
-
-  await Swal.fire({
-    icon: 'success',
-    title: 'Materia retirada',
-    text: 'La materia fue marcada como retirada.'
-  })
 }
 
-onMounted(async () => {
+const cargarMisMaterias = async () => {
   try {
     const response = await listarMisMaterias()
     const inscripciones = response.data.data
@@ -174,13 +170,18 @@ onMounted(async () => {
         estado: m.estado,
         id_inscripcion: inscripcion.id_inscripcion,
         fecha_inscripcion: inscripcion.fecha_inscripcion,
-        fecha_retiro: m.fecha_retiro || null
+        fecha_retiro: m.fecha_retiro ?? m.materia?.fecha_retiro ?? null
       }))
     )
   } catch (error) {
     console.log("Error al obtener los cursos: ", error)
   }
+}
+
+onMounted(async () => {
+  await cargarMisMaterias()
 })
+
 </script>
 
 <style scoped>
