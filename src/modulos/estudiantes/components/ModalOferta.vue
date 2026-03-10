@@ -14,7 +14,6 @@
       <form>
         <div class="form-grid">
 
-          <!-- FILA 1 -->
           <div class="field">
             <label>Código</label>
             <input :value="curso.id_materia" disabled />
@@ -40,7 +39,6 @@
             <input :value="curso.inscritos" disabled />
           </div>
 
-          <!-- FILA 2 -->
           <div class="field">
             <label>Día</label>
             <input :value="curso.dia" disabled />
@@ -65,7 +63,6 @@
             </div>
           </div>
 
-          <!-- FILA 3 -->
           <div class="field">
             <label>Fecha de inicio</label>
             <input :value="curso.fecha_inicio" disabled />
@@ -86,7 +83,6 @@
             <input :value="curso.hora_fin" disabled />
           </div>
 
-          <!-- MONTO -->
           <div class="field monto-field">
             <label>Monto</label>
             <input :value="curso.monto + ' Bs'" disabled />
@@ -211,18 +207,6 @@ const agregarAlCarrito = () => {
   } else {
     mostrarError.value = true;
   }
-};
-
-const form = ref({
-  nombre: "",
-  cupo: "",
-  dia: "",
-  monto: ""
-});
-
-const formatearFecha = (fecha) => {
-  if (!fecha) return "N/A";
-  return fecha;
 };
 </script>
 
