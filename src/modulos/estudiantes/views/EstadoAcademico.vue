@@ -80,7 +80,7 @@
         router.push({
             name: 'miProgreso',
             params: {
-            idMateria: curso.id_materia,
+            id_materia: curso.id_materia,
             idInscripcion: curso.id_inscripcion
             }
         })
