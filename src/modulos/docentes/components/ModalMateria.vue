@@ -123,7 +123,8 @@ const formatearFecha = (fecha) => {
 };
 
 const abrirNotas=()=>{
-    router.push({name:"NotasMateria"})
+   const idMateria = props.curso.id_materia
+    router.push({name:"NotasMateria",params:{id_materia:idMateria}   })
 }
 </script>
 

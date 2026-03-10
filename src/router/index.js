@@ -155,7 +155,7 @@ const routes = [
         component:MateriasDocente
       },
       {
-        path:"NotasMateria",
+        path:"NotasMateria/:id_materia",
         name:"NotasMateria",
         component:NotasMateria
       }
