@@ -28,7 +28,7 @@
       </div>
 
       <nav class="menu">
-        <router-link to="MateriasDocente" class="menu-item" @click="isMenuOpen = false">Mis Materias</router-link>
+        <router-link to="/docente/MateriasDocente" class="menu-item" @click="isMenuOpen = false">Mis Materias</router-link>
        
       </nav>
 
