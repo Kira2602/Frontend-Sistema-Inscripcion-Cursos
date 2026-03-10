@@ -76,7 +76,13 @@
         >
         Registrar Notas
         </button>
-        <button class="btn-submit">
+        
+
+        <button 
+          type="submit" 
+          class="btn-submit" 
+          @click="abrirAsistencia"
+        >
             Registrar Asistencia
         </button>
     </div>
@@ -122,6 +128,14 @@ const formatearFecha = (fecha) => {
 const abrirNotas=()=>{
    const idMateria = props.curso.id_materia
     router.push({name:"NotasMateria",params:{id_materia:idMateria}   })
+}
+const abrirAsistencia = () => {
+  const idMateria = props.curso.id_materia
+
+  router.push({
+    name: "AsistenciaMateria",
+    params: { id_materia: idMateria }
+  })
 }
 </script>
 

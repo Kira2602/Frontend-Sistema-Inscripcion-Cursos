@@ -31,10 +31,12 @@ import MiCarrera from "../modulos/estudiantes/views/miCarrera.vue";
 import MisMaterias from "../modulos/estudiantes/views/MisMaterias.vue";
 import Pagos from "../modulos/pagos/components/Pagos.vue";
 import EstadoAcademico from "../modulos/estudiantes/views/EstadoAcademico.vue";
+import MiProgreso from "../modulos/estudiantes/views/MiProgreso.vue";
 
 //Importar vistas del docente
 import MateriasDocente from "../modulos/docentes/views/MateriasDocente.vue";
 import NotasMateria from "../modulos/docentes/views/NotasMateria.vue";
+import AsistenciaMateria from "../modulos/docentes/views/AsistenciaMateria.vue"
 
 const routes = [
   {
@@ -158,6 +160,11 @@ const routes = [
         path:"NotasMateria/:id_materia",
         name:"NotasMateria",
         component:NotasMateria
+      },
+      {
+        path:"AsistenciaMateria/:id_materia",
+        name:"AsistenciaMateria",
+        component:AsistenciaMateria
       }
     ]
   },
@@ -194,6 +201,11 @@ const routes = [
         name:"pagarCarrito",
         component:Pagos
       },
+      {
+        path:"miProgreso/:id_materia",
+        name:"miProgreso",
+        component:MiProgreso
+      }
     ],
   },
 ];

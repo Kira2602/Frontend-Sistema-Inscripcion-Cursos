@@ -97,6 +97,14 @@
         >
           Materia retirada
         </button>
+
+        <button
+          type="button"
+          class="btn-progreso"
+          @click="verMiProgreso"
+        >
+          Ver mi progreso
+        </button>
       </div>
     </div>
   </div>
@@ -107,6 +115,9 @@ import { computed, ref, watch } from "vue";
 import { usarCarrito } from "../../../store/carrito";
 import ModalError from "../../seguridad/components/ModalError.vue";
 import ModalExito from "../../seguridad/components/ModalExito.vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const props = defineProps({
   curso: { type: Object, required: true },
@@ -134,6 +145,13 @@ const formatearFecha = (fecha) => {
 const normalizarEstado = (estado) => {
   if (!estado) return "";
   return String(estado).toUpperCase().trim();
+};
+
+const verMiProgreso = () => {
+  router.push({
+    name: "miProgreso",
+    params: { id_materia: props.curso.id_materia }
+  });
 };
 </script>
 
@@ -356,5 +374,19 @@ select:focus {
 
 .input-success {
   background-color: rgb(178, 255, 178);
+}
+
+.btn-progreso {
+  cursor: pointer;
+  background: #5fa8a8;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+}
+
+.btn-progreso:hover {
+  background-color: #4b8f8f;
 }
 </style>
