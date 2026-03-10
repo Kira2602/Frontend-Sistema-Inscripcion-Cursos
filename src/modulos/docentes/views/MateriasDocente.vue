@@ -33,7 +33,7 @@
 import SearchBar from '../components/SearchBar.vue'
 import { ref,computed,onMounted } from 'vue';
 
-
+import { listarMisMaterias } from '../services/DocenteService';
 import CardMateria from '../components/CardMateria.vue';
 import ModalMateria from '../components/ModalMateria.vue';
 
@@ -61,105 +61,25 @@ const filteredCursos = computed(() => {
 });
 
 
-const abrirNotas=()=>{
-    router.push({name:"NotasMateria"})
-}
+
 
 onMounted(async () => {
-  /*try {
+  try {
     
-    const response = await listarMisMaterias();
-
-const inscripciones = response.data.data;
+    const response = await listarMisMaterias(localStorage.getItem("ci"));
+    console.log(response)
+ cursos.value = response.data.data;
 
 // 🔥 Aplanamos las materias
-cursos.value = inscripciones.flatMap(inscripcion =>
-  inscripcion.materias.map(m => ({
-    ...m.materia,           // datos reales de la materia
-    estado: m.estado,       // estado INSCRITO o PENDIENTE_PAGO
-    id_inscripcion: inscripcion.id_inscripcion,
-    fecha_inscripcion: inscripcion.fecha_inscripcion
-  }))
-);
+
 
   } catch (error) {
     console.log("Error al obtener los cursos: ", error);
-  }*/
+  }
 });
 
 const cursos = ref([
-    {
-        "dia": "Martes",
-        "aula": {
-            "id_aula": 4,
-            "nombre": "Laboratorio 1"
-        },
-        "cupo": 30,
-        "inscritos": 1,
-        "tipo": "Obligatoria",
-        "nombre": "Algebra Lineal",
-        "hora_fin": "12:30:00",
-        "fecha_fin": "2026-05-25",
-        "id_materia": "MAT-111",
-        "hora_inicio": "09:00:00",
-        "aula_id_aula": 4,
-        "fecha_inicio": "2026-02-25",
-        "carrera_codigo": "ins",
-    },
-    {
-        "dia": "Miércoles",
-        "aula": {
-            "id_aula": 2,
-            "nombre": "Aula 202"
-        },
-        "cupo": 35,
-        "inscritos": 0,
-        "tipo": "Obligatoria",
-        "nombre": "Estructuras de Datos",
-        "hora_fin": "10:30:00",
-        "fecha_fin": "2026-05-25",
-        "id_materia": "SIS-201",
-        "hora_inicio": "08:00:00",
-        "aula_id_aula": 2,
-        "fecha_inicio": "2026-02-25",
-        "carrera_codigo": "ins"
-    },
-    {
-        "dia": "Jueves",
-        "aula": {
-            "id_aula": 5,
-            "nombre": "Laboratorio 2"
-        },
-        "cupo": 25,
-        "inscritos": 3,
-        "tipo": "Obligatoria",
-        "nombre": "Base de Datos I",
-        "hora_fin": "15:30:00",
-        "fecha_fin": "2026-05-25",
-        "id_materia": "SIS-230",
-        "hora_inicio": "13:00:00",
-        "aula_id_aula": 5,
-        "fecha_inicio": "2026-02-25",
-        "carrera_codigo": "ins"
-    },
-    {
-        "dia": "Viernes",
-        "aula": {
-            "id_aula": 1,
-            "nombre": "Aula Magna"
-        },
-        "cupo": 40,
-        "inscritos": 5,
-        "tipo": "Obligatoria",
-        "nombre": "Arquitectura de Computadoras",
-        "hora_fin": "18:00:00",
-        "fecha_fin": "2026-05-25",
-        "id_materia": "SIS-250",
-        "hora_inicio": "16:00:00",
-        "aula_id_aula": 1,
-        "fecha_inicio": "2026-02-25",
-        "carrera_codigo": "ins"
-    }
+    
 ]);
 
 </script>
