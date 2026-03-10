@@ -84,7 +84,6 @@ const modalAbierto = ref(false)
 const searchTerm = ref("")
 const selectedCurso = ref(null)
 const ofertaCarrera = ref(true)
-const cumpleMateria = ref(Boolean)
 const noCumplen = ref([])
 const motivosBloqueo = ref([])
 const puedeInscribirse = ref(true)
@@ -106,7 +105,7 @@ const abrirModal = async (curso) => {
       response = await detalleExtracurricular(curso.id_materia)
     }
 
-    const data = response?.data?.data || response?.data || {}
+    const data = response?.data?.data || {}
 
     if (Array.isArray(data.requisitos)) {
       data.requisitos.forEach((requisito) => {
@@ -123,17 +122,22 @@ const abrirModal = async (curso) => {
     puedeInscribirse.value = data.puede_inscribirse !== false
 
     selectedCurso.value = {
-      ...curso,
-      requisitos: data?.materia?.requisitos || curso.requisitos || [],
-      puede_inscribirse: data?.puede_inscribirse,
-      motivos_bloqueo: data?.motivos_bloqueo || []
+      ...(data.materia || curso),
+      requisitos: data.materia?.requisitos || curso.requisitos || [],
+      puede_inscribirse: data.puede_inscribirse !== false,
+      motivos_bloqueo: data.motivos_bloqueo || []
     }
 
     modalAbierto.value = true
   } catch (error) {
     console.log("Error al obtener detalle de materia:", error)
 
-    selectedCurso.value = { ...curso }
+    selectedCurso.value = {
+      ...curso,
+      requisitos: curso.requisitos || [],
+      puede_inscribirse: true,
+      motivos_bloqueo: []
+    }
     modalAbierto.value = true
   }
 }
@@ -161,12 +165,12 @@ const filteredCursosExtra = computed(() => {
 onMounted(async () => {
   try {
     const response = await listarOfertaCarrera()
-    cursos.value = response.data.data
+    cursos.value = response.data.data || []
 
     const response2 = await listarOfertaExtra()
-    cursosExtracurriculares.value = response2.data.data
+    cursosExtracurriculares.value = response2.data.data || []
   } catch (error) {
-    console.log("Error al obtener los estudiantes: ", error)
+    console.log("Error al obtener la oferta académica: ", error)
   }
 })
 </script>
