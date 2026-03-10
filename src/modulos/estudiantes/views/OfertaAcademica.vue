@@ -4,9 +4,10 @@
     <div class="head"> 
       <div class="search">
         <SearchBar
-        @update:search="searchTerm=$event"
+          @update:search="searchTerm = $event"
         />
       </div>
+
       <select v-model="ofertaCarrera">
         <option :value="true">Mi carrera</option>
         <option :value="false">Extracurricular</option>
@@ -18,138 +19,157 @@
           v-if="carrito.cursos.length > 0" 
           class="badge"
         >
-        {{ carrito.cursos.length }}
+          {{ carrito.cursos.length }}
         </span>
       </button>
-      
-      
     </div>
       
-      
-      <div class="container" v-if="ofertaCarrera">
-        
-          <OfertaCard
-          v-for="curso in filteredCursos"
-          :key="curso.id_materia"
-          :curso="curso"
-          @view="abrirModal(curso)"
-          
-          />
-      </div>
-      <div class="container" v-if="!ofertaCarrera">
-        
-          <OfertaCard
-          v-for="curso in filteredCursosExtra"
-          :key="curso.id_materia"
-          :curso="curso"
-          @view="abrirModal(curso)"
-          
-          />
-      </div>
-      <ModalOferta
+    <div class="container" v-if="ofertaCarrera">
+      <OfertaCard
+        v-for="curso in filteredCursos"
+        :key="curso.id_materia"
+        :curso="curso"
+        @view="abrirModal(curso)"
+      />
+    </div>
+
+    <div class="container" v-if="!ofertaCarrera">
+      <OfertaCard
+        v-for="curso in filteredCursosExtra"
+        :key="curso.id_materia"
+        :curso="curso"
+        @view="abrirModal(curso)"
+      />
+    </div>
+
+    <ModalOferta
       v-if="modalAbierto"
       :curso="selectedCurso"
       :noCumple="noCumplen"
+      :motivosBloqueo="motivosBloqueo"
+      :puedeInscribirse="puedeInscribirse"
       @close="modalAbierto = false"
-      />
-          <CarritoCursos 
-        v-if="mostrarCarrito" 
-        @cerrar="mostrarCarrito = false" 
-      />
-          <CarritoCursos 
-        v-if="mostrarCarrito" 
-        @cerrar="mostrarCarrito = false" 
-      />
-    </div>
-  </template>
+    />
+
+    <CarritoCursos 
+      v-if="mostrarCarrito" 
+      @cerrar="mostrarCarrito = false" 
+    />
+  </div>
+</template>
 
 <script setup>
-import OfertaCard from '../components/OfertaCard.vue';
+import OfertaCard from '../components/OfertaCard.vue'
 import SearchBar from '../components/SearchBar.vue'
-import { ref,computed,onMounted } from 'vue';
-import ModalOferta from '../components/ModalOferta.vue';
-import { usarCarrito } from '../../../store/carrito';
-import CarritoCursos from '../components/CarritoCursos.vue';
-import Icon from '../../seguridad/components/Icon.vue';
-import { listarOfertaCarrera,listarOfertaExtra, materiaOfertaDetalle } from '../services/estudianteService';
-const carrito = usarCarrito();
-const mostrarCarrito = ref(false);
+import { ref, computed, onMounted } from 'vue'
+import ModalOferta from '../components/ModalOferta.vue'
+import { usarCarrito } from '../../../store/carrito'
+import CarritoCursos from '../components/CarritoCursos.vue'
+import Icon from '../../seguridad/components/Icon.vue'
+import {
+  listarOfertaCarrera,
+  listarOfertaExtra,
+  materiaOfertaDetalle,
+  detalleExtracurricular
+} from '../services/estudianteService'
+
+const carrito = usarCarrito()
+const mostrarCarrito = ref(false)
 
 const toggleCarrito = () => {
-  mostrarCarrito.value = !mostrarCarrito.value;
-};
+  mostrarCarrito.value = !mostrarCarrito.value
+}
 
+const modalAbierto = ref(false)
+const searchTerm = ref("")
+const selectedCurso = ref(null)
+const ofertaCarrera = ref(true)
+const cumpleMateria = ref(Boolean)
+const noCumplen = ref([])
+const motivosBloqueo = ref([])
+const puedeInscribirse = ref(true)
 
-const modalAbierto=ref(false)
-const searchTerm = ref("");
-const selectedCurso = ref(null);
-const ofertaCarrera=ref(true)
-const cumpleMateria=ref(Boolean)
-const noCumplen=ref([])
+const cursos = ref([])
+const cursosExtracurriculares = ref([])
+
 const abrirModal = async (curso) => {
+  noCumplen.value = []
+  motivosBloqueo.value = []
+  puedeInscribirse.value = true
 
-  noCumplen.value = [] // limpiar siempre
+  try {
+    let response
 
-  if (ofertaCarrera.value) {
+    if (ofertaCarrera.value) {
+      response = await materiaOfertaDetalle(curso.id_materia)
+    } else {
+      response = await detalleExtracurricular(curso.id_materia)
+    }
 
-    const response = await materiaOfertaDetalle(curso.id_materia)
+    const data = response?.data?.data || response?.data || {}
 
-    response.data?.requisitos?.forEach(requisito => {
-      if (requisito.cumple === false) {
-        noCumplen.value.push(requisito.id_materia)
-      }
-    })
+    if (Array.isArray(data.requisitos)) {
+      data.requisitos.forEach((requisito) => {
+        if (requisito.cumple === false) {
+          noCumplen.value.push(requisito.id_materia)
+        }
+      })
+    }
 
-    selectedCurso.value = { ...curso }
+    motivosBloqueo.value = Array.isArray(data.motivos_bloqueo)
+      ? data.motivos_bloqueo
+      : []
+
+    puedeInscribirse.value = data.puede_inscribirse !== false
+
+    selectedCurso.value = {
+      ...curso,
+      requisitos: data?.materia?.requisitos || curso.requisitos || [],
+      puede_inscribirse: data?.puede_inscribirse,
+      motivos_bloqueo: data?.motivos_bloqueo || []
+    }
+
     modalAbierto.value = true
+  } catch (error) {
+    console.log("Error al obtener detalle de materia:", error)
 
-  } else {
-    // Si es extracurricular NO ejecuta materiaOfertaDetalle
     selectedCurso.value = { ...curso }
     modalAbierto.value = true
   }
 }
 
 const filteredCursos = computed(() => {
-  if (!searchTerm.value) return cursos.value;
+  if (!searchTerm.value) return cursos.value
 
   return cursos.value.filter(
     (curso) =>
       curso.nombre.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
-      curso.id_materia.toString().includes(searchTerm.value),
-  );
-});
+      curso.id_materia.toString().includes(searchTerm.value)
+  )
+})
 
 const filteredCursosExtra = computed(() => {
-  if (!searchTerm.value) return cursosExtracurriculares.value;
+  if (!searchTerm.value) return cursosExtracurriculares.value
 
   return cursosExtracurriculares.value.filter(
     (curso) =>
       curso.nombre.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
-      curso.id_materia.toString().includes(searchTerm.value),
-  );
-});
-
+      curso.id_materia.toString().includes(searchTerm.value)
+  )
+})
 
 onMounted(async () => {
   try {
-    const response = await listarOfertaCarrera();
-    cursos.value = response.data.data;
+    const response = await listarOfertaCarrera()
+    cursos.value = response.data.data
 
-    const response2 = await listarOfertaExtra();
-    cursosExtracurriculares.value = response2.data.data;
+    const response2 = await listarOfertaExtra()
+    cursosExtracurriculares.value = response2.data.data
   } catch (error) {
-    console.log("Error al obtener los estudiantes: ", error);
+    console.log("Error al obtener los estudiantes: ", error)
   }
-});
-
-const cursos = ref([]);
-
-const cursosExtracurriculares = ref([]);
-
+})
 </script>
-
-
 
 <style scoped>
 .wrapper{
@@ -167,8 +187,6 @@ const cursosExtracurriculares = ref([]);
   align-items: center;
   padding: 2%;
   border-radius: 10px;
-  
- 
 }
 .container {
   display: grid;
@@ -177,7 +195,6 @@ const cursosExtracurriculares = ref([]);
   margin-top: 30px;
 }
 select {
-
   width: 30%;
   padding: 10px 12px;
   border-radius: 8px;
@@ -187,10 +204,9 @@ select {
   color: #333;
   cursor: pointer;
   transition: all 0.2s ease;
-  appearance: none; /* Quita estilo nativo */
+  appearance: none;
 }
 
-/* Flecha personalizada */
 select {
   background-image: url("data:image/svg+xml;utf8,<svg fill='%235fa8a8' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
   background-repeat: no-repeat;
@@ -211,26 +227,6 @@ option {
   font-size: 14px;
   background-color: #fff;
   color: #333;
-}
-.cart-button {
-  position: relative;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 18px;
-}
-
-.badge {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background: #f7ba00;
-  color: black;
-  font-size: 12px;
-  font-weight: bold;
-  padding: 3px 7px;
-  border-radius: 50%;
 }
 .cart-button {
   position: relative;

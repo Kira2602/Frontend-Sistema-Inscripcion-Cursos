@@ -3,8 +3,7 @@
     <div class="modal-content">
       <div class="helper-container">
         <div class="user-data">
-          
-          <h2>{{curso.nombre}}</h2>
+          <h2>{{ curso.nombre }}</h2>
         </div>
 
         <div class="close-button" @click="$emit('close')">
@@ -15,103 +14,109 @@
       <form>
         <div class="form-grid">
 
-            <!-- FILA 1 -->
-            <div class="field">
-                <label>Código</label>
-                <input :value="curso.id_materia" disabled />
-            </div>
+          <!-- FILA 1 -->
+          <div class="field">
+            <label>Código</label>
+            <input :value="curso.id_materia" disabled />
+          </div>
 
-            <div class="field">
-                <label>Docente</label>
-                <input :value="curso.docente?.nombre" disabled />
-            </div>
+          <div class="field">
+            <label>Docente</label>
+            <input :value="curso.docente?.nombre" disabled />
+          </div>
 
-            <div class="field">
-                <label>Tipo</label>
-                <input :value="curso.tipo" disabled />
-            </div>
+          <div class="field">
+            <label>Tipo</label>
+            <input :value="curso.tipo" disabled />
+          </div>
 
-            <div class="field">
-                <label>Cupo</label>
-                <input :value="curso.cupo" disabled />
-            </div>
-             <div class="field">
-                <label>Inscritos</label>
-                <input :value="curso.inscritos" disabled />
-            </div>
+          <div class="field">
+            <label>Cupo</label>
+            <input :value="curso.cupo" disabled />
+          </div>
 
-                <!-- FILA 2 -->
-            <div class="field">
-                <label>Día</label>
-                <input :value="curso.dia" disabled />
-            </div>
+          <div class="field">
+            <label>Inscritos</label>
+            <input :value="curso.inscritos" disabled />
+          </div>
 
-            <div class="field requisitos" v-if="Array.isArray(curso.requisitos) && curso.requisitos.length" >
-                <label>Requisitos</label>
-                <div class="req-container">
-                    <input 
-                      v-for="req in curso.requisitos"
-                      :key="req.id_materia"
-                      :value="req.nombre"
-                      disabled
-                      :class="{
-                        'input-error': noCumpleComputed.includes(req.id_materia) === false,
-                        'input-success': req.cumple === true
-                      }"
-                    />
-                </div>
-            </div>
+          <!-- FILA 2 -->
+          <div class="field">
+            <label>Día</label>
+            <input :value="curso.dia" disabled />
+          </div>
 
-                <!-- FILA 3 -->
-            <div class="field">
-                <label>Fecha de inicio</label>
-                <input :value="curso.fecha_inicio" disabled />
+          <div
+            class="field requisitos"
+            v-if="Array.isArray(curso.requisitos) && curso.requisitos.length"
+          >
+            <label>Requisitos</label>
+            <div class="req-container">
+              <input 
+                v-for="req in curso.requisitos"
+                :key="req.id_materia"
+                :value="req.nombre"
+                disabled
+                :class="{
+                  'input-error': noCumpleComputed.includes(req.id_materia),
+                  'input-success': !noCumpleComputed.includes(req.id_materia)
+                }"
+              />
             </div>
+          </div>
 
-            <div class="field">
-                <label>Hora de inicio</label>
-                <input :value="curso.hora_inicio" disabled />
-            </div>
+          <!-- FILA 3 -->
+          <div class="field">
+            <label>Fecha de inicio</label>
+            <input :value="curso.fecha_inicio" disabled />
+          </div>
 
-            <div class="field">
-                <label>Fecha fin</label>
-                <input :value="curso.fecha_fin" disabled />
-            </div>
+          <div class="field">
+            <label>Hora de inicio</label>
+            <input :value="curso.hora_inicio" disabled />
+          </div>
 
-            <div class="field">
-                <label>Hora fin</label>
-                <input :value="curso.hora_fin" disabled />
-            </div>
+          <div class="field">
+            <label>Fecha fin</label>
+            <input :value="curso.fecha_fin" disabled />
+          </div>
 
-                <!-- MONTO -->
-            <div class="field monto-field">
-                <label>Monto</label>
-                <input :value="curso.monto + ' Bs'" disabled />
-            </div>
+          <div class="field">
+            <label>Hora fin</label>
+            <input :value="curso.hora_fin" disabled />
+          </div>
+
+          <!-- MONTO -->
+          <div class="field monto-field">
+            <label>Monto</label>
+            <input :value="curso.monto + ' Bs'" disabled />
+          </div>
 
         </div>
       </form>
-    <button 
-      type="submit" 
-      class="btn-submit" 
-      @click="agregarAlCarrito" 
-      :disabled="yaEnCarrito || (curso.requisitos.length>0 )"
-    >
-      {{ yaEnCarrito ? "Ya agregado" : curso.requisitos.length>0? "No se cumplen los requisitos":"Agregar al carrito" }}
-    </button>
+
+      <div
+        v-if="motivosBloqueoComputed.length > 0"
+        class="bloqueos-container"
+      >
+        <p class="bloqueos-title">No puedes inscribirte por lo siguiente:</p>
+        <ul class="bloqueos-list">
+          <li v-for="(motivo, index) in motivosBloqueoComputed" :key="index">
+            {{ motivo }}
+          </li>
+        </ul>
+      </div>
+
+      <button 
+        type="button" 
+        class="btn-submit" 
+        @click="agregarAlCarrito" 
+        :disabled="botonDeshabilitado"
+      >
+        {{ textoBoton }}
+      </button>
     </div>
   </div>
-
-  <ModalError
-    :message="mensajeModal"
-    :visible="mostrarError"
-    @close="mostrarError = false"
-  />
-  <ModalExito
-    :message="mensajeModal"
-    :visible="mostrarExito"
-    @close="mostrarExito = false"
-  />
 
   <ModalError
     :message="mensajeModal"
@@ -126,22 +131,71 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { usarCarrito } from "../../../store/carrito";
 import ModalError from "../../seguridad/components/ModalError.vue";
 import ModalExito from "../../seguridad/components/ModalExito.vue";
-import { materiaOfertaDetalle } from "../services/estudianteService";
-const carrito=usarCarrito();
-const mensajeModal=ref("");
-const mostrarExito=ref(false)
-const mostrarError=ref(false);
+
+const carrito = usarCarrito();
+const mensajeModal = ref("");
+const mostrarExito = ref(false);
+const mostrarError = ref(false);
+
+const props = defineProps({ 
+  curso: { type: Object, required: true },
+  noCumple: { type: Array, required: true },
+  motivosBloqueo: { type: Array, default: () => [] },
+  puedeInscribirse: { type: Boolean, default: true }
+});
+
+const emit = defineEmits(["close", "save"]);
+
+const noCumpleComputed = computed(() => {
+  return Array.isArray(props.noCumple) ? props.noCumple : [];
+});
+
+const motivosBloqueoComputed = computed(() => {
+  return Array.isArray(props.motivosBloqueo) ? props.motivosBloqueo : [];
+});
+
+const yaEnCarrito = computed(() => {
+  return carrito.cursos.some(
+    c => c.id_materia === props.curso.id_materia
+  );
+});
+
+const tieneRequisitosIncumplidos = computed(() => {
+  return noCumpleComputed.value.length > 0;
+});
+
+const tieneBloqueos = computed(() => {
+  return motivosBloqueoComputed.value.length > 0 || props.puedeInscribirse === false;
+});
+
+const botonDeshabilitado = computed(() => {
+  return yaEnCarrito.value || tieneRequisitosIncumplidos.value || tieneBloqueos.value;
+});
+
+const textoBoton = computed(() => {
+  if (yaEnCarrito.value) return "Ya agregado";
+  if (tieneBloqueos.value) return "No disponible";
+  if (tieneRequisitosIncumplidos.value) return "No se cumplen los requisitos";
+  return "Agregar al carrito";
+});
 
 const agregarAlCarrito = () => {
-  // Solo bloquear si hay materias que no cumplen requisito
-  if (props.noCumple.length>0) {
+  if (tieneBloqueos.value) {
+    mensajeModal.value = motivosBloqueoComputed.value.length > 0
+      ? motivosBloqueoComputed.value.join(" | ")
+      : "No puedes inscribirte en esta materia";
+    mostrarError.value = true;
+    return;
+  }
+
+  if (tieneRequisitosIncumplidos.value) {
     mensajeModal.value = "No puedes agregar este curso porque no cumple los requisitos";
     mostrarError.value = true;
-    return; // detiene la función
+    return;
   }
 
   const resultado = carrito.agregarCurso(props.curso);
@@ -150,48 +204,27 @@ const agregarAlCarrito = () => {
 
   if (resultado.exito) {
     mostrarExito.value = true;
-    
-    // cerrar después de un pequeño delay
-    setTimeout(() => {
-      emit("close")
-    }, 3000);
 
+    setTimeout(() => {
+      emit("close");
+    }, 3000);
   } else {
     mostrarError.value = true;
   }
 };
 
-const yaEnCarrito = computed(() => {
-  return carrito.cursos.some(
-    c => c.id_materia === props.curso.id_materia
-  )
-})
-const props = defineProps({ 
-  curso: { type: Object, required: true },
-  noCumple:{type:Array,required:true}
-});
-const emit = defineEmits(["close", "save"]);
-const noCumpleComputed = computed(() => {
-  // si props.noCumple viene como array de ids
-  return Array.isArray(props.noCumple) ? props.noCumple : [];
-});
-// Renombramos user a curso para claridad
-
-// Estado del formulario - solo nombre es editable
 const form = ref({
   nombre: "",
-  cupo:"",
-  dia:"",
-  monto:""
+  cupo: "",
+  dia: "",
+  monto: ""
 });
 
-// Formatear fecha para mostrar
 const formatearFecha = (fecha) => {
   if (!fecha) return "N/A";
-  return fecha; // Las fechas ya vienen en formato YYYY-MM-DD
+  return fecha;
 };
 </script>
-
 
 <style scoped>
 .modal-overlay {
@@ -308,6 +341,7 @@ input:focus {
   padding: 10px 22px;
   border-radius: 8px;
   color: white;
+  margin-top: 24px;
 }
 
 .btn-submit:disabled {
@@ -323,6 +357,7 @@ input:focus {
   font-size: 13px;
   margin-top: 4px;
 }
+
 .password-wrapper {
   position: relative;
   display: flex;
@@ -348,6 +383,7 @@ input:focus {
 .toggle-btn:hover {
   color: #5fa8a8;
 }
+
 select {
   width: 100%;
   padding: 10px;
@@ -379,11 +415,32 @@ select:focus {
   grid-column: 4;
   margin-top: 10px;
 }
+
 .input-error {
   background-color: rgb(255, 173, 173);
 }
 
 .input-success {
   background-color: rgb(178, 255, 178);
+}
+
+.bloqueos-container {
+  margin-top: 20px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #ffe3e3;
+  border: 1px solid #f0a7a7;
+}
+
+.bloqueos-title {
+  margin: 0 0 8px 0;
+  font-weight: 700;
+  color: #8a1f1f;
+}
+
+.bloqueos-list {
+  margin: 0;
+  padding-left: 20px;
+  color: #7a2323;
 }
 </style>
