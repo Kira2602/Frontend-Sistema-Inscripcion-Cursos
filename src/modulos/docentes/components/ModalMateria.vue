@@ -65,10 +65,7 @@
             </div>
 
                 <!-- MONTO -->
-            <div class="field monto-field">
-                <label>Monto</label>
-                <input :value="curso.monto + ' Bs'" disabled />
-            </div>
+            
 
         </div>
       </form>

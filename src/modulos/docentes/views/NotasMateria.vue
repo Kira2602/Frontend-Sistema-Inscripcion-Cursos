@@ -2,7 +2,7 @@
   <div class="contenedor">
     <div class="icon-wrapper">
       <Icon
-      to="MateriasDocente"
+      to="../MateriasDocente"
       iconName="arrow_back"
       iconColor="black"
       message="Volver"
@@ -122,18 +122,33 @@
 </div>
 
   </div>
+  <ModalExito 
+    :message="mensajeModal" 
+    :visible="mostrarExito" 
+    @close="mostrarExito = false"
+  />
+
+   <ModalError
+    :message="mensajeModal"
+    :visible="mostrarError"
+    @close="mostrarError = false"
+  />
 </template>
 
 <script setup>
 import { ref,onMounted } from "vue"
 import Icon from "../../seguridad/components/Icon.vue"
-import { useRoute } from "vue-router"
+import { useRoute,useRouter } from "vue-router"
 const mostrarModal = ref(false)
-
+import ModalExito from "../../seguridad/components/ModalExito.vue"
+import ModalError from "../../seguridad/components/ModalError.vue"
 import { computed } from "vue"
-import { listarNotasMateria } from "../services/DocenteService";
+import { listarNotasMateria, registrarNotas } from "../services/DocenteService";
 const route = useRoute()
-
+const router=useRouter()
+const mostrarError=ref(false);
+const mostrarExito=ref(false)
+const mensajeModal=ref("")
 onMounted(async () => {
   try {
 
@@ -141,10 +156,11 @@ onMounted(async () => {
 
     const response = await listarNotasMateria(id_materia)
 
-    estudiantes.value = response.data.map(e => ({
+    estudiantes.value = response.data.data.map(e => ({
       ...e,
       notas: e.notas ?? []
     }))
+
 
   } catch (error) {
     console.log("Error al obtener los cursos: ", error);
@@ -232,7 +248,7 @@ function obtenerNuevaNota(id_estudiante){
 function guardarNotas() {
   mostrarModal.value = true
 }
-function confirmarGuardado() {
+ async function confirmarGuardado() {
   const id_materia = route.params.id_materia
   console.log("Notas a enviar:")
   console.log(JSON.stringify(nuevasNotas.value, null, 2))
@@ -245,6 +261,24 @@ function confirmarGuardado() {
   console.log(JSON.stringify(enviar, null, 2))
   console.log(enviar)
   mostrarModal.value = false
+
+
+  try{
+    const response=await registrarNotas(enviar)
+    if(response.exito){
+      mensajeModal.value="Notas correctamente registradas"
+      mostrarExito.value=true;
+
+
+      setTimeout(()=>{
+        router.go(0)
+      },3000)
+    }
+  }catch(error){
+    mensajeModal.value="Error al registrar notas";
+    mostrarError.value=true;
+    console.log(error)
+  }
 
 }
 function cancelarGuardado(){

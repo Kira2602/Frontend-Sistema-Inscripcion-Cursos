@@ -22,3 +22,27 @@ export const listarNotasMateria=async(id_materia)=>{
     },
   })
 }
+
+
+
+export const registrarNotas=async (datos) => {
+  try {
+    const response = await api.post("/docentes/registrar-notas", datos, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+    return {
+      exito: true,
+      mensaje: response.data.message,
+      data: response.data.data,
+    };
+  } catch (error) {
+    return {
+      exito: false,
+      mensaje:
+        error.response?.data?.message || "Error de conexión con el servidor",
+      status: error.response?.status || 500,
+    };
+  }
+};
