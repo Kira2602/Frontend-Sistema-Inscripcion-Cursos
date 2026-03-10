@@ -16,9 +16,9 @@
         <div class="filter-container">
             <select v-model="estadoFiltro">
             <option value="">Filtrar por estado</option>
-            <option value="ACTIVO">Activo</option>
-            <option value="APROBADO">Aprobado</option>
-            <option value="REPROBADO">Reprobado</option>
+            <option value="EN_CURSO">Activo</option>
+            <option value="APROBADA">Aprobado</option>
+            <option value="REPROBADA">Reprobado</option>
             </select>
         </div>
 
@@ -30,74 +30,69 @@
 
         <div class="container">
         <CursoEstadoCard
-            v-for="curso in filteredActivas"
+            v-for="curso in filteredEnCurso"
             :key="curso.id_materia + '-' + (curso.id_inscripcion || '')"
             :curso="curso"
-            @view="abrirModal(curso)"
-        />
+            @view="irMiProgreso"
+            />
         </div>
 
-        <ModalCurso
-        v-if="modalAbierto"
-        :curso="selectedCurso"
-        :noCumple="[]"
-        @close="modalAbierto = false"
-        />
-
         <ModalMateriasCulminadas
-        v-if="modalArchivadas"
-        :materias="filteredArchivadas"
-        @close="modalArchivadas = false"
-        @view="abrirModalDesdeArchivadas"
+            v-if="modalArchivadas"
+            :materias="filteredArchivadas"
+            @close="modalArchivadas = false"
+            @view="irMiProgreso"
         />
     </div>
-</template>
+    </template>
 
-<script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import SearchBar from '../components/SearchBar.vue'
-import ModalCurso from '../components/ModalCurso.vue'
-import CursoEstadoCard from '../components/CursoEstadoCard.vue'
-import ModalMateriasCulminadas from '../components/ModalMateriasCulminadas.vue'
-import { listarMisMaterias } from '../services/estudianteService'
+    <script setup>
+    import { ref, computed, onMounted } from 'vue'
+    import { useRouter } from 'vue-router'
+    import SearchBar from '../components/SearchBar.vue'
+    import CursoEstadoCard from '../components/CursoEstadoCard.vue'
+    import ModalMateriasCulminadas from '../components/ModalMateriasCulminadas.vue'
+    import {
+    listarMateriasEnCurso,
+    listarMateriasCulminadas
+    } from '../services/estudianteService'
 
-const router = useRouter()
+    const router = useRouter()
 
-const searchTerm = ref("")
-const estadoFiltro = ref("")
-const materias = ref([])
-const modalAbierto = ref(false)
-const modalArchivadas = ref(false)
-const selectedCurso = ref(null)
+    const searchTerm = ref("")
+    const estadoFiltro = ref("")
+    const materiasEnCurso = ref([])
+    const materiasArchivadas = ref([])
+    const modalArchivadas = ref(false)
+    
 
-const normalizarEstadoAcademico = (estado) => {
+    const normalizarEstadoAcademico = (estado) => {
     if (!estado) return ""
-    return estado.toUpperCase().trim()
-}
+    return String(estado).toUpperCase().trim()
+    }
 
-const abrirModal = (curso) => {
-    selectedCurso.value = { ...curso }
-    modalAbierto.value = true
-}
-
-const abrirModalDesdeArchivadas = (curso) => {
-    selectedCurso.value = { ...curso }
-    modalArchivadas.value = false
-    modalAbierto.value = true
-}
-
-const abrirArchivadas = () => {
+    const abrirArchivadas = () => {
     modalArchivadas.value = true
-}
+    }
 
-const volver = () => {
+    const irMiProgreso = (curso) => {
+    modalArchivadas.value = false
+        router.push({
+            name: 'miProgreso',
+            params: {
+            idMateria: curso.id_materia,
+            idInscripcion: curso.id_inscripcion
+            }
+        })
+        }
+
+    const volver = () => {
     router.back()
-}
+    }
 
-const filteredActivas = computed(() => {
-    let resultado = materias.value.filter(
-        (curso) => normalizarEstadoAcademico(curso.estado_academico) === 'ACTIVO'
+    const filteredEnCurso = computed(() => {
+    let resultado = materiasEnCurso.value.filter(
+        (curso) => normalizarEstadoAcademico(curso.estado_academico) === 'EN_CURSO'
     )
 
     if (searchTerm.value) {
@@ -116,13 +111,13 @@ const filteredActivas = computed(() => {
     }
 
     return resultado
-})
-
-const filteredArchivadas = computed(() => {
-    let resultado = materias.value.filter((curso) => {
-        const estado = normalizarEstadoAcademico(curso.estado_academico)
-        return estado === 'APROBADO' || estado === 'REPROBADO'
     })
+
+    const filteredArchivadas = computed(() => {
+        let resultado = materiasArchivadas.value.filter((curso) => {
+            const estado = normalizarEstadoAcademico(curso.estado_academico)
+            return estado === 'APROBADA' || estado === 'REPROBADA'
+        })
 
     if (searchTerm.value) {
         resultado = resultado.filter(
@@ -140,14 +135,14 @@ const filteredArchivadas = computed(() => {
     }
 
     return resultado
-})
+    })
 
-onMounted(async () => {
+    const cargarMateriasEnCurso = async () => {
     try {
-        const response = await listarMisMaterias()
-        const inscripciones = response.data.data
+        const response = await listarMateriasEnCurso()
+        const inscripciones = response.data.data || []
 
-        materias.value = inscripciones.flatMap(inscripcion =>
+        materiasEnCurso.value = inscripciones.flatMap(inscripcion =>
         inscripcion.materias.map(m => ({
             ...m.materia,
             estado: m.estado,
@@ -155,12 +150,40 @@ onMounted(async () => {
             id_inscripcion: inscripcion.id_inscripcion,
             fecha_inscripcion: inscripcion.fecha_inscripcion,
             fecha_retiro: m.fecha_retiro || null,
-            fecha_culminacion: m.fecha_culminacion || null
+            fecha_culminacion: m.fecha_fin || null
         }))
         )
     } catch (error) {
-        console.log("Error al obtener estado académico:", error)
+        console.log("Error al obtener materias en curso:", error)
     }
+    }
+
+    const cargarMateriasArchivadas = async () => {
+    try {
+        const response = await listarMateriasCulminadas()
+        const inscripciones = response.data.data || []
+
+        materiasArchivadas.value = inscripciones.flatMap(inscripcion =>
+        inscripcion.materias.map(m => ({
+            ...m.materia,
+            estado: m.estado,
+            estado_academico: m.estado_academico,
+            id_inscripcion: inscripcion.id_inscripcion,
+            fecha_inscripcion: inscripcion.fecha_inscripcion,
+            fecha_retiro: m.fecha_retiro || null,
+            fecha_culminacion: m.fecha_fin || null
+        }))
+        )
+    } catch (error) {
+        console.log("Error al obtener materias culminadas:", error)
+    }
+}
+
+onMounted(async () => {
+    await Promise.all([
+        cargarMateriasEnCurso(),
+        cargarMateriasArchivadas()
+    ])
 })
 </script>
 

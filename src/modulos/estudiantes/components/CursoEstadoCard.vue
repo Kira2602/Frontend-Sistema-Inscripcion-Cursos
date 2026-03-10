@@ -5,15 +5,15 @@
         <p class="codigo">Código materia</p>
         <p class="codigo-value">{{ curso.id_materia }}</p>
         <p class="docente">Docente</p>
-        <p class="docente-value">{{ curso.docente?.nombre }}</p>
+        <p class="docente-value">{{ curso.docente?.nombre || 'Sin docente' }}</p>
         </div>
 
         <div class="content">
         <div class="schedule-section">
-            <div class="pill dia">{{ curso.dia }}</div>
+            <div class="pill dia">{{ curso.dia || 'Día' }}</div>
             <div class="horarios">
-            <span class="pill small">{{ curso.hora_inicio }}</span>
-            <span class="pill small">{{ curso.hora_fin }}</span>
+            <span class="pill small">{{ curso.hora_inicio || 'Hora inicio' }}</span>
+            <span class="pill small">{{ curso.hora_fin || 'Hora fin' }}</span>
             </div>
         </div>
 
@@ -22,15 +22,15 @@
         </span>
 
         <p
-            v-if="(normalizarEstado(curso.estado_academico) === 'APROBADO' || normalizarEstado(curso.estado_academico) === 'REPROBADO') && curso.fecha_culminacion"
+            v-if="(normalizarEstado(curso.estado_academico) === 'APROBADA' || normalizarEstado(curso.estado_academico) === 'REPROBADA')"
             class="fecha"
         >
-            Fecha de culminación: {{ curso.fecha_culminacion }}
+            Fecha de culminación: {{ formatearFecha(curso.fecha_culminacion) }}
         </p>
         </div>
 
         <div class="footer">
-        <button class="btn" @click="$emit('view')">Ver más</button>
+        <button class="btn" @click="$emit('view', curso)">Ver más</button>
         </div>
     </div>
 </template>
@@ -46,22 +46,31 @@ defineEmits(['view'])
 
 const normalizarEstado = (estado) => {
     if (!estado) return ""
-    return estado.toUpperCase().trim()
+    return String(estado).toUpperCase().trim()
+}
+
+const formatearFecha = (fecha) => {
+    if (!fecha) return "N/A"
+    return fecha
 }
 
 const estadoLabel = computed(() => {
     const estado = normalizarEstado(props.curso.estado_academico)
-    if (estado === 'ACTIVO') return 'Activo'
-    if (estado === 'APROBADO') return 'Aprobado'
-    if (estado === 'REPROBADO') return 'Reprobado'
-    return props.curso.estado_academico
+
+    if (estado === 'EN_CURSO') return 'Activo'
+    if (estado === 'APROBADA') return 'Aprobado'
+    if (estado === 'REPROBADA') return 'Reprobado'
+
+    return props.curso.estado_academico || 'Sin estado'
 })
 
 const estadoClass = computed(() => {
     const estado = normalizarEstado(props.curso.estado_academico)
-    if (estado === 'ACTIVO') return 'estado-activo'
-    if (estado === 'APROBADO') return 'estado-aprobado'
-    if (estado === 'REPROBADO') return 'estado-reprobado'
+
+    if (estado === 'EN_CURSO') return 'estado-activo'
+    if (estado === 'APROBADA') return 'estado-aprobado'
+    if (estado === 'REPROBADA') return 'estado-reprobado'
+
     return ''
 })
 </script>
@@ -82,9 +91,25 @@ const estadoClass = computed(() => {
     border: 1px solid #8ed2eb;
 }
 
-.title { margin: 0; font-size: 1.2rem; color: #333; }
-.codigo, .docente { margin: 5px 0 0; font-size: 0.85rem; color: #777; }
-.codigo-value, .docente-value { margin: 0; font-size: 0.9rem; color: #444; }
+.title {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.codigo,
+.docente {
+    margin: 5px 0 0;
+    font-size: 0.85rem;
+    color: #777;
+}
+
+.codigo-value,
+.docente-value {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #444;
+}
 
 .content {
     display: flex;
@@ -135,18 +160,18 @@ const estadoClass = computed(() => {
 .estado-aprobado {
     background: #a9d86b;
     color: #29440c;
-    }
+}
 
 .estado-reprobado {
     background: #ea7272;
     color: #4f0f0f;
-    }
+}
 
 .fecha {
     margin: 0;
     font-size: 0.8rem;
     color: #8a8a8a;
-    }
+}
 
 .footer {
     display: flex;
@@ -162,5 +187,5 @@ const estadoClass = computed(() => {
     padding: 10px;
     cursor: pointer;
     font-weight: bold;
-    }
+}
 </style>
