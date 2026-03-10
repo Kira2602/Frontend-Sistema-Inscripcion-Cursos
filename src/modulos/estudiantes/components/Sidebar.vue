@@ -28,9 +28,9 @@
       </div>
 
       <nav class="menu">
-        <router-link to="miCarrera" class="menu-item" @click="isMenuOpen = false">Mi Carrera</router-link>
-        <router-link to="ofertaAcademica" class="menu-item" @click="isMenuOpen = false">Oferta Academica</router-link>
-        <router-link to="misMaterias" class="menu-item" @click="isMenuOpen = false">Mis materias</router-link>
+        <router-link to="/estudiante/miCarrera" class="menu-item" @click="isMenuOpen = false">Mi Carrera</router-link>
+        <router-link to="/estudiante/ofertaAcademica" class="menu-item" @click="isMenuOpen = false">Oferta Academica</router-link>
+        <router-link to="/estudiante/misMaterias" class="menu-item" @click="isMenuOpen = false">Mis materias</router-link>
       </nav>
 
       <button class="logout-btn" @click="logoutUsuario">
