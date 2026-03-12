@@ -9,7 +9,7 @@
 </template>
 
 <script setup>
-import Sidebar from '../modulos/seguridad/components/sidebar.vue';
+import Sidebar from '../modulos/seguridad/components/Sidebar.vue';
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 const router = useRouter();
