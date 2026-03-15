@@ -6,53 +6,106 @@
   <div class="main-card">
     <p>Nombre o Código del Aula:</p>
     <div class="register-container">
-      <input type="text" class="new-aula" placeholder="Nombre o código" />
-      <button class="registrar">Registrar</button>
+      <input
+        v-model="nombreAula"
+        type="text"
+        class="new-aula"
+        placeholder="Nombre o código"
+      />
+      <button class="registrar" @click="handleRegister">Registrar</button>
     </div>
 
     <h2>Aulas Registradas:</h2>
     <div class="aulas-cards">
-      <div class="single-aula" v-for="aula in mockData" :key="aula.id_aula">
+      <div class="single-aula" v-for="aula in aulas" :key="aula.id_aula">
         <Icon iconName="classroom" iconColor="#0095ff" />
         <p>{{ aula.nombre }}</p>
       </div>
     </div>
   </div>
+
+  <div v-if="modal.show" class="modal-overlay">
+    <div class="modal-content" :class="modal.type">
+      <h3>{{ modal.title }}</h3>
+      <p>{{ modal.message }}</p>
+      <button @click="modal.show = false">Cerrar</button>
+    </div>
+  </div>
 </template>
 
 <script setup>
+import { onMounted, ref } from "vue";
+import { listAllAulas, registrarAula } from "../servicios/aulasService";
 import Icon from "../../seguridad/components/Icon.vue";
 
-const mockData = [
-  {
-    id_aula: 1,
-    nombre: "AULA-1",
-  },
-  {
-    id_aula: 2,
-    nombre: "AULA-2",
-  },
-  {
-    id_aula: 3,
-    nombre: "AULA-3",
-  },
-  {
-    id_aula: 4,
-    nombre: "AULA-4",
-  },
-  {
-    id_aula: 5,
-    nombre: "AULA-5",
-  },
-  {
-    id_aula: 6,
-    nombre: "AULA-6",
-  },
-  {
-    id_aula: 7,
-    nombre: "AULA-7",
-  },
-];
+const nombreAula = ref("");
+
+const aulas = ref([]);
+
+const modal = ref({
+  show: false,
+  title: "",
+  message: "",
+  type: "",
+});
+
+const showModal = (title, message, type) => {
+  modal.value = {
+    show: true,
+    title,
+    message,
+    type,
+  };
+};
+
+const handleRegister = async () => {
+  if (!nombreAula.value.trim()) {
+    showModal("Campo vacío", "Ingrese el nombre del aula", "error");
+    return;
+  }
+
+  try {
+    const payload = { nombre: nombreAula.value.trim() };
+    const response = await registrarAula(payload);
+
+    if (response && response.exito !== false) {
+      showModal("Exito", `Aula ${nombreAula.value} registrada`, "success");
+
+      if (response.id_aula) {
+        mockData.value.push(response);
+      }
+
+      nombreAula.value = "";
+      await fetchAulas();
+    } else {
+      const msg = response.mensaje || "Error al registrar el aula";
+      showModal("Error", msg, "error");
+    }
+  } catch (error) {
+    showModal(
+      "Error de conexión",
+      "No se pudo establecer la conexión al servidor",
+      "error",
+    );
+  }
+};
+
+const fetchAulas = async () => {
+  try {
+    const response = await listAllAulas();
+    if (response && response.exito) {
+      aulas.value = response.data;
+    } else {
+      console.error("Error al cargar aulas:", response.mensaje);
+    }
+  } catch (error) {
+    console.error("Error de conexión al listar aulas:", error);
+  }
+};
+
+onMounted(async () => {
+  await fetchAulas();
+});
 </script>
 
 <style scoped>
@@ -134,5 +187,55 @@ const mockData = [
   border-radius: 12px;
   background-color: #f6f6f6;
   box-shadow: 5px 5px 0px 2px #cfcece;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.success h3 {
+  color: #27ae60;
+}
+.error h3 {
+  color: #e74c3c;
+}
+
+.modal-button {
+  margin-top: 1.5rem;
+  padding: 0.7rem 2rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #0095ff;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.modal-button:hover {
+  background-color: #0076ca;
 }
 </style>
