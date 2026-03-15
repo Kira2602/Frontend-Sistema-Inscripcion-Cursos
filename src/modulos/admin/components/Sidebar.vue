@@ -3,7 +3,6 @@
     <div class="sidebar-accent"></div>
 
     <div class="sidebar-content">
-      
       <!-- Logo y título -->
       <div class="profile-section">
         <div class="profile-img">
@@ -17,18 +16,17 @@
 
       <!-- NUEVA SECCIÓN USUARIO -->
       <div class="user-section">
-  <div class="user-icon">
-    <img 
-      src="https://cdn-icons-png.flaticon.com/512/149/149071.png" 
-      alt="Usuario"
-    />
-  </div>
-  <div class="user-data">
-    <div class="user-name">{{ nombreUsuario }}</div>
-    <div class="user-role">Administrador</div>
-  </div>
-</div>
-
+        <div class="user-icon">
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+            alt="Usuario"
+          />
+        </div>
+        <div class="user-data">
+          <div class="user-name">{{ nombreUsuario }}</div>
+          <div class="user-role">Administrador</div>
+        </div>
+      </div>
 
       <!-- Menú -->
       <!-- 
@@ -36,54 +34,59 @@
         
       -->
       <nav class="menu">
-        <router-link :to="{name:'listarCarreras'}" class="menu-item">Carreras</router-link>
-        <router-link :to="{name:'listarCursos'}" class="menu-item">Cursos</router-link>
-        <router-link :to="{name:'listarExtra'}" class="menu-item">Extracurriculares</router-link>
+        <router-link :to="{ name: 'listarCarreras' }" class="menu-item"
+          >Carreras</router-link
+        >
+        <router-link :to="{ name: 'listarCursos' }" class="menu-item"
+          >Cursos</router-link
+        >
+        <router-link :to="{ name: 'listarExtra' }" class="menu-item"
+          >Extracurriculares</router-link
+        >
+        <router-link :to="{ name: 'listarAulas' }" class="menu-item"
+          >Aulas</router-link
+        >
       </nav>
 
       <!-- Logout -->
-      <button class="logout-btn" @click="logoutUsuario">
-        Cerrar Sesión
-      </button>
-
+      <button class="logout-btn" @click="logoutUsuario">Cerrar Sesión</button>
     </div>
   </aside>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { useRouter } from "vue-router";
+import { ref, onMounted } from "vue";
 //import { logout } from '../servicios/seguridadService'
 
-const router = useRouter()
+const router = useRouter();
 
-const nombreUsuario = ref('')
+const nombreUsuario = ref("");
 onMounted(() => {
-  nombreUsuario.value = localStorage.getItem('nombre') || "Usuario"; 
-})
+  nombreUsuario.value = localStorage.getItem("nombre") || "Usuario";
+});
 
 const logoutUsuario = async () => {
-  localStorage.clear()
+  localStorage.clear();
   router.push({
-    name:"login"
-  })
-}
+    name: "login",
+  });
+};
 </script>
 
 <style scoped>
-
 /* Contenedor principal */
 .sidebar-container {
   display: flex;
   width: 280px;
   height: 100vh;
-  background-color: #A0DDE0;
+  background-color: #a0dde0;
 }
 
 /* Franja lateral */
 .sidebar-accent {
   width: 45px;
-  background-color: #004D66;
+  background-color: #004d66;
   height: 100%;
 }
 
@@ -107,7 +110,7 @@ const logoutUsuario = async () => {
 .profile-img {
   width: 80px;
   height: 80px;
-  background-color: #D9D9D9;
+  background-color: #d9d9d9;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -128,7 +131,7 @@ const logoutUsuario = async () => {
 .titulo {
   font-size: 3.5vh;
   font-weight: bold;
-  color: #004D66;
+  color: #004d66;
 }
 
 /* SECCIÓN USUARIO */
@@ -144,7 +147,7 @@ const logoutUsuario = async () => {
   width: 45px;
   height: 45px;
   border-radius: 50%;
-  background-color: #004D66;
+  background-color: #004d66;
   color: white;
   display: flex;
   justify-content: center;
@@ -159,12 +162,12 @@ const logoutUsuario = async () => {
 
 .user-name {
   font-weight: bold;
-  color: #002B3D;
+  color: #002b3d;
 }
 
 .user-role {
   font-size: 0.85rem;
-  color: #004D66;
+  color: #004d66;
   opacity: 0.8;
 }
 
@@ -181,8 +184,8 @@ const logoutUsuario = async () => {
   text-decoration: none;
   padding: 15px;
   border-radius: 30px;
-  background: #7FB6BD;
-  color: #002B3D;
+  background: #7fb6bd;
+  color: #002b3d;
   font-weight: 600;
   text-align: center;
   transition: all 0.3s ease;
@@ -220,7 +223,7 @@ const logoutUsuario = async () => {
   width: 45px;
   height: 45px;
   border-radius: 50%;
-  background-color: #004D66;
+  background-color: #004d66;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -232,6 +235,4 @@ const logoutUsuario = async () => {
   height: 70%;
   object-fit: contain;
 }
-
-
 </style>
