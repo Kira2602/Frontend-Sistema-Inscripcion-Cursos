@@ -59,6 +59,8 @@ import ModalError from "../../seguridad/components/ModalError.vue"; //Modal de e
 import ModalExito from "../../seguridad/components/ModalExito.vue"; //Modal de exito en operacion
 import DeletionModal from "../../seguridad/components/DeletionModal.vue";
 import { listarExtra } from "../servicios/adminsService";
+import { eliminarCurso, editarCursoExtracurricular } from "../servicios/cursosService";
+
 
 const showModal = ref(false);
 const successMessage = ref("");
@@ -133,7 +135,7 @@ const deleteTeacher = async () => {
   if (!selectedUser.value) return;
 
   try {
-    const response = await eliminarcurso(selectedUser.value.ci);
+    const response = await eliminarCurso(selectedUser.value.id_materia);
     if (response.success === false) {
       console.error("Error al eliminar: ", response.message);
       return;
