@@ -190,7 +190,7 @@ export const retirarMateria = async (inscripcionId, materiaId) => {
 };
 
 export const miPerfil = async () => {
-  return api.get("/estudiante/mi-perfil", {
+  return api.get("/estudiantes/mi-perfil", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
