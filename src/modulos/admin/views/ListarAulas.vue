@@ -12,8 +12,18 @@
         class="new-aula"
         placeholder="Nombre o código"
         @keyup.enter="handleRegister"
+        :disabled="isSubmitting"
       />
-      <button class="registrar" @click="handleRegister">Registrar</button>
+      <button
+        class="registrar"
+        @click="handleRegister"
+        :disabled="isSubmitting"
+      >
+        <span v-if="!isSubmitting">Registrar</span>
+        <span v-else class="loading-content">
+          <i class="spinner"></i> Registrando...
+        </span>
+      </button>
     </div>
 
     <h2>Aulas Registradas:</h2>
@@ -53,6 +63,8 @@ import Icon from "../../seguridad/components/Icon.vue";
 
 const nombreAula = ref("");
 const aulas = ref([]);
+const isSubmitting = ref(false);
+
 const modal = ref({
   show: false,
   title: "",
@@ -73,6 +85,8 @@ const handleRegister = async () => {
     );
     return;
   }
+
+  isSubmitting.value = true;
 
   try {
     const payload = { nombre: nombreAula.value.trim() };
@@ -95,6 +109,8 @@ const handleRegister = async () => {
     }
   } catch (error) {
     showModal("Error de conexión", "Servidor no disponible", "error");
+  } finally {
+    isSubmitting.value = false;
   }
 };
 
@@ -119,14 +135,17 @@ onMounted(() => fetchAulas());
   align-items: flex-start;
   margin-bottom: 2rem;
 }
+
 .subtitle {
   color: #707070;
 }
+
 .main-card {
   padding: 2rem;
   background: white;
   border-radius: 12px;
 }
+
 .register-container {
   margin: 0.5rem 0rem;
   display: flex;
@@ -134,6 +153,7 @@ onMounted(() => fetchAulas());
   align-items: center;
   margin-bottom: 1rem;
 }
+
 .new-aula {
   flex: 6;
   padding: 0.8rem;
@@ -142,28 +162,18 @@ onMounted(() => fetchAulas());
   outline: none;
   transition: 0.2s;
 }
+
 .new-aula:focus {
   border-color: #0095ff;
 }
-.registrar {
-  cursor: pointer;
-  flex: 2;
-  padding: 0.8rem;
-  background: #0095ff;
-  color: white;
-  border: 1px solid #0076ca;
-  border-radius: 6px;
-  font-weight: bold;
-}
-.registrar:hover {
-  background: #0076ca;
-}
+
 .aulas-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1rem;
   margin-top: 1rem;
 }
+
 .single-aula {
   height: 10rem;
   display: flex;
@@ -175,6 +185,53 @@ onMounted(() => fetchAulas());
   border-radius: 12px;
   background: #f6f6f6;
   box-shadow: 4px 4px 0px #cfcece;
+}
+
+.registrar {
+  cursor: pointer;
+  flex: 2;
+  padding: 0.8rem;
+  background: #0095ff;
+  color: white;
+  border: 1px solid #0076ca;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.registrar:hover:not(:disabled) {
+  background: #0076ca;
+}
+
+.registrar:disabled {
+  background: #a5d8ff;
+  border-color: #a5d8ff;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.loading-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .modal-overlay {
@@ -196,7 +253,6 @@ onMounted(() => fetchAulas());
   max-width: 400px;
   text-align: center;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  transform: scale(1);
   animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
@@ -217,6 +273,7 @@ onMounted(() => fetchAulas());
   color: #27ae60;
   border: 2px solid #27ae60;
 }
+
 .success h3 {
   color: #27ae60;
 }
@@ -226,6 +283,7 @@ onMounted(() => fetchAulas());
   color: #e74c3c;
   border: 2px solid #e74c3c;
 }
+
 .error h3 {
   color: #e74c3c;
 }
@@ -267,6 +325,7 @@ onMounted(() => fetchAulas());
 .fade-leave-active {
   transition: opacity 0.3s ease;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
