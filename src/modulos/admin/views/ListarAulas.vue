@@ -11,6 +11,7 @@
         type="text"
         class="new-aula"
         placeholder="Nombre o código"
+        @keyup.enter="handleRegister"
       />
       <button class="registrar" @click="handleRegister">Registrar</button>
     </div>
@@ -24,13 +25,25 @@
     </div>
   </div>
 
-  <div v-if="modal.show" class="modal-overlay">
-    <div class="modal-content" :class="modal.type">
-      <h3>{{ modal.title }}</h3>
-      <p>{{ modal.message }}</p>
-      <button @click="modal.show = false">Cerrar</button>
+  <Transition name="fade">
+    <div
+      v-if="modal.show"
+      class="modal-overlay"
+      @click.self="modal.show = false"
+    >
+      <div class="modal-content" :class="modal.type">
+        <div class="modal-icon-circle">
+          <span v-if="modal.type === 'success'">✓</span>
+          <span v-else>✕</span>
+        </div>
+        <h3>{{ modal.title }}</h3>
+        <p>{{ modal.message }}</p>
+        <button class="modal-close-btn" @click="modal.show = false">
+          Entendido
+        </button>
+      </div>
     </div>
-  </div>
+  </Transition>
 </template>
 
 <script setup>
@@ -39,9 +52,7 @@ import { listAllAulas, registrarAula } from "../servicios/aulasService";
 import Icon from "../../seguridad/components/Icon.vue";
 
 const nombreAula = ref("");
-
 const aulas = ref([]);
-
 const modal = ref({
   show: false,
   title: "",
@@ -50,17 +61,16 @@ const modal = ref({
 });
 
 const showModal = (title, message, type) => {
-  modal.value = {
-    show: true,
-    title,
-    message,
-    type,
-  };
+  modal.value = { show: true, title, message, type };
 };
 
 const handleRegister = async () => {
   if (!nombreAula.value.trim()) {
-    showModal("Campo vacío", "Ingrese el nombre del aula", "error");
+    showModal(
+      "Campo vacío",
+      "Por favor, ingresa un nombre para el aula.",
+      "error",
+    );
     return;
   }
 
@@ -69,24 +79,22 @@ const handleRegister = async () => {
     const response = await registrarAula(payload);
 
     if (response && response.exito !== false) {
-      showModal("Exito", `Aula ${nombreAula.value} registrada`, "success");
-
-      if (response.id_aula) {
-        mockData.value.push(response);
-      }
-
+      showModal(
+        "¡Registro Exitoso!",
+        `El aula ${nombreAula.value} ha sido guardada.`,
+        "success",
+      );
       nombreAula.value = "";
       await fetchAulas();
     } else {
-      const msg = response.mensaje || "Error al registrar el aula";
-      showModal("Error", msg, "error");
+      showModal(
+        "No se pudo registrar",
+        response.mensaje || "Error inesperado",
+        "error",
+      );
     }
   } catch (error) {
-    showModal(
-      "Error de conexión",
-      "No se pudo establecer la conexión al servidor",
-      "error",
-    );
+    showModal("Error de conexión", "Servidor no disponible", "error");
   }
 };
 
@@ -95,87 +103,67 @@ const fetchAulas = async () => {
     const response = await listAllAulas();
     if (response && response.exito) {
       aulas.value = response.data;
-    } else {
-      console.error("Error al cargar aulas:", response.mensaje);
     }
   } catch (error) {
-    console.error("Error de conexión al listar aulas:", error);
+    console.error("Error al listar aulas:", error);
   }
 };
 
-onMounted(async () => {
-  await fetchAulas();
-});
+onMounted(() => fetchAulas());
 </script>
 
 <style scoped>
 .titles {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: flex-start;
-  width: 100%;
-  margin: 0rem 0rem 2rem 0rem;
+  margin-bottom: 2rem;
 }
-
 .subtitle {
   color: #707070;
 }
-
 .main-card {
-  margin: 0px 0px 0px 0px;
-  padding: 2rem 2rem;
-  width: 100%;
-  background-color: white;
+  padding: 2rem;
+  background: white;
   border-radius: 12px;
 }
-
 .register-container {
-  width: 100%;
-  margin: 0rem 0rem 1rem 0rem;
+  margin: 0.5rem 0rem;
   display: flex;
-  flex-direction: row;
-  justify-content: center;
+  gap: 2rem;
   align-items: center;
-  gap: 4rem;
+  margin-bottom: 1rem;
 }
-
 .new-aula {
   flex: 6;
-  margin: 0.5rem 0rem;
-  padding: 0.8rem 0.5rem;
-  outline: none;
+  padding: 0.8rem;
   border: 2px solid #b1b1b1;
   border-radius: 6px;
-  transition: all 0.2s ease-in 0s;
+  outline: none;
+  transition: 0.2s;
 }
-
 .new-aula:focus {
-  border: 2px solid #0095ff;
+  border-color: #0095ff;
 }
-
 .registrar {
   cursor: pointer;
-  flex: 4;
-  padding: 0.5rem;
-  background-color: #0095ff;
-  color: #ffffff;
-  border: 2px solid #0076ca;
+  flex: 2;
+  padding: 0.8rem;
+  background: #0095ff;
+  color: white;
+  border: 1px solid #0076ca;
   border-radius: 6px;
-  font-size: medium;
+  font-weight: bold;
 }
-
 .registrar:hover {
-  background-color: #0076ca;
+  background: #0076ca;
 }
-
 .aulas-cards {
-  margin: 1rem 0rem;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1rem;
+  margin-top: 1rem;
 }
-
 .single-aula {
   height: 10rem;
   display: flex;
@@ -185,17 +173,15 @@ onMounted(async () => {
   gap: 1rem;
   border: 1px solid #e0e0e0;
   border-radius: 12px;
-  background-color: #f6f6f6;
-  box-shadow: 5px 5px 0px 2px #cfcece;
+  background: #f6f6f6;
+  box-shadow: 4px 4px 0px #cfcece;
 }
 
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -204,38 +190,85 @@ onMounted(async () => {
 
 .modal-content {
   background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  max-width: 400px;
+  padding: 2.5rem;
+  border-radius: 20px;
   width: 90%;
+  max-width: 400px;
   text-align: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  transform: scale(1);
+  animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-.modal-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+.modal-icon-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 1.8rem;
+  font-weight: bold;
 }
 
+.success .modal-icon-circle {
+  background: #e8f8f0;
+  color: #27ae60;
+  border: 2px solid #27ae60;
+}
 .success h3 {
   color: #27ae60;
+}
+
+.error .modal-icon-circle {
+  background: #fdf2f2;
+  color: #e74c3c;
+  border: 2px solid #e74c3c;
 }
 .error h3 {
   color: #e74c3c;
 }
 
-.modal-button {
-  margin-top: 1.5rem;
-  padding: 0.7rem 2rem;
-  border: none;
-  border-radius: 6px;
-  background-color: #0095ff;
-  color: white;
-  cursor: pointer;
-  font-weight: bold;
+.modal-content p {
+  color: #636e72;
+  margin-bottom: 2rem;
+  line-height: 1.5;
 }
 
-.modal-button:hover {
-  background-color: #0076ca;
+.modal-close-btn {
+  width: 100%;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 8px;
+  background: #2d3436;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.modal-close-btn:hover {
+  background: #000;
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
