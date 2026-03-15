@@ -24,6 +24,7 @@
         <div class="user-data">
           <div class="user-name">{{ nombreUsuario }}</div>
           <div class="user-role">Estudiante</div>
+          <router-link to="miPerfil">Mi Perfil</router-link>
         </div>
       </div>
 
