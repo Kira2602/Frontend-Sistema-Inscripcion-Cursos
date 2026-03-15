@@ -188,3 +188,11 @@ export const retirarMateria = async (inscripcionId, materiaId) => {
     throw error.response?.data || error;
   }
 };
+
+export const miPerfil = async () => {
+  return api.get("/estudiante/mi-perfil", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

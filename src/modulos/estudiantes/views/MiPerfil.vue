@@ -114,7 +114,7 @@
 import { ref, computed, onMounted } from "vue"
 import { miPerfil } from "../services/estudianteService"
 
-// ESTADOS
+//ESTADOS
 const estudiante = ref(null)
 const materias = ref([])
 const horario = ref([])
