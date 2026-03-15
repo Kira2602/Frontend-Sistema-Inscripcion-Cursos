@@ -30,6 +30,7 @@ import OfertaAcademica from "../modulos/estudiantes/views/OfertaAcademica.vue";
 import MiCarrera from "../modulos/estudiantes/views/miCarrera.vue";
 import MisMaterias from "../modulos/estudiantes/views/MisMaterias.vue";
 import Pagos from "../modulos/pagos/components/Pagos.vue";
+import MiPerfil from "../modulos/estudiantes/views/MiPerfil.vue";
 import EstadoAcademico from "../modulos/estudiantes/views/EstadoAcademico.vue";
 import MiProgreso from "../modulos/estudiantes/views/MiProgreso.vue";
 
@@ -212,6 +213,11 @@ const routes = [
         name: "miProgreso",
         component: MiProgreso,
       },
+      {
+        path:"miPerfil",
+        name:"miPerfil",
+        component:MiPerfil
+      }
     ],
   },
 ];
