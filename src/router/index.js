@@ -29,13 +29,16 @@ import ListarExtra from "../modulos/admin/views/ListarExtra.vue";
 import OfertaAcademica from "../modulos/estudiantes/views/OfertaAcademica.vue";
 import MiCarrera from "../modulos/estudiantes/views/miCarrera.vue";
 import MisMaterias from "../modulos/estudiantes/views/MisMaterias.vue";
-import pagos from "../modulos/pagos/components/Pagos.vue"
 import Pagos from "../modulos/pagos/components/Pagos.vue";
 import MiPerfil from "../modulos/estudiantes/views/MiPerfil.vue";
+import EstadoAcademico from "../modulos/estudiantes/views/EstadoAcademico.vue";
+import MiProgreso from "../modulos/estudiantes/views/MiProgreso.vue";
 
 //Importar vistas del docente
 import MateriasDocente from "../modulos/docentes/views/MateriasDocente.vue";
 import NotasMateria from "../modulos/docentes/views/NotasMateria.vue";
+import AsistenciaMateria from "../modulos/docentes/views/AsistenciaMateria.vue";
+import ListarAulas from "../modulos/admin/views/ListarAulas.vue";
 
 const routes = [
   {
@@ -112,6 +115,11 @@ const routes = [
         component: ListarExtra,
       },
       {
+        path: "listarAulas",
+        name: "listarAulas",
+        component: ListarAulas,
+      },
+      {
         path: "",
         redirect: { name: "listarCarreras" },
       },
@@ -145,22 +153,27 @@ const routes = [
   {
     path: "/docente",
     component: DocenteLayout,
-    children:[
+    children: [
       {
-        path:"",
-        redirect:{name:"MateriasDocente"}
+        path: "",
+        redirect: { name: "MateriasDocente" },
       },
       {
-        path:"MateriasDocente",
-        name:"MateriasDocente",
-        component:MateriasDocente
+        path: "MateriasDocente",
+        name: "MateriasDocente",
+        component: MateriasDocente,
       },
       {
-        path:"NotasMateria/:id_materia",
-        name:"NotasMateria",
-        component:NotasMateria
-      }
-    ]
+        path: "NotasMateria/:id_materia",
+        name: "NotasMateria",
+        component: NotasMateria,
+      },
+      {
+        path: "AsistenciaMateria/:id_materia",
+        name: "AsistenciaMateria",
+        component: AsistenciaMateria,
+      },
+    ],
   },
   {
     path: "/estudiante",
@@ -181,14 +194,24 @@ const routes = [
         component: MiCarrera,
       },
       {
-        path:"misMaterias",
-        name:"misMaterias",
-        component:MisMaterias
+        path: "misMaterias",
+        name: "misMaterias",
+        component: MisMaterias,
       },
       {
-        path:"pagarCarrito",
-        name:"pagarCarrito",
-        component:Pagos
+        path: "estadoAcademico",
+        name: "estadoAcademico",
+        component: EstadoAcademico,
+      },
+      {
+        path: "pagarCarrito",
+        name: "pagarCarrito",
+        component: Pagos,
+      },
+      {
+        path: "miProgreso/:id_materia",
+        name: "miProgreso",
+        component: MiProgreso,
       },
       {
         path:"miPerfil",

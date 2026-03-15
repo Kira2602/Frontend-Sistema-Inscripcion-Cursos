@@ -3,8 +3,7 @@
     <div class="modal-content">
       <div class="helper-container">
         <div class="user-data">
-          
-          <h2>{{curso.nombre}}</h2>
+          <h2>{{ curso.nombre }}</h2>
         </div>
 
         <div class="close-button" @click="$emit('close')">
@@ -15,69 +14,100 @@
       <form>
         <div class="form-grid">
 
-            <!-- FILA 1 -->
-            <div class="field">
-                <label>Código</label>
-                <input :value="curso.id_materia" disabled />
-            </div>
+          <!-- FILA 1 -->
+          <div class="field">
+            <label>Código</label>
+            <input :value="curso.id_materia" disabled />
+          </div>
 
-            <div class="field">
-                <label>Docente</label>
-                <input :value="curso.docente?.nombre" disabled />
-            </div>
+          <div class="field">
+            <label>Docente</label>
+            <input :value="curso.docente?.nombre || 'Sin docente'" disabled />
+          </div>
 
-            <div class="field">
-                <label>Tipo</label>
-                <input :value="curso.tipo" disabled />
-            </div>
+          <div class="field">
+            <label>Tipo</label>
+            <input :value="curso.tipo || 'N/A'" disabled />
+          </div>
 
-            <div class="field">
-                <label>Cupo</label>
-                <input :value="curso.cupo" disabled />
-            </div>
+          <div class="field">
+            <label>Cupo</label>
+            <input :value="curso.cupo ?? 'N/A'" disabled />
+          </div>
 
-                <!-- FILA 2 -->
-            <div class="field">
-                <label>Día</label>
-                <input :value="curso.dia" disabled />
-            </div>
+          <!-- FILA 2 -->
+          <div class="field">
+            <label>Día</label>
+            <input :value="curso.dia || 'N/A'" disabled />
+          </div>
 
-           
+          <!-- FILA 3 -->
+          <div class="field">
+            <label>Fecha de inicio</label>
+            <input :value="formatearFecha(curso.fecha_inicio)" disabled />
+          </div>
 
-                <!-- FILA 3 -->
-            <div class="field">
-                <label>Fecha de inicio</label>
-                <input :value="curso.fecha_inicio" disabled />
-            </div>
+          <div class="field">
+            <label>Hora de inicio</label>
+            <input :value="curso.hora_inicio || 'N/A'" disabled />
+          </div>
 
-            <div class="field">
-                <label>Hora de inicio</label>
-                <input :value="curso.hora_inicio" disabled />
-            </div>
+          <div class="field">
+            <label>Fecha fin</label>
+            <input :value="formatearFecha(curso.fecha_fin)" disabled />
+          </div>
 
-            <div class="field">
-                <label>Fecha fin</label>
-                <input :value="curso.fecha_fin" disabled />
-            </div>
+          <div class="field">
+            <label>Hora fin</label>
+            <input :value="curso.hora_fin || 'N/A'" disabled />
+          </div>
 
-            <div class="field">
-                <label>Hora fin</label>
-                <input :value="curso.hora_fin" disabled />
-            </div>
+          <div
+            v-if="normalizarEstado(curso.estado) === 'RETIRADO'"
+            class="field"
+          >
+            <label>Fecha retiro</label>
+            <input :value="formatearFecha(curso.fecha_retiro)" disabled />
+          </div>
 
-                <!-- MONTO -->
-            <div class="field monto-field">
-                <label>Monto</label>
-                <input :value="curso.monto + ' Bs'" disabled />
-            </div>
+          <!-- MONTO -->
+          <div class="field monto-field">
+            <label>Monto</label>
+            <input :value="curso.monto != null ? `${curso.monto} Bs` : 'N/A'" disabled />
+          </div>
 
         </div>
       </form>
-    
+
+      <div class="buttons">
+        <button
+          v-if="normalizarEstado(curso.estado) !== 'RETIRADO'"
+          type="button"
+          class="btn-retirar"
+          @click="$emit('retirar', curso)"
+        >
+          Retirar Materia
+        </button>
+
+        <button
+          v-else
+          type="button"
+          class="btn-retirada"
+          disabled
+        >
+          Materia retirada
+        </button>
+
+        <button
+          type="button"
+          class="btn-progreso"
+          @click="verMiProgreso"
+        >
+          Ver mi progreso
+        </button>
+      </div>
     </div>
   </div>
-
-  
 </template>
 
 <script setup>
@@ -85,35 +115,45 @@ import { computed, ref, watch } from "vue";
 import { usarCarrito } from "../../../store/carrito";
 import ModalError from "../../seguridad/components/ModalError.vue";
 import ModalExito from "../../seguridad/components/ModalExito.vue";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 
-
-const props = defineProps({ 
+const props = defineProps({
   curso: { type: Object, required: true },
-  noCumple:{type:Array,required:true}
+  noCumple: { type: Array, required: true }
 });
-const emit = defineEmits(["close"]);
+
+const emit = defineEmits(["close", "retirar"]);
+
 const noCumpleComputed = computed(() => {
-  // si props.noCumple viene como array de ids
   return Array.isArray(props.noCumple) ? props.noCumple : [];
 });
-// Renombramos user a curso para claridad
 
-// Estado del formulario - solo nombre es editable
 const form = ref({
   nombre: "",
-  cupo:"",
-  dia:"",
-  monto:""
+  cupo: "",
+  dia: "",
+  monto: ""
 });
 
-// Formatear fecha para mostrar
 const formatearFecha = (fecha) => {
   if (!fecha) return "N/A";
-  return fecha; // Las fechas ya vienen en formato YYYY-MM-DD
+  return fecha;
+};
+
+const normalizarEstado = (estado) => {
+  if (!estado) return "";
+  return String(estado).toUpperCase().trim();
+};
+
+const verMiProgreso = () => {
+  router.push({
+    name: "miProgreso",
+    params: { id_materia: props.curso.id_materia }
+  });
 };
 </script>
-
 
 <style scoped>
 .modal-overlay {
@@ -207,7 +247,7 @@ input:focus {
 .buttons {
   margin-top: 40px;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 15px;
 }
 
@@ -240,11 +280,36 @@ input:focus {
   color: white;
 }
 
+.btn-retirar {
+  cursor: pointer;
+  background: #e88787;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+}
+
+.btn-retirar:hover {
+  background-color: #d96d6d;
+}
+
+.btn-retirada {
+  cursor: not-allowed;
+  background: #8e8e8e;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+}
+
 .error {
   color: rgb(255, 128, 128);
   font-size: 13px;
   margin-top: 4px;
 }
+
 .password-wrapper {
   position: relative;
   display: flex;
@@ -270,6 +335,7 @@ input:focus {
 .toggle-btn:hover {
   color: #5fa8a8;
 }
+
 select {
   width: 100%;
   padding: 10px;
@@ -301,11 +367,26 @@ select:focus {
   grid-column: 4;
   margin-top: 10px;
 }
+
 .input-error {
   background-color: rgb(255, 173, 173);
 }
 
 .input-success {
   background-color: rgb(178, 255, 178);
+}
+
+.btn-progreso {
+  cursor: pointer;
+  background: #5fa8a8;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+}
+
+.btn-progreso:hover {
+  background-color: #4b8f8f;
 }
 </style>
