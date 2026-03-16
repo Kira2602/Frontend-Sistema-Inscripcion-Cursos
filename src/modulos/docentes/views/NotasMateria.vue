@@ -49,7 +49,7 @@
 
           <!-- NOTAS ANTIGUAS SOLO VISUAL -->
           <td v-for="i in cantidadEvaluaciones" :key="i">
-            {{ estudiante.notas[i-1].calificacion ?? "-" }}
+            {{ estudiante.notas?.[i - 1]?.calificacion ?? "-" }}
           </td>
 
           <!-- NUEVA NOTA -->
@@ -170,7 +170,7 @@ const mostrarModal = ref(false)
 import ModalExito from "../../seguridad/components/ModalExito.vue"
 import ModalError from "../../seguridad/components/ModalError.vue"
 import { computed } from "vue"
-import { listarNotasMateria, registrarNotas } from "../services/DocenteService";
+import { listarNotasMateria, registrarNotas, editarNotas } from "../services/DocenteService";
 const route = useRoute()
 const router=useRouter()
 const mostrarError=ref(false);
@@ -180,29 +180,36 @@ const mostrarModalEditar = ref(false)
 const estudianteSeleccionado = ref(null)
 const notasEditar = ref([])
 onMounted(async () => {
-  try {
+  const id_materia = route.params.id_materia
+  const response = await listarNotasMateria(id_materia)
 
-    const id_materia = route.params.id_materia
-
-    const response = await listarNotasMateria(id_materia)
-
-    estudiantes.value = response.data.data.map(e => ({
-      ...e,
-      notas: e.notas ?? []
-    }))
-
-
-  } catch (error) {
-    console.log("Error al obtener los cursos: ", error);
+  if (!response?.data?.data) {
+    mensajeModal.value = response?.mensaje || "Error al obtener las notas de la materia"
+    mostrarError.value = true
+    estudiantes.value = []
+    return
   }
+
+  estudiantes.value = response.data.data.map(e => ({
+    ...e,
+    notas: e.notas ?? []
+  }))
 })
+
 function abrirModalEditar(estudiante) {
+  if (!estudiante.notas || estudiante.notas.length === 0) {
+    mensajeModal.value = "Este estudiante todavía no tiene notas registradas para editar"
+    mostrarError.value = true
+    return
+  }
+
   estudianteSeleccionado.value = estudiante
-  // Hacemos una copia de sus notas actuales para editar
+
   notasEditar.value = estudiante.notas.map(n => ({
     id_nota: n.id_nota,
     calificacion: n.calificacion,
   }))
+
   mostrarModalEditar.value = true
 }
 function cancelarEdicion() {
@@ -214,6 +221,26 @@ function cancelarEdicion() {
 async function guardarEdicion() {
   if (!estudianteSeleccionado.value) return
 
+  if (!notasEditar.value || notasEditar.value.length === 0) {
+    mensajeModal.value = "No hay notas para editar"
+    mostrarError.value = true
+    return
+  }
+
+  const tieneNotasInvalidas = notasEditar.value.some(
+    nota =>
+      nota.calificacion === null ||
+      nota.calificacion === undefined ||
+      nota.calificacion === "" ||
+      Number.isNaN(Number(nota.calificacion))
+  )
+
+  if (tieneNotasInvalidas) {
+    mensajeModal.value = "Todas las notas deben tener una calificación válida"
+    mostrarError.value = true
+    return
+  }
+
   const id_materia = route.params.id_materia
   const enviar = {
     id_materia,
@@ -221,28 +248,41 @@ async function guardarEdicion() {
       {
         id_estudiante: estudianteSeleccionado.value.id_estudiante,
         nombre: estudianteSeleccionado.value.nombre,
-        nuevas_notas: [...notasEditar.value] // ya contiene id_nota y calificacion
+        nuevas_notas: notasEditar.value.map(n => ({
+          id_nota: n.id_nota,
+          calificacion: Number(n.calificacion),
+        }))
       }
     ]
   }
+
   console.log(JSON.stringify(enviar, null, 2))
-  
-/*
-  try {
-    const response = await registrarNotas(enviar)
-    if (response.exito) {
-      mensajeModal.value = "Notas actualizadas correctamente"
-      mostrarExito.value = true
-      // Actualizamos localmente las notas
-      estudianteSeleccionado.value.notas = notasEditar.value.map(n => ({ ...n }))
-      cancelarEdicion()
-    }
-  } catch (error) {
-    mensajeModal.value = "Error al actualizar notas"
-    mostrarError.value = true
-    console.log(error)
-  }*/
+
+  const response = await editarNotas(enviar)
+
+  if (response.exito) {
+    mensajeModal.value = response.mensaje || "Notas actualizadas correctamente"
+    mostrarExito.value = true
+
+    estudianteSeleccionado.value.notas = notasEditar.value.map(n => ({
+      ...n,
+      calificacion: Number(n.calificacion),
+    }))
+
+    cancelarEdicion()
+
+    setTimeout(() => {
+      router.go(0)
+    }, 2000)
+
+    return
+  }
+
+  mensajeModal.value = response.mensaje || "Error al actualizar notas"
+  mostrarError.value = true
+  console.log(response)
 }
+
 const notasCompletas = computed(() => {
 
   if(!nuevaEvaluacion.value) return false
@@ -252,14 +292,17 @@ const notasCompletas = computed(() => {
   )
 
 })
-function calcularPromedio(estudiante){
-  let notas = [...estudiante.notas.map(n => n.calificacion)]
+function calcularPromedio(estudiante) {
+  let notas = [...(estudiante.notas ?? []).map(n => Number(n.calificacion))]
   const nueva = obtenerNuevaNota(estudiante.id_estudiante)
-  if(nueva && nueva.nueva_nota !== null){
+
+  if (nueva && nueva.nueva_nota !== null && nueva.nueva_nota !== undefined) {
     notas.push(Number(nueva.nueva_nota))
   }
-  if(notas.length === 0) return "-"
-  const suma = notas.reduce((a,b)=>a+Number(b),0)
+
+  if (notas.length === 0) return "-"
+
+  const suma = notas.reduce((a, b) => a + Number(b), 0)
   return Math.round(suma / notas.length)
 }
 
@@ -275,23 +318,33 @@ const estudiantes = ref([
 
 const cantidadEvaluaciones = computed(() => {
   if (estudiantes.value.length === 0) return 1
-  return Math.max(estudiantes.value[0].notas?.length ?? 0, 1)
+
+  const maxNotas = Math.max(
+    ...estudiantes.value.map(e => e.notas?.length ?? 0),
+    1
+  )
+
+  return maxNotas
 })
 
 function calcularEstado(estudiante) {
+  let notas = [...(estudiante.notas ?? []).map(n => Number(n.calificacion))]
 
-  let notas = [...estudiante.notas]
+  const nueva = obtenerNuevaNota(estudiante.id_estudiante)
 
-  if(estudiante.nueva_nota !== null && estudiante.nueva_nota !== undefined){
-    notas.push(Number(estudiante.nueva_nota))
+  if (nueva && nueva.nueva_nota !== null && nueva.nueva_nota !== undefined && nueva.nueva_nota !== "") {
+    notas.push(Number(nueva.nueva_nota))
   }
 
-  const suma = notas.reduce((a,b)=>a+Number(b),0)
+  if (notas.length === 0) {
+    estudiante.estado = null
+    return
+  }
 
+  const suma = notas.reduce((a, b) => a + Number(b), 0)
   const promedio = suma / notas.length
 
   estudiante.estado = promedio >= 51 ? "APROBADO" : "REPROBADO"
-
 }
 
 function agregarEvaluacion() {
@@ -315,37 +368,55 @@ function obtenerNuevaNota(id_estudiante){
 function guardarNotas() {
   mostrarModal.value = true
 }
- async function confirmarGuardado() {
+
+async function confirmarGuardado() {
   const id_materia = route.params.id_materia
-  console.log("Notas a enviar:")
+
+  const hayNotasInvalidas = nuevasNotas.value.some(
+    nota =>
+      nota.nueva_nota === null ||
+      nota.nueva_nota === undefined ||
+      nota.nueva_nota === "" ||
+      Number.isNaN(Number(nota.nueva_nota))
+  )
+
+  if (hayNotasInvalidas) {
+    mensajeModal.value = "Debes completar todas las nuevas notas"
+    mostrarError.value = true
+    mostrarModal.value = false
+    return
+  }
 
   const enviar = {
     id_materia,
-    notas: [...nuevasNotas.value]
+    notas: nuevasNotas.value.map(n => ({
+      id_estudiante: n.id_estudiante,
+      nombre: n.nombre,
+      nueva_nota: Number(n.nueva_nota),
+    }))
   }
 
   console.log(JSON.stringify(enviar, null, 2))
-  console.log(enviar)
   mostrarModal.value = false
 
+  const response = await registrarNotas(enviar)
 
-  try{
-    const response=await registrarNotas(enviar)
-    if(response.exito){
-      mensajeModal.value="Notas correctamente registradas"
-      mostrarExito.value=true;
+  if (response.exito) {
+    mensajeModal.value = response.mensaje || "Notas correctamente registradas"
+    mostrarExito.value = true
 
+    setTimeout(() => {
+      router.go(0)
+    }, 3000)
 
-      setTimeout(()=>{
-        router.go(0)
-      },3000)
-    }
-  }catch(error){
-    mensajeModal.value="Error al registrar notas";
-    mostrarError.value=true;
-    console.log(error)
+    return
   }
+
+  mensajeModal.value = response.mensaje || "Error al registrar notas"
+  mostrarError.value = true
+  console.log(response)
 }
+
 function cancelarGuardado(){
   mostrarModal.value = false
 }
