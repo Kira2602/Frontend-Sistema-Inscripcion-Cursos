@@ -49,7 +49,7 @@
 
           <!-- NOTAS ANTIGUAS SOLO VISUAL -->
           <td v-for="i in cantidadEvaluaciones" :key="i">
-            {{ estudiante.notas[i-1] ?? "-" }}
+            {{ estudiante.notas[i-1].calificacion ?? "-" }}
           </td>
 
           <!-- NUEVA NOTA -->
@@ -71,6 +71,11 @@
             >
               {{ calcularPromedio(estudiante) }}
             </span>
+          </td>
+          <td>
+            <button class="btn-editar" @click="abrirModalEditar(estudiante)">
+              Editar
+            </button>
           </td>
 
         </tr>
@@ -119,9 +124,31 @@
 
   </div>
 
+
 </div>
 
   </div>
+    <div v-if="mostrarModalEditar" class="modal-overlay">
+  <div class="modal">
+    <h3>Editar notas de {{ estudianteSeleccionado.nombre }}</h3>
+
+    <div class="lista-notas">
+      <div v-for="(nota, index) in notasEditar" :key="nota.id_nota" class="item-nota">
+        Nota {{ index + 1 }}:
+        <input
+          type="number"
+          v-model.number="nota.calificacion"
+          class="input-nota"
+        />
+      </div>
+    </div>
+
+    <div class="botones">
+      <button class="btn-cancelar" @click="cancelarEdicion">Cancelar</button>
+      <button class="btn-confirmar" @click="guardarEdicion">Guardar</button>
+    </div>
+  </div>
+</div>
   <ModalExito 
     :message="mensajeModal" 
     :visible="mostrarExito" 
@@ -149,6 +176,9 @@ const router=useRouter()
 const mostrarError=ref(false);
 const mostrarExito=ref(false)
 const mensajeModal=ref("")
+const mostrarModalEditar = ref(false)
+const estudianteSeleccionado = ref(null)
+const notasEditar = ref([])
 onMounted(async () => {
   try {
 
@@ -166,7 +196,53 @@ onMounted(async () => {
     console.log("Error al obtener los cursos: ", error);
   }
 })
+function abrirModalEditar(estudiante) {
+  estudianteSeleccionado.value = estudiante
+  // Hacemos una copia de sus notas actuales para editar
+  notasEditar.value = estudiante.notas.map(n => ({
+    id_nota: n.id_nota,
+    calificacion: n.calificacion,
+  }))
+  mostrarModalEditar.value = true
+}
+function cancelarEdicion() {
+  mostrarModalEditar.value = false
+  estudianteSeleccionado.value = null
+  notasEditar.value = []
+}
 
+async function guardarEdicion() {
+  if (!estudianteSeleccionado.value) return
+
+  const id_materia = route.params.id_materia
+  const enviar = {
+    id_materia,
+    notas: [
+      {
+        id_estudiante: estudianteSeleccionado.value.id_estudiante,
+        nombre: estudianteSeleccionado.value.nombre,
+        nuevas_notas: [...notasEditar.value] // ya contiene id_nota y calificacion
+      }
+    ]
+  }
+  console.log(JSON.stringify(enviar, null, 2))
+  
+/*
+  try {
+    const response = await registrarNotas(enviar)
+    if (response.exito) {
+      mensajeModal.value = "Notas actualizadas correctamente"
+      mostrarExito.value = true
+      // Actualizamos localmente las notas
+      estudianteSeleccionado.value.notas = notasEditar.value.map(n => ({ ...n }))
+      cancelarEdicion()
+    }
+  } catch (error) {
+    mensajeModal.value = "Error al actualizar notas"
+    mostrarError.value = true
+    console.log(error)
+  }*/
+}
 const notasCompletas = computed(() => {
 
   if(!nuevaEvaluacion.value) return false
@@ -177,23 +253,14 @@ const notasCompletas = computed(() => {
 
 })
 function calcularPromedio(estudiante){
-
-  let notas = [...estudiante.notas]
-
+  let notas = [...estudiante.notas.map(n => n.calificacion)]
   const nueva = obtenerNuevaNota(estudiante.id_estudiante)
-
   if(nueva && nueva.nueva_nota !== null){
     notas.push(Number(nueva.nueva_nota))
   }
-
   if(notas.length === 0) return "-"
-
   const suma = notas.reduce((a,b)=>a+Number(b),0)
-
-  const promedio = suma / notas.length
-
-  return Math.round(promedio)
-
+  return Math.round(suma / notas.length)
 }
 
 
@@ -251,7 +318,6 @@ function guardarNotas() {
  async function confirmarGuardado() {
   const id_materia = route.params.id_materia
   console.log("Notas a enviar:")
-  console.log(JSON.stringify(nuevasNotas.value, null, 2))
 
   const enviar = {
     id_materia,
@@ -279,7 +345,6 @@ function guardarNotas() {
     mostrarError.value=true;
     console.log(error)
   }
-
 }
 function cancelarGuardado(){
   mostrarModal.value = false
@@ -422,5 +487,17 @@ function cancelarGuardado(){
 
 .icon-wrapper:hover {
   background-color: #eee;
+}
+.btn-editar {
+  background: #f0ad4e;
+  color: white;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-editar:hover {
+  background: #ec971f;
 }
 </style>
