@@ -24,11 +24,11 @@
         <div class="user-data">
           <div class="user-name">{{ nombreUsuario }}</div>
           <div class="user-role">Estudiante</div>
-          <router-link to="miPerfil">Mi Perfil</router-link>
         </div>
       </div>
 
       <nav class="menu">
+        <router-link to="/estudiante/miPerfil" class="menu-item" @click="isMenuOpen = false">Mi Perfil</router-link>
         <router-link to="/estudiante/miCarrera" class="menu-item" @click="isMenuOpen = false">Mi Carrera</router-link>
         <router-link to="/estudiante/ofertaAcademica" class="menu-item" @click="isMenuOpen = false">Oferta Academica</router-link>
         <router-link to="/estudiante/misMaterias" class="menu-item" @click="isMenuOpen = false">Mis materias</router-link>
