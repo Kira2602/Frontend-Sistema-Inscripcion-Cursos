@@ -123,7 +123,7 @@
     </div>
 
     <!-- Contenedor con scroll horizontal -->
-    <div class="tabla-contenedor">
+    <div class="tabla-contenedor" v-if="tieneFechas">
       <table class="tabla">
         <thead>
           <tr>
@@ -193,16 +193,23 @@
                   class="icono-asistencia"
                   :class="{
                     'presente': estudiante.asistencias[fecha] === true,
-                    'ausente': estudiante.asistencias[fecha] === false
+                    'ausente': estudiante.asistencias[fecha] === false,
+                    'sin-registro': estudiante.asistencias[fecha] === undefined || estudiante.asistencias[fecha] === null
                   }"
                 >
-                  {{ estudiante.asistencias[fecha] === true ? '✓' : '✗' }}
+                  {{ obtenerIconoAsistencia(estudiante.asistencias[fecha]) }}
                 </span>
               </div>
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Mensaje cuando no hay fechas registradas -->
+    <div v-else class="sin-datos-mensaje">
+      <p>No hay asistencias registradas para esta materia</p>
+      <p class="subtitulo-mensaje">Haz clic en "Registrar Nueva Asistencia" para comenzar</p>
     </div>
 
     <!-- Botones de acción (solo visibles en modo registro) -->
@@ -222,14 +229,15 @@
 
 <script setup>
 import { obtenerHistorialMateria, registrarAsistenciaClase } from "../services/asistenciaService";
-
-import { ref, computed, onMounted } from "vue"
+import { ref, computed, onMounted, watch } from "vue" // Agregué watch aquí
 import { useRoute, useRouter } from "vue-router"
 
 const route = useRoute()
 const materiaId = route.params.id_materia
+const router = useRouter()
 
-// Estados
+// 1. PRIMERO: Declarar los refs
+const estudiantes = ref([])
 const modoRegistro = ref(false)
 const mostrarModalFecha = ref(false)
 const mostrarModalConfirmacion = ref(false)
@@ -239,23 +247,30 @@ const mensajeExito = ref("")
 const nuevaFecha = ref("")
 const nuevaFechaActual = ref("")
 
-const router =useRouter()
+// 2. DESPUÉS: Computed properties que dependen de estudiantes
+const tieneFechas = computed(() => {
+  return fechasOrdenadas.value.length > 0
+})
 
-
-// Datos de ejemplo (esto vendría de tu API)
-const estudiantes = ref([])
-
-// Computed properties
 const todasLasFechas = computed(() => {
   const fechasSet = new Set()
+  // Aquí ya podemos usar estudiantes.value porque ya está declarado
   estudiantes.value.forEach(est => {
-    Object.keys(est.asistencias).forEach(fecha => fechasSet.add(fecha))
+    Object.keys(est.asistencias).forEach(fecha => {
+      if (fecha && fecha !== 'undefined' && fecha !== 'null' && fecha.trim() !== '') {
+        fechasSet.add(fecha)
+      }
+    })
   })
   return Array.from(fechasSet)
 })
 
 const fechasOrdenadas = computed(() => {
-  return [...todasLasFechas.value].sort((a, b) => {
+  const fechas = todasLasFechas.value.filter(fecha => {
+    return fecha && fecha !== 'undefined' && fecha !== 'null' && fecha.trim() !== ''
+  })
+  
+  return fechas.sort((a, b) => {
     return new Date(b) - new Date(a)
   })
 })
@@ -269,24 +284,33 @@ const estudiantesSinMarcar = computed(() => {
   })
 })
 
-// Métodos
 const fechaActual = computed(() => {
   const today = new Date()
-  // Ajustar a la zona horaria local para evitar problemas
   const year = today.getFullYear()
   const month = String(today.getMonth() + 1).padStart(2, '0')
   const day = String(today.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
 })
 
+// 3. FUNCIONES
+const obtenerIconoAsistencia = (estado) => {
+  if (estado === true) return '✓'
+  if (estado === false) return '✗'
+  return '-'
+}
+
 const formatearFecha = (fecha) => {
+  if (!fecha || fecha === 'undefined' || fecha === 'null') return 'Fecha inválida'
   const [year, month, day] = fecha.split('-')
   return `${day}/${month}/${year}`
 }
 
 const calcularPorcentajes = () => {
+  // Verificar que estudiantes existe antes de usarlo
+  if (!estudiantes.value) return
+  
   estudiantes.value.forEach(est => {
-    const asistencias = Object.values(est.asistencias)
+    const asistencias = Object.values(est.asistencias).filter(val => val !== undefined && val !== null)
     const total = asistencias.length
     if (total > 0) {
       const presentes = asistencias.filter(a => a === true).length
@@ -297,7 +321,6 @@ const calcularPorcentajes = () => {
   })
 }
 
-// Gestión de fechas
 const abrirModalFecha = () => {
   nuevaFecha.value = ""
   mostrarModalFecha.value = true
@@ -311,26 +334,19 @@ const cerrarModalFecha = () => {
 const confirmarNuevaFecha = () => {
   if (!nuevaFecha.value) return
 
-  // Verificar si la fecha ya existe
   if (todasLasFechas.value.includes(nuevaFecha.value)) {
+    alert("Esta fecha ya ha sido registrada")
     return
   }
 
-  // Activar modo registro si no estaba activo
   if (!modoRegistro.value) {
     modoRegistro.value = true
   }
   
-  // Establecer la nueva fecha actual
   nuevaFechaActual.value = nuevaFecha.value
   
-  // IMPORTANTE: Agregar la fecha a asistencias de cada estudiante (con null)
-  // para que aparezca la columna en la tabla
   estudiantes.value.forEach(est => {
-    // Agregar a asistencias para que se muestre la columna
     est.asistencias[nuevaFecha.value] = null
-    
-    // También mantener en asistenciasTemp para el modo registro
     est.asistenciasTemp[nuevaFecha.value] = null
   })
 
@@ -343,18 +359,14 @@ const cambiarAsistenciaTemp = (estudiante, fecha) => {
   const estadoActual = estudiante.asistenciasTemp[fecha]
   
   if (estadoActual === null || estadoActual === undefined) {
-    estudiante.asistenciasTemp[fecha] = true // null -> presente
+    estudiante.asistenciasTemp[fecha] = true
   } else if (estadoActual === true) {
-    estudiante.asistenciasTemp[fecha] = false // presente -> ausente
+    estudiante.asistenciasTemp[fecha] = false
   } else {
-    estudiante.asistenciasTemp[fecha] = null // ausente -> pendiente
-  }
-    const cerrarModalExito = () => {
-    mostrarModalExito.value = false
+    estudiante.asistenciasTemp[fecha] = null
   }
 }
 
-// Gestión de confirmación
 const abrirModalConfirmacion = () => {
   mostrarModalConfirmacion.value = true
 }
@@ -369,13 +381,13 @@ const cerrarModalExito = () => {
 
 const confirmarGuardado = async () => {
   try {
-    // Construir payload para backend
     const asistenciasPayload = estudiantes.value.map(est => {
       const temp = est.asistenciasTemp[nuevaFechaActual.value];
+      const estado = temp === true ? true : false;
 
       return {
         ci: est.id_estudiante,
-        estado: temp === true ? true : false
+        estado: estado
       };
     });
 
@@ -386,7 +398,6 @@ const confirmarGuardado = async () => {
 
     const resp = await registrarAsistenciaClase(materiaId, payload);
 
-    // Guardar en UI local después de éxito
     estudiantes.value.forEach(est => {
       const temp = est.asistenciasTemp[nuevaFechaActual.value];
       est.asistencias[nuevaFechaActual.value] = temp === true ? true : false;
@@ -405,7 +416,6 @@ const confirmarGuardado = async () => {
     mostrarModalExito.value = true;
 
     cerrarModalConfirmacion();
-        router.go(0)
 
   } catch (err) {
     console.error(err);
@@ -431,22 +441,23 @@ const confirmarCancelacion = () => {
   mostrarModalCancelar.value = false
 }
 
-// Calcular porcentajes iniciales
-calcularPorcentajes()
-
-// Cargar datos desde el backend
+// 4. onMounted para cargar datos
 onMounted(async () => {
   try {
     const resp = await obtenerHistorialMateria(materiaId);
-    console.log(resp)
+    console.log("Historial de asistencias:", resp)
     const historial = resp.data;
 
     estudiantes.value = historial.map(est => {
       const asistenciasObj = {};
 
-      est.asistencias.forEach(a => {
-        asistenciasObj[a.fecha] = a.estado;
-      });
+      if (est.asistencias && Array.isArray(est.asistencias)) {
+        est.asistencias.forEach(a => {
+          if (a.fecha && a.fecha !== 'undefined' && a.fecha !== 'null') {
+            asistenciasObj[a.fecha] = a.estado;
+          }
+        });
+      }
 
       return {
         id_estudiante: est.ci,
@@ -458,12 +469,15 @@ onMounted(async () => {
 
     calcularPorcentajes();
 
-
   } catch (err) {
-    console.error(err);
+    console.error("Error cargando historial:", err);
   }
 });
 
+// 5. Watch para debug
+watch(todasLasFechas, (nuevasFechas) => {
+  console.log("Fechas actualizadas:", nuevasFechas)
+})
 </script>
 
 <style scoped>
@@ -827,5 +841,41 @@ onMounted(async () => {
 
 .btn-guardar:hover {
   background: #d9a104;
+}
+
+/* Nuevos estilos para el mensaje de sin datos */
+.sin-datos-mensaje {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #5ca6d4;
+  margin: 20px 0;
+}
+
+.sin-datos-mensaje p {
+  font-size: 18px;
+  color: #666;
+  margin: 10px 0;
+}
+
+.sin-datos-mensaje .subtitulo-mensaje {
+  font-size: 14px;
+  color: #999;
+  font-style: italic;
+}
+
+/* Nuevo estilo para el icono de sin registro */
+.icono-asistencia.sin-registro {
+  background: #e0e0e0;
+  color: #666;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: bold;
 }
 </style>

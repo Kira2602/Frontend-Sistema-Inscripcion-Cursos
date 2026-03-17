@@ -20,9 +20,13 @@
         :user="curso"
         @edit="openEditModal(curso)"
         @delete="openDeletionModal(curso)"
+        @info-pagos="verInfoPagos(curso)"
       />
     </div>
   </div>
+
+  <router-view></router-view>
+
   <EditModal
     v-if="isOpen"
     :user="selectedUser"
@@ -52,6 +56,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
 import EditModal from "../components/EditModalExtra.vue"; //modal de edicion de cursos extracurriculares
 import ActionCard from "../components/ActionCard.vue";
 import SearchBarCurso from "../components/SearchBarCurso.vue";//barra de busqueda
@@ -61,6 +66,7 @@ import DeletionModal from "../../seguridad/components/DeletionModal.vue";
 import { listarExtra } from "../servicios/adminsService";
 import { eliminarCurso, editarCursoExtracurricular } from "../servicios/cursosService";
 
+const router = useRouter();
 
 const showModal = ref(false);
 const successMessage = ref("");
@@ -75,7 +81,9 @@ const isDeletion = ref(false);
 
 const carreraSeleccionada = ref("");
 
-
+const verInfoPagos = (curso) => {
+  router.push(`/administrador/info-curso/${curso.id_materia}`);
+};
 
 const openEditModal = (curso) => {
   selectedUser.value = { ...curso };

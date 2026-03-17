@@ -6,6 +6,9 @@
       <p class="teacher-details">{{ user.descripcion}}</p>
     </div>
     <div class="action-group">
+      <button class="action" @click="$emit('info-pagos')" v-if="user.id_materia">
+        <Icon iconName="info" />
+      </button>
       <button class="action" @click="$emit('edit')">
         <Icon v-if="user.id_materia" iconName="edit" />
         <Icon v-else iconName="arrow_forward" />
@@ -21,7 +24,7 @@
 import Icon from '../../seguridad/components/Icon.vue';
 
 defineProps({ user: { type: Object, required: true } });
-defineEmits(["edit", "delete"]);
+defineEmits(["edit", "delete", "info-pagos"]);
 </script>
 
 <style scoped>
