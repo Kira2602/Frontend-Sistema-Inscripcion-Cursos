@@ -502,13 +502,17 @@ const validateAllFacturaFields = () => {
 .layout {
   display: flex;
   flex: 1;
+  flex-wrap: wrap; /* 👈 clave */
 }
 
 .sidebar {
   width: 48px;
-  background: #1a5f7a;
-  display: flex;
-  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none; /* 👈 ocultar en celular */
+  }
 }
 
 .sidebar-top {
@@ -520,15 +524,17 @@ const validateAllFacturaFields = () => {
   flex: 1;
   display: flex;
   align-items: flex-start;
-  justify-content: flex-start;
+  justify-content: center;
   background: transparent; /* 👈 cambiar */
 }
 
 .card {
+  width: 100%;
+  max-width: 680px;
+  margin: 16px;
   background: #ffffff;
   border-radius: 12px;
   padding: 32px 36px 48px;
-  width: 680px;
   margin: 24px;
   box-shadow: 0 2px 16px rgba(0,0,0,0.06);
 }
@@ -555,7 +561,7 @@ const validateAllFacturaFields = () => {
 }
 
 .form-input {
-  width: 380px;
+  width: 100%;
   height: 36px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
@@ -590,10 +596,12 @@ const validateAllFacturaFields = () => {
   gap: 24px;
   margin-top: 40px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .pay-btn {
-  width: 160px;
+  width: 100%;
+  max-width: 160px;
   height: 72px;
   border: none;
   border-radius: 12px;
@@ -631,11 +639,12 @@ const validateAllFacturaFields = () => {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 20;
-  width: 460px;
+  width: 90%;
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.2);
   animation: fadeIn 0.2s ease;
+  max-width: 460px;
 }
 
 @keyframes fadeIn {
@@ -696,12 +705,12 @@ const validateAllFacturaFields = () => {
   width: 175px !important;
 }
 
-/* Modal actions */
 .modal-actions {
   display: flex;
-  gap: 20px;
-  margin-top: 32px;
+  gap: 12px;
+  margin-top: 24px;
   justify-content: center;
+  flex-wrap: wrap; /* 👈 clave */
 }
 
 .btn-pagar {
@@ -743,13 +752,15 @@ const validateAllFacturaFields = () => {
 
 /* QR modal */
 .qr-modal-body {
-  padding: 40px 40px 32px;
+  padding: 24px;
+  text-align: center;
 }
 
 .qr-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 8px;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
 /* Right items sidebar */
@@ -761,6 +772,13 @@ const validateAllFacturaFields = () => {
   flex-direction: column;
   padding: 0;
   min-height: 100%;
+}
+
+@media (max-width: 1024px) {
+  .items-sidebar {
+    width: 100%;
+    order: 3; /* 👈 se va abajo */
+  }
 }
 
 .items-sidebar-header {
@@ -883,5 +901,21 @@ const validateAllFacturaFields = () => {
 .total-highlight {
   font-size: 16px;
   color: #1a5f7a;
+}
+@media (max-width: 600px) {
+  .row-group {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .name-row {
+    flex-direction: column;
+  }
+
+  .expiry-input,
+  .security-input,
+  .name-input {
+    width: 100% !important;
+  }
 }
 </style>

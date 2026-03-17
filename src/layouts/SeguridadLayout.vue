@@ -35,4 +35,10 @@ onMounted(() => {
   background: #f5f6f7;
   overflow-y: auto;
 }
+@media (max-width: 768px) {
+  .content {
+    padding: 20px;
+    padding-top: 70px; /* Espacio para el botón hamburguesa */
+  }
+}
 </style>

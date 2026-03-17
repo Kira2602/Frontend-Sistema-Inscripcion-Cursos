@@ -1,5 +1,8 @@
 <template>
-  <aside class="sidebar-container">
+  <button class="menu-toggle" @click="toggleMenu">
+    ☰
+  </button>
+  <aside class="sidebar-container" :class="{ 'is-open': isMenuOpen }">
     <div class="sidebar-accent"></div>
 
     <div class="sidebar-content">
@@ -50,6 +53,8 @@
 
     </div>
   </aside>
+    <div v-if="isMenuOpen" class="overlay" @click="isMenuOpen = false"></div>
+
 </template>
 
 <script setup>
@@ -60,6 +65,11 @@ import { logout } from '../servicios/seguridadService'
 const router = useRouter()
 
 const nombreUsuario = ref('')
+const isMenuOpen = ref(false) // Estado del menú
+
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value
+}
 onMounted(() => {
   nombreUsuario.value = localStorage.getItem('nombre') 
 })
@@ -79,6 +89,8 @@ const logoutUsuario = async () => {
   width: 280px;
   height: 100vh;
   background-color: #A0DDE0;
+  transition: transform 0.3s ease; /* Transición suave */
+  z-index: 1000;
 }
 
 /* Franja lateral */
@@ -194,6 +206,12 @@ const logoutUsuario = async () => {
   color: white;
 }
 
+.menu-item-disabled {
+  background: #999 !important;
+  color: #666 !important;
+  cursor: not-allowed !important;
+}
+
 /* Logout */
 .logout-btn {
   width: 90%;
@@ -228,5 +246,73 @@ const logoutUsuario = async () => {
   object-fit: contain;
 }
 
+.menu-toggle {
+  display: none; /* Escondido en escritorio */
+  position: fixed;
+  top: 20px;
+  left: 20px; /* Botón a la derecha */
+  z-index: 1100;
+  background: #004D66;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 20px;
+  cursor: pointer;
+}
 
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block; /* Aparece en móviles */
+  }
+
+  .sidebar-container {
+    position: fixed;
+    top: 0;
+    left: 0; /* Lo posicionamos a la derecha */
+    transform: translateX(-100%); /* Lo sacamos de la pantalla por la derecha */
+  }
+
+  /* Cuando tiene la clase 'is-open', vuelve a su posición */
+  .sidebar-container.is-open {
+    transform: translateX(0);
+  }
+
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+  }
+}
+</style>
+2. Layout (AdminContainer.vue)
+Para que el contenido no se rompa cuando el sidebar "desaparece", asegúrate de que el contenedor principal use relative o maneje bien el flujo:
+
+Fragmento de código
+<style scoped>
+.admin-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden; /* Evita scrolls raros */
+}
+
+.content {
+  flex: 1;
+  padding: 40px;
+  background: #f5f6f7;
+  overflow-y: auto;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 20px;
+    padding-top: 70px; /* Espacio para el botón hamburguesa */
+  }
+}
 </style>
