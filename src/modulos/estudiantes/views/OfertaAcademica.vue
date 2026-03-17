@@ -172,6 +172,14 @@ onMounted(async () => {
   } catch (error) {
     console.log("Error al obtener la oferta académica: ", error)
   }
+  try {
+    
+
+    const response2 = await listarOfertaExtra()
+    cursosExtracurriculares.value = response2.data.data || []
+  } catch (error) {
+    console.log("Error al obtener la oferta académica: ", error)
+  }
 })
 </script>
 

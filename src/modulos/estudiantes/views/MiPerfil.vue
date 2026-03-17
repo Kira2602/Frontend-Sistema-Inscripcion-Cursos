@@ -121,7 +121,7 @@ const horario = ref([])
 const modalActivo = ref(false)
 const seleccion = ref(null)
 
-const dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"]
+const dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sábado"]
 
 // CONFIGURACIÓN (Precisión de 15 minutos)
 const START_MIN = 7 * 60; // 07:00
