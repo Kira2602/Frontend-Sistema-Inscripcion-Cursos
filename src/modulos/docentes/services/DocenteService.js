@@ -16,8 +16,7 @@ export const listarMisMaterias = async (ci) => {
 
     return {
       exito: false,
-      mensaje:
-        error.response?.data?.mensaje || "Error al obtener las materias",
+      mensaje: error.response?.data?.mensaje || "Error al obtener las materias",
       status: error.response?.status || 500,
     };
   }
@@ -39,8 +38,7 @@ export const listarNotasMateria = async (id_materia) => {
 
     return {
       exito: false,
-      mensaje:
-        error.response?.data?.mensaje || "Error al obtener las notas",
+      mensaje: error.response?.data?.mensaje || "Error al obtener las notas",
       status: error.response?.status || 500,
     };
   }
@@ -66,8 +64,7 @@ export const registrarNotas = async (datos) => {
 
     return {
       exito: false,
-      mensaje:
-        error.response?.data?.mensaje || "Error al registrar notas",
+      mensaje: error.response?.data?.mensaje || "Error al registrar notas",
       errores: error.response?.data?.errores || [],
       status: error.response?.status || 500,
     };
@@ -97,9 +94,30 @@ export const editarNotas = async (datos) => {
 
     return {
       exito: false,
-      mensaje:
-        error.response?.data?.mensaje || "Error al actualizar notas",
+      mensaje: error.response?.data?.mensaje || "Error al actualizar notas",
       errores: error.response?.data?.errores || [],
+      status: error.response?.status || 500,
+    };
+  }
+};
+
+export const enviarCertificadosLote = async (payload) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.post("/certificados/enviar-lote", payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return {
+      exito: true,
+      mensaje: response.data.message,
+      data: response.data.data,
+    };
+  } catch (error) {
+    console.error("Error enviando lote de certificados:", error);
+    return {
+      exito: false,
+      mensaje:
+        error.response?.data?.message || "Error al enviar los certificados",
       status: error.response?.status || 500,
     };
   }
