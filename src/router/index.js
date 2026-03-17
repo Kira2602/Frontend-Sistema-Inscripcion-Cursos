@@ -24,6 +24,7 @@ import RegistrarCursos from "../modulos/admin/views/RegistrarCursos.vue";
 import RegistrarCursosExtra from "../modulos/admin/views/RegistrarCursosExtra.vue";
 import ListarCursos from "../modulos/admin/views/ListarCursos.vue";
 import ListarExtra from "../modulos/admin/views/ListarExtra.vue";
+import InfoCurso from "../modulos/admin/views/InfoCurso.vue";
 
 //Importar vistas del estudiante
 import OfertaAcademica from "../modulos/estudiantes/views/OfertaAcademica.vue";
@@ -148,6 +149,11 @@ const routes = [
         name: "verCarrera",
         component: VerCarrera,
       },
+      {
+        path: "info-curso/:id",
+        name: "infoCurso",
+        component: () => import("../modulos/admin/views/InfoCurso.vue"), 
+      }
     ],
   },
   {

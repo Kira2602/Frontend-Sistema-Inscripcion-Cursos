@@ -290,3 +290,75 @@ export const listarAulas = async () => {
     };
   }
 };
+
+// ============================================
+// INFORMACIÓN DE PAGOS POR CURSO
+// ============================================
+
+/**
+ * Obtener lista de estudiantes y sus pagos de un curso
+ * GET /api/cursos/:id/estudiantes-pagos
+ */
+export const obtenerEstudiantesPagosCurso = async (id) => {
+  try {
+    const token = getToken();
+    const response = await api.get(`/cursos/${id}/estudiantes-pagos`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return {
+      exito: true,
+      data: response.data.data,
+      mensaje: response.data.message || "Datos obtenidos correctamente",
+    };
+  } catch (error) {
+    if (error.response) {
+      return {
+        exito: false,
+        mensaje: error.response.data.message || "Error al obtener los datos",
+        data: null,
+        status: error.response.status,
+      };
+    }
+    return {
+      exito: false,
+      mensaje: "Error de conexión con el servidor",
+      data: null,
+    };
+  }
+};
+
+/**
+ * Obtener resumen de pagos de un curso
+ * GET /api/cursos/:id/resumen-pagos
+ */
+export const obtenerResumenPagosCurso = async (id) => {
+  try {
+    const token = getToken();
+    const response = await api.get(`/cursos/${id}/resumen-pagos`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return {
+      exito: true,
+      data: response.data.data,
+      mensaje: response.data.message || "Resumen obtenido correctamente",
+    };
+  } catch (error) {
+    if (error.response) {
+      return {
+        exito: false,
+        mensaje: error.response.data.message || "Error al obtener el resumen",
+        data: null,
+        status: error.response.status,
+      };
+    }
+    return {
+      exito: false,
+      mensaje: "Error de conexión con el servidor",
+      data: null,
+    };
+  }
+};
