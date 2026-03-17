@@ -77,13 +77,13 @@
     const irMiProgreso = (curso) => {
     modalArchivadas.value = false
     router.push({
-        name: 'miProgreso',
+        name: "miProgreso",
         params: {
-        idMateria: curso.id_materia,
-        idInscripcion: curso.id_inscripcion
+        id_materia: curso.id_materia
         }
     })
-    }
+}
+
 
     const volver = () => {
     router.back()
